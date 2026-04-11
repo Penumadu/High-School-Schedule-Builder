@@ -41,7 +41,17 @@ export default function Sidebar() {
   const { role, user } = useAuth();
   const pathname = usePathname();
 
-  const filteredItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
+  const filteredItems = NAV_ITEMS.filter((item) => {
+    if (item.roles.includes(role)) return true;
+    
+    // If we are a SUPER_ADMIN and have a school selected, also show Principal/Coordinator items
+    if (role === 'SUPER_ADMIN' && (item.roles.includes('PRINCIPAL') || item.roles.includes('COORDINATOR'))) {
+      const activeSchoolId = typeof window !== 'undefined' ? (schoolId || sessionStorage.getItem('acting_school_id')) : schoolId;
+      return !!activeSchoolId;
+    }
+    
+    return false;
+  });
 
   return (
     <aside className={styles.sidebar}>
