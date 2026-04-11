@@ -9,7 +9,6 @@ from app.models.schedule import (
     ScheduleResponse,
     PublishRequest,
 )
-from app.services.solver import ScheduleSolver
 from app.services.email_service import send_schedule_emails
 
 router = APIRouter(prefix="/schedule", tags=["Scheduling"])
@@ -24,6 +23,10 @@ async def generate_schedule(
     Trigger the OR-Tools CP-SAT solver to generate a schedule.
     Compiles data from Firestore, runs the constraint model, and writes output.
     """
+    # Lazy import — ortools is very large and would crash the serverless function
+    # if imported at module startup
+    from app.services.solver import ScheduleSolver
+    
     solver = ScheduleSolver(request.school_id)
 
     try:
