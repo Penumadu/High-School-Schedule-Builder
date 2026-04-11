@@ -1,10 +1,5 @@
 {
   "version": 2,
-  "functions": {
-    "backend/main.py": {
-      "runtime": "python@3.9"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/v1/:path*",
