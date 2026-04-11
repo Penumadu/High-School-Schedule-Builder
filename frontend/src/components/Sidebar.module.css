@@ -1,0 +1,154 @@
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: rgba(5, 8, 17, 0.85);
+  border-right: 1px solid var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 32px 24px;
+}
+
+.logoIcon {
+  font-size: 26px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-500), var(--accent-600));
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+}
+
+.logoTitle {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(to right, #fff, var(--primary-300));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logoSubtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.nav {
+  flex: 1;
+  padding: 8px 16px;
+  overflow-y: auto;
+}
+
+.navSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.navSectionLabel {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  padding: 0 12px;
+  margin-bottom: 8px;
+  opacity: 0.6;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  transition: all var(--transition-base);
+  text-decoration: none;
+  position: relative;
+}
+
+.navItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.navItem.active {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary-400);
+}
+
+.activeIndicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 20px;
+  background: var(--primary-500);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 15px var(--primary-500);
+}
+
+.navIcon {
+  font-size: 19px;
+  width: 24px;
+  text-align: center;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid var(--border-glass);
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: radial-gradient(circle at top left, var(--primary-400), var(--accent-600));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+

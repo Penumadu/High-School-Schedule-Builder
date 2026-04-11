@@ -1,0 +1,97 @@
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useAuth } from './AuthProvider';
+import styles from './Sidebar.module.css';
+
+interface NavItem {
+  label: string;
+  href: string;
+  icon: string;
+  roles: string[];
+}
+
+const NAV_ITEMS: NavItem[] = [
+  // Super Admin
+  { label: 'Platform Overview', href: '/super-admin', icon: '🏢', roles: ['SUPER_ADMIN'] },
+  { label: 'School Registry', href: '/super-admin/schools', icon: '🏫', roles: ['SUPER_ADMIN'] },
+
+  // Principal / Coordinator
+  { label: 'Dashboard', href: '/dashboard', icon: '📊', roles: ['PRINCIPAL', 'COORDINATOR'] },
+  { label: 'Staff', href: '/dashboard/staff', icon: '👨‍🏫', roles: ['PRINCIPAL', 'COORDINATOR'] },
+  { label: 'Subjects', href: '/dashboard/subjects', icon: '📚', roles: ['PRINCIPAL', 'COORDINATOR'] },
+  { label: 'Classrooms', href: '/dashboard/classrooms', icon: '🚪', roles: ['PRINCIPAL'] },
+  { label: 'Students', href: '/dashboard/students', icon: '🎓', roles: ['PRINCIPAL', 'COORDINATOR'] },
+  { label: 'Rules Engine', href: '/dashboard/rules', icon: '⚖️', roles: ['PRINCIPAL', 'COORDINATOR'] },
+  { label: 'Import Data', href: '/dashboard/import', icon: '📤', roles: ['PRINCIPAL', 'COORDINATOR'] },
+  { label: 'Schedule', href: '/dashboard/schedule', icon: '📅', roles: ['PRINCIPAL', 'COORDINATOR'] },
+
+  // Teacher
+  { label: 'My Schedule', href: '/teacher', icon: '📅', roles: ['TEACHER'] },
+  { label: 'Attendance', href: '/teacher/attendance', icon: '✅', roles: ['TEACHER'] },
+
+  // Student
+  { label: 'My Schedule', href: '/student', icon: '📅', roles: ['STUDENT'] },
+  { label: 'Course Selection', href: '/student/courses', icon: '📝', roles: ['STUDENT'] },
+];
+
+export default function Sidebar() {
+  const { role, user } = useAuth();
+  const pathname = usePathname();
+
+  const filteredItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
+
+  return (
+    <aside className={styles.sidebar}>
+      <div className={styles.logo}>
+        <div className={styles.logoIcon}>📅</div>
+        <div className={styles.logoText}>
+          <span className={styles.logoTitle}>ScheduleBuilder</span>
+          <span className={styles.logoSubtitle}>v1.0</span>
+        </div>
+      </div>
+
+      <nav className={styles.nav}>
+        <div className={styles.navSection}>
+          <span className={styles.navSectionLabel}>Navigation</span>
+          {filteredItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+              >
+                <span className={styles.navIcon}>{item.icon}</span>
+                <span className={styles.navLabel}>{item.label}</span>
+                {isActive && <div className={styles.activeIndicator} />}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      <div className={styles.userInfo}>
+        <div className={styles.userAvatar}>
+          {user?.displayName?.charAt(0) || user?.email?.charAt(0) || '?'}
+        </div>
+        <div className={styles.userDetails}>
+          <span className={styles.userName}>
+            {user?.displayName || user?.email?.split('@')[0] || 'User'}
+          </span>
+          <span className={`badge ${
+            role === 'SUPER_ADMIN' ? 'badge-accent' :
+            role === 'PRINCIPAL' ? 'badge-primary' :
+            role === 'COORDINATOR' ? 'badge-success' :
+            role === 'TEACHER' ? 'badge-warning' :
+            'badge-primary'
+          }`}>
+            {role || 'No Role'}
+          </span>
+        </div>
+      </div>
+    </aside>
+  );
+}

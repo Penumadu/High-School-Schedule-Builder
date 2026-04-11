@@ -1,0 +1,98 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import DashboardLayout from '@/components/DashboardLayout';
+import DataGrid from '@/components/DataGrid';
+import { useAuth } from '@/components/AuthProvider';
+import { api } from '@/lib/api';
+
+import { useRouter } from 'next/navigation';
+import StaffModal from '@/components/StaffModal';
+
+export default function StaffRegistry() {
+  const { schoolId } = useAuth();
+  const router = useRouter();
+  const [staff, setStaff] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchStaff = async () => {
+    if (!schoolId) return;
+    setLoading(true);
+    try {
+      const res = await api.get(`/admin/${schoolId}/staff`);
+      setStaff(res);
+    } catch (err) {
+      console.error('Failed to load staff', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStaff();
+  }, [schoolId]);
+
+  const columns = [
+    // ... existing column definitions
+    { key: 'first_name', label: 'First Name' },
+    { key: 'last_name', label: 'Last Name' },
+    { key: 'email', label: 'Email' },
+    { 
+      key: 'specializations', 
+      label: 'Specializations',
+      render: (specs: string[]) => (
+        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+          {(specs || []).map(s => <span key={s} className="badge badge-primary">{s}</span>)}
+        </div>
+      )
+    },
+    { key: 'max_periods_per_week', label: 'Max Periods' },
+    { 
+      key: 'is_active', 
+      label: 'Status',
+      render: (isActive: boolean) => (
+        <span className={`badge ${isActive ? 'badge-success' : 'badge-error'}`}>
+          {isActive ? 'Active' : 'Inactive'}
+        </span>
+      )
+    }
+  ];
+
+  return (
+    <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
+      <DashboardLayout title="Staff Registry">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginBottom: '20px' }}>
+          <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=staff')}>
+            📥 Import Staff
+          </button>
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            + Add Staff Member
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="skeleton" style={{ height: '400px', borderRadius: 'var(--radius-lg)' }} />
+        ) : (
+          <DataGrid 
+            columns={columns} 
+            data={staff} 
+            searchPlaceholder="Search staff by name or email..." 
+          />
+        )}
+
+        {isModalOpen && (
+          <StaffModal 
+            schoolId={schoolId} 
+            onClose={() => setIsModalOpen(false)} 
+            onSuccess={() => {
+              setIsModalOpen(false);
+              fetchStaff();
+            }} 
+          />
+        )}
+      </DashboardLayout>
+    </ProtectedRoute>
+  );
+}

@@ -1,0 +1,86 @@
+.loginContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+}
+
+.loginCard {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(13, 17, 33, 0.75);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-xl);
+  padding: 48px;
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+              var(--shadow-primary);
+  animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.logoWrapper {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logoIcon {
+  font-size: 34px;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-500), var(--accent-600));
+  border-radius: var(--radius-lg);
+  margin: 0 auto 20px;
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+  animation: logo-breath 4s infinite ease-in-out;
+}
+
+@keyframes logo-breath {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(99, 102, 241, 0.6); }
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+  background: linear-gradient(to bottom right, #fff, var(--primary-300));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.errorMessage {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  animation: fadeIn 0.4s ease;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+

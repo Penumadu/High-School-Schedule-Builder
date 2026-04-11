@@ -1,0 +1,30 @@
+# Environment Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+serviceAccountKey.json
+
+# Dependencies
+node_modules/
+backend/venv/
+backend/__pycache__/
+*.pyc
+.ipynb_checkpoints
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Build Outputs
+backend/dist/
+frontend/out/
+frontend/.next/
+
+# IDEs
+.vscode/
+.idea/
+.project
+.pydevproject
+.settings/
