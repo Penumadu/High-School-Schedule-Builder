@@ -161,3 +161,37 @@ async def update_school_status(
 
     doc_ref.update({"status": new_status})
     return {"message": f"School '{school_id}' status updated to {new_status}"}
+@router.delete("/schools/{school_id}")
+async def delete_school(
+    school_id: str,
+    user: dict = Depends(require_role("SUPER_ADMIN")),
+):
+    """Permanently delete a school and all its data."""
+    db = get_firestore_client()
+    school_ref = db.collection("schools").document(school_id)
+    
+    if not school_ref.get().exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"School '{school_id}' not found",
+        )
+
+    # Recursive deletion of sub-collections
+    collections = ["teachers", "subjects", "students", "classrooms", "rules", "schedules"]
+    
+    for coll_name in collections:
+        coll_ref = school_ref.collection(coll_name)
+        # Note: Streaming and deleting is fine for small/medium collections
+        docs = coll_ref.stream()
+        for doc in docs:
+            # We also need to check for sub-sub-collections like 'student_schedules'
+            if coll_name == "students":
+                sub_docs = doc.reference.collection("student_schedules").stream()
+                for sd in sub_docs:
+                    sd.reference.delete()
+            doc.reference.delete()
+
+    # Finally delete the root school document
+    school_ref.delete()
+    
+    return {"message": f"School '{school_id}' and all associated data permanently deleted"}

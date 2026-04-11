@@ -1,6 +1,7 @@
 import { auth } from './firebase';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 
+                 (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8000/api/v1');
 
 interface RequestOptions {
   method?: string;

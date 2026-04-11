@@ -48,6 +48,21 @@ export default function SchoolsRegistry() {
     }
   };
 
+  const handleDelete = async (schoolId: string) => {
+    if (!window.confirm('CRITICAL: This will permanently delete the school and ALL its data (teachers, subjects, students, schedules). This action cannot be undone. Proceed?')) {
+      return;
+    }
+
+    try {
+      await api.delete(`/system/schools/${schoolId}`);
+      alert('School deleted successfully');
+      fetchSchools();
+    } catch (err: any) {
+      console.error('Failed to delete school', err);
+      alert(`Delete failed: ${err.message}`);
+    }
+  };
+
   const filteredSchools = _schools.filter((s) => {
     const name = s.school_name || s.name || '';
     const id = s.school_id || '';
@@ -126,6 +141,12 @@ export default function SchoolsRegistry() {
                             onClick={() => handleStatusToggle(school.school_id, school.status)}
                           >
                             {school.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                          </button>
+                          <button 
+                            className="btn btn-error btn-sm"
+                            onClick={() => handleDelete(school.school_id)}
+                          >
+                            Delete
                           </button>
                         </div>
                       </td>
