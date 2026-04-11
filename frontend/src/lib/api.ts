@@ -10,10 +10,26 @@ interface RequestOptions {
 }
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
-  const user = auth.currentUser;
+  // Wait for auth to initialize if needed
+  let user = auth.currentUser;
+  
+  if (!user) {
+    // Wait up to 2 seconds for auth to initialize
+    user = await new Promise((resolve) => {
+      const unsubscribe = auth.onAuthStateChanged((u) => {
+        unsubscribe();
+        resolve(u);
+      });
+      setTimeout(() => {
+        unsubscribe();
+        resolve(auth.currentUser);
+      }, 2000);
+    });
+  }
+
   if (!user) return {};
 
-  const token = user?.getIdToken ? await user.getIdToken() : 'mock-token';
+  const token = await user.getIdToken();
   return {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
