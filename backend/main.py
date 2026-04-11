@@ -33,7 +33,7 @@ app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(system.router, prefix=settings.API_V1_PREFIX)
 app.include_router(admin.router, prefix=settings.API_V1_PREFIX)
 app.include_router(imports.router, prefix=settings.API_V1_PREFIX)
-# app.include_router(schedule.router, prefix=settings.API_V1_PREFIX)
+app.include_router(schedule.router, prefix=settings.API_V1_PREFIX)
 app.include_router(student_teacher.router, prefix=settings.API_V1_PREFIX)
 app.include_router(export.router, prefix=settings.API_V1_PREFIX)
 

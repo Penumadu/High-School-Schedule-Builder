@@ -4,7 +4,7 @@ import io
 import uuid
 from typing import List, Dict, Any
 
-import pandas as pd
+
 from app.core.firebase import get_firestore_client
 from app.models.admin import ValidationReport, ValidationError
 
@@ -21,8 +21,9 @@ class ImportService:
         self.school_id = school_id
         self.db = get_firestore_client()
 
-    def _read_file(self, contents: bytes, filename: str) -> pd.DataFrame:
+    def _read_file(self, contents: bytes, filename: str):
         """Read Excel or CSV into a DataFrame."""
+        import pandas as pd
         if filename.endswith(".csv"):
             return pd.read_csv(io.BytesIO(contents))
         else:
@@ -30,6 +31,7 @@ class ImportService:
 
     async def validate_staff(self, contents: bytes, filename: str) -> ValidationReport:
         """Validate a staff import file."""
+        import pandas as pd
         df = self._read_file(contents, filename)
         errors = []
         warnings = []
@@ -57,6 +59,7 @@ class ImportService:
 
     async def validate_subjects(self, contents: bytes, filename: str) -> ValidationReport:
         """Validate a subjects import file."""
+        import pandas as pd
         df = self._read_file(contents, filename)
         errors = []
         
@@ -79,6 +82,7 @@ class ImportService:
 
     async def validate_classrooms(self, contents: bytes, filename: str) -> ValidationReport:
         """Validate a classrooms import file."""
+        import pandas as pd
         df = self._read_file(contents, filename)
         errors = []
         
@@ -99,6 +103,7 @@ class ImportService:
 
     async def validate_student_choices(self, contents: bytes, filename: str) -> ValidationReport:
         """Validate student choices."""
+        import pandas as pd
         df = self._read_file(contents, filename)
         errors = []
         
