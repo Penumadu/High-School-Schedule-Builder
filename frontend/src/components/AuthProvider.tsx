@@ -58,8 +58,19 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         setUser(firebaseUser);
         try {
           const tokenResult = await firebaseUser.getIdTokenResult();
-          setRole((tokenResult.claims.role as string) || '');
-          setSchoolId((tokenResult.claims.school_id as string) || '');
+          const realRole = (tokenResult.claims.role as string) || '';
+          
+          // Check for session overrides (for SUPER_ADMINs managing a specific school)
+          const sessionRole = sessionStorage.getItem('acting_role');
+          const sessionSchoolId = sessionStorage.getItem('acting_school_id');
+          
+          if (realRole === 'SUPER_ADMIN' && sessionRole && sessionSchoolId) {
+            setRole(sessionRole);
+            setSchoolId(sessionSchoolId);
+          } else {
+            setRole(realRole);
+            setSchoolId((tokenResult.claims.school_id as string) || '');
+          }
         } catch (e) {
           console.error("Failed to load claims", e);
         }
@@ -67,6 +78,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         setRole('');
         setSchoolId('');
+        sessionStorage.removeItem('acting_role');
+        sessionStorage.removeItem('acting_school_id');
       }
       setLoading(false);
     });

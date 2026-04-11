@@ -42,6 +42,8 @@ export default function SchoolsRegistry() {
   }, []);
 
   const handleManageSchool = (id: string) => {
+    sessionStorage.setItem('acting_role', 'PRINCIPAL');
+    sessionStorage.setItem('acting_school_id', id);
     setSchoolId(id);
     setRole('PRINCIPAL');
     router.push('/dashboard');
