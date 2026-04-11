@@ -48,10 +48,12 @@ export default function SchoolsRegistry() {
     }
   };
 
-  const filteredSchools = _schools.filter((s) => 
-    s.school_name.toLowerCase().includes(search.toLowerCase()) || 
-    s.school_id.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredSchools = _schools.filter((s) => {
+    const name = s.school_name || s.name || '';
+    const id = s.school_id || '';
+    return name.toLowerCase().includes(search.toLowerCase()) || 
+           id.toLowerCase().includes(search.toLowerCase());
+  });
 
   return (
     <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
@@ -101,7 +103,7 @@ export default function SchoolsRegistry() {
                   filteredSchools.map((school) => (
                     <tr key={school.school_id}>
                       <td style={{ fontFamily: 'monospace' }}>{school.school_id}</td>
-                      <td style={{ fontWeight: 600 }}>{school.school_name}</td>
+                      <td style={{ fontWeight: 600 }}>{school.school_name || school.name || 'Unnamed School'}</td>
                       <td>
                         <span className="badge badge-primary">{school.subscription_tier}</span>
                       </td>

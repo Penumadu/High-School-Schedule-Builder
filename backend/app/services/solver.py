@@ -88,6 +88,8 @@ class ScheduleSolver:
         for doc in self.school_ref.collection("subjects").stream():
             data = doc.to_dict()
             data["subject_id"] = doc.id
+            # Ensure mandatory defaults to False
+            data["is_mandatory"] = data.get("is_mandatory", False)
             subjects.append(data)
 
         # Classrooms
@@ -149,7 +151,10 @@ class ScheduleSolver:
             qualified = []
             for ti, teacher in enumerate(teachers):
                 specs = teacher.get("specializations", [])
-                if subj["subject_id"] in specs or subj.get("name", "") in specs:
+                # Check for matches against ID, Name, or Code
+                if (subj["subject_id"] in specs or 
+                    subj.get("name", "") in specs or 
+                    subj.get("code", "") in specs):
                     qualified.append(ti)
             # If no one is specifically qualified, allow all teachers
             if not qualified:
@@ -164,11 +169,28 @@ class ScheduleSolver:
         for si, subj in enumerate(subjects):
             enrolled = []
             subj_id = subj["subject_id"]
+            subj_code = subj.get("code", "")
+            subj_grade = subj.get("grade_level")
+            is_mandatory = subj.get("is_mandatory", False)
             rule = rules.get(subj_id)
 
             for sti, student in enumerate(students):
-                requested = student.get("requested_subjects", [])
-                if subj_id in requested or subj.get("name", "") in requested:
+                student_grade = student.get("grade_level")
+                
+                # Logic 1: Mandatory Subject for this grade?
+                should_enroll = False
+                if is_mandatory and student_grade == subj_grade:
+                    should_enroll = True
+                
+                # Logic 2: Optional Choice?
+                else:
+                    requested = student.get("requested_subjects", [])
+                    if (subj_id in requested or 
+                        subj.get("name", "") in requested or 
+                        subj_code in requested):
+                        should_enroll = True
+
+                if should_enroll:
                     # Enforce Academic Rule if exists
                     if rule and not self._evaluate_logic(student, rule):
                         excluded_conflicts.append(ConflictItem(
@@ -221,7 +243,6 @@ class ScheduleSolver:
                     x[s, t, r, p]
                     for t in subject_teachers[s]
                     for r in range(num_rooms)
-                    if (s, t, r, p) in x
                     for p in range(num_p)
                     if (s, t, r, p) in x
                 ) == req_periods
@@ -281,7 +302,6 @@ class ScheduleSolver:
                     for s in range(num_subjects)
                     if t in subject_teachers.get(s, [])
                     for r in range(num_rooms)
-                    if (s, t, r, p) in x
                     for p in range(num_p)
                     if (s, t, r, p) in x
                 ) <= max_p

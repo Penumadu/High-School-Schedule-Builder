@@ -46,6 +46,7 @@ class SubjectCreate(BaseModel):
     grade_level: int = Field(ge=9, le=12)
     required_periods_per_week: int = Field(default=5, ge=1, le=10)
     facility_type: str = Field(default="REGULAR", description="e.g. REGULAR, LAB, GYM")
+    is_mandatory: bool = Field(default=False, description="If true, all students in the grade are enrolled")
 
 
 class SubjectResponse(BaseModel):
@@ -55,6 +56,7 @@ class SubjectResponse(BaseModel):
     grade_level: int
     required_periods_per_week: int
     facility_type: str = "REGULAR"
+    is_mandatory: bool = False
 
 
 # ---------- CLASSROOMS ----------

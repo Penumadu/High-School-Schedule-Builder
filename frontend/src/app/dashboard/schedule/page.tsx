@@ -42,13 +42,20 @@ export default function ScheduleDashboard() {
     try {
       const res = await api.post('/schedule/generate', {
         school_id: schoolId,
-        semester: 1 // Hardcoded to 1 for MVP
+        semester: 1 
       });
-      // Fetch the full details of this new schedule
-      const fullRes = await api.get(`/schedule/${schoolId}/${res.schedule_id}`);
-      setActiveSchedule(fullRes);
-      fetchSchedules();
+      
+      if (res.schedule_id) {
+        // Fetch the full details of this new schedule
+        const fullRes = await api.get(`/schedule/${schoolId}/${res.schedule_id}`);
+        setActiveSchedule(fullRes);
+        await fetchSchedules();
+        alert('✨ Schedule generated successfully!');
+      } else {
+        throw new Error('Solver completed but no schedule ID was returned.');
+      }
     } catch (err: any) {
+      console.error(err);
       alert(`Generator failed: ${err.message}`);
     } finally {
       setGenerating(false);

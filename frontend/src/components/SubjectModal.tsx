@@ -17,14 +17,17 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
     code: '',
     grade_level: 10,
     required_periods_per_week: 5,
-    facility_type: 'REGULAR'
+    facility_type: 'REGULAR',
+    is_mandatory: false
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target as HTMLInputElement;
+    const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    
     setFormData(prev => ({
       ...prev,
-      [name]: (name === 'grade_level' || name === 'required_periods_per_week') ? parseInt(value) : value
+      [name]: (name === 'grade_level' || name === 'required_periods_per_week') ? parseInt(value as string) : val
     }));
   };
 
@@ -121,9 +124,20 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
               value={formData.required_periods_per_week} 
               onChange={handleChange} 
             />
-            <p className="form-help" style={{ marginTop: '4px', fontSize: '12px', color: 'var(--text-muted)' }}>
-              Standard is usually 5 (one period per day).
-            </p>
+          </div>
+
+          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
+            <input 
+              type="checkbox" 
+              name="is_mandatory" 
+              id="is_mandatory"
+              checked={formData.is_mandatory} 
+              onChange={handleChange} 
+              style={{ width: '18px', height: '18px' }}
+            />
+            <label htmlFor="is_mandatory" className="form-label" style={{ marginBottom: 0 }}>
+              Mandatory Course (All students in this grade must take this)
+            </label>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', borderTop: '1px solid var(--border-glass)', paddingTop: '20px' }}>
@@ -135,6 +149,5 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
         </form>
       </div>
     </div>
-
   );
 }

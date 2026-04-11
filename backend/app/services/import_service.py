@@ -13,7 +13,7 @@ class ImportService:
     """Handles Excel validation and Firestore batch writes."""
 
     STAFF_COLUMNS = ["first_name", "last_name", "email", "specializations", "max_periods_per_week", "off_times"]
-    SUBJECT_COLUMNS = ["code", "name", "grade_level", "required_periods_per_week", "facility_type"]
+    SUBJECT_COLUMNS = ["code", "name", "grade_level", "required_periods_per_week", "facility_type", "is_mandatory"]
     STUDENT_COLUMNS = ["first_name", "last_name", "email", "grade_level", "requested_subjects"]
     CLASSROOM_COLUMNS = ["code", "name", "capacity", "facility_type"]
 
@@ -146,6 +146,7 @@ class ImportService:
                     "grade_level": int(item.get("grade_level", 9)),
                     "required_periods_per_week": int(item.get("required_periods_per_week", 5)),
                     "facility_type": item.get("facility_type", "REGULAR"),
+                    "is_mandatory": str(item.get("is_mandatory", "No")).lower() in ["yes", "true", "1"]
                 }
                 batch.set(school_ref.collection("subjects").document(doc_id), doc_data)
 

@@ -39,6 +39,19 @@ export default function SubjectsRegistry() {
     { key: 'name', label: 'Subject Name' },
     { key: 'grade_level', label: 'Grade' },
     { key: 'required_periods_per_week', label: 'Periods/Week' },
+    { 
+      key: 'is_mandatory', 
+      label: 'Requirement Type',
+      render: (val: any) => val ? (
+        <span style={{ color: 'var(--success-700)', background: 'var(--success-100)', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+          Mandatory
+        </span>
+      ) : (
+        <span style={{ color: 'var(--text-muted)', background: '#f0f0f0', padding: '2px 8px', borderRadius: '4px', fontSize: '12px' }}>
+          Optional
+        </span>
+      )
+    },
   ];
 
   return (
