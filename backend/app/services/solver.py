@@ -14,7 +14,7 @@ import logging
 from datetime import datetime
 from typing import List, Dict, Any, Tuple
 
-from ortools.sat.python import cp_model
+# from ortools.sat.python import cp_model
 
 from app.core.firebase import get_firestore_client
 from app.models.schedule import (
