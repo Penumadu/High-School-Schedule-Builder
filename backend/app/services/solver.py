@@ -2,10 +2,15 @@
 OR-Tools CP-SAT Constraint Solver for High School Scheduling.
 
 Translates school data into mathematical constraints and finds an optimal
-assignment of (subject, teacher, room, period) tuples.
+assignment of (subject, section, teacher, room, period) tuples.
+
+Supports automatic sectioning: if student demand exceeds room capacity,
+multiple sections are created for the same subject.
 """
 
+import math
 import uuid
+import logging
 from datetime import datetime
 from typing import List, Dict, Any, Tuple
 
@@ -18,6 +23,8 @@ from app.models.schedule import (
     ConflictReport,
     ConflictItem,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ScheduleSolver:
@@ -162,7 +169,6 @@ class ScheduleSolver:
             subject_teachers[si] = qualified
 
         # Build subject → student enrollment mapping (with Academic Rule Enforcement)
-        # Build subject → student enrollment mapping (with Academic Rule Enforcement)
         subject_students: Dict[int, List[int]] = {}
         excluded_conflicts: List[ConflictItem] = []
 
@@ -170,6 +176,7 @@ class ScheduleSolver:
             enrolled = []
             subj_id = subj["subject_id"]
             subj_code = subj.get("code", "")
+            subj_name = subj.get("name", "")
             subj_grade = subj.get("grade_level")
             is_mandatory = subj.get("is_mandatory", False)
             rule = rules.get(subj_id)
@@ -186,7 +193,7 @@ class ScheduleSolver:
                 else:
                     requested = student.get("requested_subjects", [])
                     if (subj_id in requested or 
-                        subj.get("name", "") in requested or 
+                        subj_name in requested or 
                         subj_code in requested):
                         should_enroll = True
 
@@ -195,7 +202,7 @@ class ScheduleSolver:
                     if rule and not self._evaluate_logic(student, rule):
                         excluded_conflicts.append(ConflictItem(
                             type="PREREQUISITE_FAILURE",
-                            description=f"Student {student['student_id']} excluded from {subj['name']} (Prerequisite not met)",
+                            description=f"Student {student.get('first_name','')} {student.get('last_name','')} excluded from {subj_name} (Prerequisite not met)",
                             affected_ids=[student["student_id"], subj_id]
                         ))
                         continue
@@ -205,68 +212,118 @@ class ScheduleSolver:
         # Facility type matching helper
         def get_facility(item): return item.get("facility_type", "REGULAR").upper()
 
+        # ──────────── AUTOMATIC SECTIONING ────────────
+        # Determine the maximum room capacity for each facility type
+        facility_rooms: Dict[str, List[int]] = {}
+        for ri, room in enumerate(classrooms):
+            ftype = get_facility(room)
+            facility_rooms.setdefault(ftype, []).append(ri)
+
+        def max_capacity_for_facility(ftype: str) -> int:
+            rooms = facility_rooms.get(ftype, [])
+            if not rooms:
+                return 30  # default fallback
+            return max(classrooms[ri].get("capacity", 30) for ri in rooms)
+
+        # Build sections: list of (subject_idx, section_idx, student_indices)
+        sections = []  # Each entry: (original_subject_idx, section_number, [student_indices])
+        section_subject_map = []  # Maps flat section index → original subject index
+
+        for si, subj in enumerate(subjects):
+            enrolled = subject_students.get(si, [])
+            ftype = get_facility(subj)
+            max_cap = max_capacity_for_facility(ftype)
+            
+            if not enrolled:
+                # Still create 1 section so the subject is scheduled
+                num_sections = 1
+            else:
+                num_sections = max(1, math.ceil(len(enrolled) / max_cap))
+            
+            # Split students across sections as evenly as possible
+            for sec_idx in range(num_sections):
+                start = sec_idx * max_cap
+                end = min((sec_idx + 1) * max_cap, len(enrolled))
+                section_students = enrolled[start:end] if enrolled else []
+                sections.append((si, sec_idx, section_students))
+                section_subject_map.append(si)
+
+        logger.info(f"Created {len(sections)} sections from {len(subjects)} subjects")
+
         # ──────────── BUILD THE CP-SAT MODEL ────────────
         model = cp_model.CpModel()
 
-        num_subjects = len(subjects)
+        num_sections = len(sections)
         num_teachers = len(teachers)
         num_rooms = len(classrooms)
         num_p = len(period_names)
 
         x = {}
-        for s in range(num_subjects):
-            for t in subject_teachers[s]:
+        for sec_i, (si, sec_idx, sec_students) in enumerate(sections):
+            subj = subjects[si]
+            for t in subject_teachers[si]:
                 for r in range(num_rooms):
-                    # Facility match constraint: Subject facility must match Room facility
-                    # Exception: If subject needs GYM, it MUST have a GYM room
-                    subj_facility = get_facility(subjects[s])
+                    # Facility match constraint
+                    subj_facility = get_facility(subj)
                     room_facility = get_facility(classrooms[r])
                     
                     if subj_facility != room_facility:
-                        # Legacy check for is_gym boolean
                         if subj_facility == "GYM" and not classrooms[r].get("is_gym"):
                             continue
-                        if subj_facility != "GYM": # Regular or Lab must match exactly
+                        if subj_facility != "GYM":
                             continue
 
+                    # Room capacity check: this section must fit in this room
+                    room_cap = classrooms[r].get("capacity", 30)
+                    if len(sec_students) > room_cap:
+                        continue  # skip rooms too small for this section
+
                     for p in range(num_p):
-                        x[s, t, r, p] = model.NewBoolVar(f"x_s{s}_t{t}_r{r}_p{p}")
+                        x[sec_i, t, r, p] = model.NewBoolVar(f"x_sec{sec_i}_t{t}_r{r}_p{p}")
 
         # ── HARD CONSTRAINTS ──
 
-        # 1. Each subject assigned to required number of periods
-        for s in range(num_subjects):
-            req_periods = subjects[s].get("required_periods_per_week", 1)
+        # 1. Each section assigned to required number of periods
+        for sec_i, (si, sec_idx, sec_students) in enumerate(sections):
+            req_periods = subjects[si].get("required_periods_per_week", 1)
             req_periods = min(req_periods, num_p)
-            model.Add(
-                sum(
-                    x[s, t, r, p]
-                    for t in subject_teachers[s]
-                    for r in range(num_rooms)
-                    for p in range(num_p)
-                    if (s, t, r, p) in x
-                ) == req_periods
-            )
+            
+            vars_for_section = [
+                x[sec_i, t, r, p]
+                for t in subject_teachers[si]
+                for r in range(num_rooms)
+                for p in range(num_p)
+                if (sec_i, t, r, p) in x
+            ]
+            
+            if not vars_for_section:
+                excluded_conflicts.append(ConflictItem(
+                    type="NO_VALID_ASSIGNMENT",
+                    description=f"No valid room/teacher combo for {subjects[si].get('name','')} section {sec_idx+1}. Check facility types and room capacities.",
+                    affected_ids=[subjects[si]["subject_id"]],
+                ))
+                continue
+            
+            model.Add(sum(vars_for_section) == req_periods)
 
         # 2. No teacher double-booking + Off-Times
         for t in range(num_teachers):
             off_times = teachers[t].get("off_times", [])
             for p in range(num_p):
-                # If teacher is busy this period, they cannot teach
                 if (p + 1) in off_times:
-                    for s in range(num_subjects):
-                        if t in subject_teachers.get(s, []):
+                    for sec_i, (si, _, _) in enumerate(sections):
+                        if t in subject_teachers.get(si, []):
                             for r in range(num_rooms):
-                                if (s, t, r, p) in x:
-                                    model.Add(x[s, t, r, p] == 0)
+                                if (sec_i, t, r, p) in x:
+                                    model.Add(x[sec_i, t, r, p] == 0)
                 
                 model.Add(
                     sum(
-                        x[s, t, r, p]
-                        for s in range(num_subjects)
-                        if t in subject_teachers.get(s, [])
+                        x[sec_i, t, r, p]
+                        for sec_i, (si, _, _) in enumerate(sections)
+                        if t in subject_teachers.get(si, [])
                         for r in range(num_rooms)
-                        if (s, t, r, p) in x
+                        if (sec_i, t, r, p) in x
                     ) <= 1
                 )
 
@@ -275,60 +332,47 @@ class ScheduleSolver:
             for p in range(num_p):
                 model.Add(
                     sum(
-                        x[s, t, r, p]
-                        for s in range(num_subjects)
-                        for t in subject_teachers.get(s, [])
-                        if (s, t, r, p) in x
+                        x[sec_i, t, r, p]
+                        for sec_i, (si, _, _) in enumerate(sections)
+                        for t in subject_teachers.get(si, [])
+                        if (sec_i, t, r, p) in x
                     ) <= 1
                 )
 
-        # 4. Room capacity
-        for s in range(num_subjects):
-            num_enrolled = len(subject_students.get(s, []))
-            for r in range(num_rooms):
-                room_cap = classrooms[r].get("capacity", 30)
-                if num_enrolled > room_cap:
-                    for t in subject_teachers[s]:
-                        for p in range(num_p):
-                            if (s, t, r, p) in x:
-                                model.Add(x[s, t, r, p] == 0)
-
-        # 5. Teacher max workload
+        # 4. Teacher max workload
         for t in range(num_teachers):
             max_p = teachers[t].get("max_periods_per_week", 25)
             model.Add(
                 sum(
-                    x[s, t, r, p]
-                    for s in range(num_subjects)
-                    if t in subject_teachers.get(s, [])
+                    x[sec_i, t, r, p]
+                    for sec_i, (si, _, _) in enumerate(sections)
+                    if t in subject_teachers.get(si, [])
                     for r in range(num_rooms)
                     for p in range(num_p)
-                    if (s, t, r, p) in x
+                    if (sec_i, t, r, p) in x
                 ) <= max_p
             )
 
-        # 6. Student No-Overlap (Unique Student Schedules)
-        # For each student, they cannot have more than one subject in the same period
-        for sti, student in enumerate(students):
-            approved_subjs = []
-            for si, subj in enumerate(subjects):
-                if sti in subject_students.get(si, []):
-                    approved_subjs.append(si)
-            
-            if not approved_subjs:
+        # 5. Student No-Overlap (Unique Student Schedules)
+        # Build student → sections mapping
+        student_sections: Dict[int, List[int]] = {}
+        for sec_i, (si, sec_idx, sec_students) in enumerate(sections):
+            for sti in sec_students:
+                student_sections.setdefault(sti, []).append(sec_i)
+        
+        for sti, sec_list in student_sections.items():
+            if len(sec_list) <= 1:
                 continue
-
             for p in range(num_p):
-                # Sum of all assignments for this student's subjects in this period must be <= 1
-                model.Add(
-                    sum(
-                        x[s, t, r, p]
-                        for s in approved_subjs
-                        for t in subject_teachers.get(s, [])
-                        for r in range(num_rooms)
-                        if (s, t, r, p) in x
-                    ) <= 1
-                )
+                overlap_vars = []
+                for sec_i in sec_list:
+                    si_for = section_subject_map[sec_i]
+                    for t in subject_teachers.get(si_for, []):
+                        for r in range(num_rooms):
+                            if (sec_i, t, r, p) in x:
+                                overlap_vars.append(x[sec_i, t, r, p])
+                if overlap_vars:
+                    model.Add(sum(overlap_vars) <= 1)
 
         # ── SOLVE ──
         solver = cp_model.CpSolver()
@@ -339,18 +383,19 @@ class ScheduleSolver:
         assignments = []
 
         if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
-            for s in range(num_subjects):
-                for t in subject_teachers[s]:
+            for sec_i, (si, sec_idx, sec_students) in enumerate(sections):
+                for t in subject_teachers[si]:
                     for r in range(num_rooms):
                         for p in range(num_p):
-                            if (s, t, r, p) in x and solver.Value(x[s, t, r, p]):
+                            if (sec_i, t, r, p) in x and solver.Value(x[sec_i, t, r, p]):
                                 enrolled_ids = [
                                     students[sti]["student_id"]
-                                    for sti in subject_students.get(s, [])
+                                    for sti in sec_students
                                 ]
+                                section_label = f" (Section {sec_idx+1})" if len([s for s in sections if s[0] == si]) > 1 else ""
                                 assignments.append(ScheduleAssignment(
                                     period_name=period_names[p],
-                                    subject_id=subjects[s]["subject_id"],
+                                    subject_id=subjects[si]["subject_id"],
                                     teacher_id=teachers[t]["teacher_id"],
                                     room_id=classrooms[r]["room_id"],
                                     enrolled_student_ids=enrolled_ids,
@@ -358,18 +403,25 @@ class ScheduleSolver:
         else:
             conflicts.append(ConflictItem(
                 type="INFEASIBLE",
-                description="Solver failed to find a valid schedule. Check for room or teacher shortages.",
+                description="Solver failed to find a valid schedule. Common causes: not enough rooms or teachers for the number of subjects/sections, or teacher off-times are too restrictive.",
                 affected_ids=[],
             ))
 
         # Check for unassigned students
-        scheduled_subjects = {a.subject_id for a in assignments}
+        scheduled_subject_ids = {a.subject_id for a in assignments}
         for student in students:
             for req in student.get("requested_subjects", []):
-                if req not in scheduled_subjects:
+                # Match by ID, name, or code
+                matched = False
+                for subj in subjects:
+                    if req in (subj["subject_id"], subj.get("name", ""), subj.get("code", "")):
+                        if subj["subject_id"] in scheduled_subject_ids:
+                            matched = True
+                        break
+                if not matched:
                     conflicts.append(ConflictItem(
                         type="UNASSIGNED_STUDENT",
-                        description=f"Student {student['student_id']} choice '{req}' not scheduled.",
+                        description=f"Student {student.get('first_name','')} {student.get('last_name','')} choice '{req}' not scheduled.",
                         affected_ids=[student["student_id"]],
                     ))
 
@@ -417,7 +469,6 @@ class ScheduleSolver:
         return ScheduleGenerateResponse(
             schedule_id=schedule_id,
             status="DRAFT",
-            message=f"Generated {len(assignments)} classes" + (f" ({len(conflicts)} conflicts)" if conflicts else ""),
+            message=f"Generated {len(assignments)} classes across {len(sections)} sections" + (f" ({len(conflicts)} conflicts)" if conflicts else ""),
             conflict_report=conflict_report,
         )
-

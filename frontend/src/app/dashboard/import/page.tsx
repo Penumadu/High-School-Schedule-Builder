@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardLayout from '@/components/DashboardLayout';
 import FileUploader from '@/components/FileUploader';
@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx';
 
 import { useSearchParams } from 'next/navigation';
 
-export default function ImportHub() {
+function ImportHubContent() {
   const { schoolId } = useAuth();
   const searchParams = useSearchParams();
   const [importType, setImportType] = useState('staff');
@@ -189,5 +189,17 @@ export default function ImportHub() {
         </div>
       </DashboardLayout>
     </ProtectedRoute>
+  );
+}
+
+export default function ImportHub() {
+  return (
+    <Suspense fallback={
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div className="spinner" />
+      </div>
+    }>
+      <ImportHubContent />
+    </Suspense>
   );
 }

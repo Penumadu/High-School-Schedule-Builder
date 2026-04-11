@@ -6,24 +6,62 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/components/AuthProvider';
 import { api } from '@/lib/api';
 
+interface Subject {
+  subject_id: string;
+  name: string;
+  code: string;
+  grade_level: number;
+  required_periods_per_week: number;
+  facility_type: string;
+  is_mandatory: boolean;
+}
+
+interface ValidationRejection {
+  subject: string;
+  reason: string;
+}
+
+interface ValidationResult {
+  valid: boolean;
+  rejections: ValidationRejection[];
+}
+
 export default function CourseSelection() {
-  const { schoolId } = useAuth();
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const { schoolId, user } = useAuth();
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [validating, setValidating] = useState(false);
-  const [validationResult, setValidationResult] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const [studentId, setStudentId] = useState<string>('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!schoolId) return;
       try {
         const [subjRes, scheduleRes] = await Promise.all([
-          api.get(`/admin/${schoolId}/subjects`),
-          api.get(`/student/${schoolId}/schedule`) // piggybacking on schedule to get student ID ideally, but let's assume we have a way to get choices
+          api.get<Subject[]>(`/admin/${schoolId}/subjects`),
+          api.get<{ student_id: string; schedule: unknown[] }>(`/student/${schoolId}/schedule`)
         ]);
         setSubjects(subjRes);
-        // Normally we'd fetch the student's current choices here
+        if (scheduleRes?.student_id) {
+          setStudentId(scheduleRes.student_id);
+        }
+
+        // Load the student's existing choices from Firestore
+        if (scheduleRes?.student_id) {
+          try {
+            const studentRes = await api.get<{ requested_subjects: string[] }>(
+              `/admin/${schoolId}/students/${scheduleRes.student_id}`
+            );
+            if (studentRes?.requested_subjects?.length) {
+              setSelectedSubjects(studentRes.requested_subjects);
+            }
+          } catch {
+            // Student doc may not have choices yet — that's fine
+          }
+        }
       } catch (err) {
         console.error('Failed to load courses', err);
       } finally {
@@ -34,6 +72,8 @@ export default function CourseSelection() {
   }, [schoolId]);
 
   const handleToggle = (subjectId: string) => {
+    setSaveSuccess(false);
+    setValidationResult(null);
     if (selectedSubjects.includes(subjectId)) {
       setSelectedSubjects(selectedSubjects.filter(id => id !== subjectId));
     } else {
@@ -45,28 +85,36 @@ export default function CourseSelection() {
     }
   };
 
-  const handleValidate = async () => {
-    setValidating(true);
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveSuccess(false);
     setValidationResult(null);
     try {
-      // Find the student ID for the current user
-      const students = await api.get(`/admin/${schoolId}/students`);
-      // Since this is the student portal and we don't have the student collection ID in auth token directly,
-      // in a real app backend would resolve this from Firebase Auth UID. We'll pass empty and let backend handle.
-      
-      const res = await api.post('/rules/validate-student', {
+      // Step 1: Validate
+      const res = await api.post<ValidationResult>('/rules/validate-student', {
         school_id: schoolId,
+        student_id: studentId,
         requested_subjects: selectedSubjects
       });
       setValidationResult(res);
-      
-      if (res.valid) {
-        alert("Choices validated. In a full implementation, these would now be saved.");
+
+      if (!res.valid) {
+        setSaving(false);
+        return;
       }
-    } catch (err: any) {
-      alert(`Validation failed: ${err.message}`);
+
+      // Step 2: Save to Firestore
+      await api.put(`/student/${schoolId}/choices`, {
+        student_id: studentId,
+        requested_subjects: selectedSubjects
+      });
+
+      setSaveSuccess(true);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      alert(`Save failed: ${message}`);
     } finally {
-      setValidating(false);
+      setSaving(false);
     }
   };
 
@@ -120,20 +168,28 @@ export default function CourseSelection() {
                 <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: 'var(--radius-md)', marginBottom: '16px', borderLeft: '3px solid var(--error-500)' }}>
                   <h4 style={{ color: 'var(--error-400)', fontSize: '13px', margin: '0 0 8px 0' }}>Prerequisites Not Met:</h4>
                   <ul style={{ paddingLeft: '16px', color: '#fca5a5', fontSize: '12px', margin: 0 }}>
-                    {validationResult.rejections.map((r: any, i: number) => (
+                    {validationResult.rejections.map((r: ValidationRejection, i: number) => (
                       <li key={i}>{r.subject}: {r.reason}</li>
                     ))}
                   </ul>
                 </div>
               )}
 
+              {saveSuccess && (
+                <div style={{ background: 'rgba(34, 197, 94, 0.1)', padding: '12px', borderRadius: 'var(--radius-md)', marginBottom: '16px', borderLeft: '3px solid #22c55e' }}>
+                  <p style={{ color: '#4ade80', fontSize: '13px', margin: 0 }}>
+                    ✓ Your course choices have been saved successfully!
+                  </p>
+                </div>
+              )}
+
               <button 
                 className="btn btn-primary" 
                 style={{ width: '100%' }}
-                disabled={selectedSubjects.length === 0 || validating}
-                onClick={handleValidate}
+                disabled={selectedSubjects.length === 0 || saving}
+                onClick={handleSave}
               >
-                {validating ? 'Checking Rules...' : 'Validate & Save'}
+                {saving ? 'Saving...' : 'Validate & Save Choices'}
               </button>
             </div>
           </div>

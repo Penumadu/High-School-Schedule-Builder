@@ -49,23 +49,44 @@ export default function ScheduleDashboard() {
     if (!confirm('This will run the constraint solver. It may take up to 30 seconds. Proceed?')) return;
     setGenerating(true);
     try {
-      const res = await api.post('/schedule/generate', {
+      const res = await api.post<{
+        schedule_id: string;
+        status: string;
+        message: string;
+        conflict_report: {
+          has_conflicts: boolean;
+          total_conflicts: number;
+          conflicts: Array<{ type: string; description: string; affected_ids: string[] }>;
+        };
+      }>('/schedule/generate', {
         school_id: schoolId,
         semester: 1 
       });
       
       if (res.schedule_id) {
         // Fetch the full details of this new schedule
-        const fullRes = await api.get(`/schedule/${schoolId}/${res.schedule_id}`);
+        const fullRes = await api.get<Schedule>(`/schedule/${schoolId}/${res.schedule_id}`);
         setActiveSchedule(fullRes);
         await fetchSchedules();
-        alert('✨ Schedule generated successfully!');
+
+        // Show a detailed result message
+        if (res.conflict_report?.has_conflicts) {
+          const infeasible = res.conflict_report.conflicts.find((c: { type: string }) => c.type === 'INFEASIBLE');
+          if (infeasible) {
+            alert(`⚠️ Schedule generation failed:\n\n${infeasible.description}\n\nPlease check that you have enough teachers, rooms, and that teacher off-times are not too restrictive.`);
+          } else {
+            alert(`✨ ${res.message}\n\nSome conflicts were detected — check the Conflict Report below.`);
+          }
+        } else {
+          alert(`✨ ${res.message}`);
+        }
       } else {
         throw new Error('Solver completed but no schedule ID was returned.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(`Generator failed: ${err.message}`);
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      alert(`Generator failed: ${message}`);
     } finally {
       setGenerating(false);
     }
@@ -82,8 +103,9 @@ export default function ScheduleDashboard() {
       alert('Schedule published! Emails are being dispatched.');
       fetchSchedules();
       setActiveSchedule({ ...activeSchedule, status: 'PUBLISHED' });
-    } catch (err: any) {
-      alert(`Publish failed: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      alert(`Publish failed: ${message}`);
     } finally {
       setPublishing(false);
     }
