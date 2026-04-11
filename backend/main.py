@@ -1,8 +1,10 @@
 """FastAPI application entry point — School Schedule Builder API."""
 
 import logging
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.config import settings
 from app.core.firebase import init_firebase
@@ -21,15 +23,11 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS middleware
+# CORS middleware — allow all origins in production for now to avoid CORS issues
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        settings.FRONTEND_URL,
-        "http://localhost:3000",
-        "http://localhost:3001",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -66,4 +64,36 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    """Health check with Firebase status."""
+    firebase_ok = False
+    firebase_error = ""
+    try:
+        from app.core.firebase import get_firebase_app
+        get_firebase_app()
+        firebase_ok = True
+    except Exception as e:
+        firebase_error = str(e)
+
+    return {
+        "status": "healthy",
+        "firebase": "connected" if firebase_ok else f"error: {firebase_error}",
+        "env_check": {
+            "has_service_account_json": bool(os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON", "")),
+            "has_private_key": bool(os.getenv("FIREBASE_PRIVATE_KEY", "")),
+            "has_client_email": bool(os.getenv("FIREBASE_CLIENT_EMAIL", "")),
+            "project_id": settings.FIREBASE_PROJECT_ID,
+        }
+    }
+
+
+@app.get("/api/v1/debug/routes")
+async def debug_routes():
+    """List all registered routes — for debugging 404s."""
+    routes = []
+    for route in app.routes:
+        if hasattr(route, "methods"):
+            routes.append({
+                "path": route.path,
+                "methods": list(route.methods),
+            })
+    return {"routes": routes, "total": len(routes)}
