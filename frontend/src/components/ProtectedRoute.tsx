@@ -18,9 +18,14 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
       if (!user) {
         router.push('/login');
       } else if (allowedRoles && role && !allowedRoles.includes(role)) {
-        // Redirect to a default dashboard if they don't have access to this specific route
-        if (role === 'SUPER_ADMIN') router.push('/super-admin');
-        else if (role === 'PRINCIPAL' || role === 'COORDINATOR') router.push('/dashboard');
+        // Only redirect if they aren't authorized
+        if (role === 'SUPER_ADMIN' && !window.location.pathname.includes('/super-admin')) {
+            // If they are a super admin but not on the Registry, don't force a redirect 
+            // if the page allows them.
+            if (!allowedRoles.includes('SUPER_ADMIN')) {
+                router.push('/super-admin');
+            }
+        } else if (role === 'PRINCIPAL' || role === 'COORDINATOR') {
         else if (role === 'TEACHER') router.push('/teacher');
         else if (role === 'STUDENT') router.push('/student');
         else router.push('/login');

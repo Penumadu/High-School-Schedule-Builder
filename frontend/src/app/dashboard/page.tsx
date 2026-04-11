@@ -44,7 +44,7 @@ export default function DashboardLanding() {
   }, [schoolId]);
 
   return (
-    <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
+    <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR', 'SUPER_ADMIN']}>
       <DashboardLayout title="School Dashboard">
         <div style={{ marginBottom: 'var(--space-xl)' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-secondary)' }}>
