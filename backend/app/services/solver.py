@@ -47,8 +47,17 @@ class ScheduleSolver:
             threshold = node.get("value", 50.0)
             
             grades = student.get("historical_grades", {})
-            # Try both ID and name for flexibility
-            student_grade = grades.get(prereq_id, 0.0)
+            
+            # If student has NO historical grades at all, treat as new student → pass
+            if not grades:
+                return True
+            
+            # If the specific prerequisite isn't in their grades, pass
+            # (they haven't taken the prerequisite course yet)
+            if prereq_id not in grades:
+                return True
+            
+            student_grade = grades[prereq_id]
             
             if operator == ">=": return student_grade >= threshold
             if operator == ">": return student_grade > threshold
@@ -283,7 +292,8 @@ class ScheduleSolver:
 
         # ── HARD CONSTRAINTS ──
 
-        # 1. Each section assigned to required number of periods
+        # 1. Each section assigned to at least 1 period, targeting required periods
+        all_section_sums = []
         for sec_i, (si, sec_idx, sec_students) in enumerate(sections):
             req_periods = subjects[si].get("required_periods_per_week", 1)
             req_periods = min(req_periods, num_p)
@@ -304,7 +314,15 @@ class ScheduleSolver:
                 ))
                 continue
             
-            model.Add(sum(vars_for_section) == req_periods)
+            section_sum = sum(vars_for_section)
+            # Flexible: at least 1 period, at most the required number
+            model.Add(section_sum >= 1)
+            model.Add(section_sum <= req_periods)
+            all_section_sums.append(section_sum)
+        
+        # Maximize total assigned periods across all sections
+        if all_section_sums:
+            model.Maximize(sum(all_section_sums))
 
         # 2. No teacher double-booking + Off-Times
         for t in range(num_teachers):
