@@ -1,67 +1,73 @@
-"""FastAPI application entry point — Defensive for Debugging."""
+"""FastAPI application entry point — School Schedule Builder API."""
 
-import logging
 import os
 import sys
-import traceback
+import logging
+
+# Ensure the backend directory is in the Python path for Vercel
+sys.path.append(os.path.dirname(__file__))
+
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.core.config import settings
+from app.core.firebase import init_firebase
+from app.api import auth, system, admin, imports, schedule, student_teacher, export
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Create FastAPI app
-app = FastAPI(title="Defensive Diagnostic App")
+app = FastAPI(
+    title=settings.APP_NAME,
+    version="1.0.0",
+)
 
-# Global error storage to report via health check
-IMPORT_ERROR = None
-ROUTERS_LOADED = []
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-try:
-    from app.core.config import settings
-    from app.api import auth, system, admin, imports, schedule, student_teacher, export
-    
-    app.include_router(auth.router, prefix="/api/v1")
-    ROUTERS_LOADED.append("auth")
-    
-    app.include_router(system.router, prefix="/api/v1")
-    ROUTERS_LOADED.append("system")
-    
-    app.include_router(admin.router, prefix="/api/v1")
-    ROUTERS_LOADED.append("admin")
-    
-    app.include_router(imports.router, prefix="/api/v1")
-    ROUTERS_LOADED.append("imports")
-    
-    app.include_router(student_teacher.router, prefix="/api/v1")
-    ROUTERS_LOADED.append("student_teacher")
-    
-    app.include_router(export.router, prefix="/api/v1")
-    ROUTERS_LOADED.append("export")
-    
-except Exception as e:
-    IMPORT_ERROR = {
-        "error": str(e),
-        "type": type(e).__name__,
-        "traceback": traceback.format_exc()
-    }
-    logger.error(f"❌ CRITICAL IMPORT ERROR: {e}")
+# Include API routers (All modules are now lazy-loaded for stability)
+app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
+app.include_router(system.router, prefix=settings.API_V1_PREFIX)
+app.include_router(admin.router, prefix=settings.API_V1_PREFIX)
+app.include_router(imports.router, prefix=settings.API_V1_PREFIX)
+app.include_router(schedule.router, prefix=settings.API_V1_PREFIX)
+app.include_router(student_teacher.router, prefix=settings.API_V1_PREFIX)
+app.include_router(export.router, prefix=settings.API_V1_PREFIX)
 
-@app.get("/api/v1/health")
+
+@app.get(f"{settings.API_V1_PREFIX}/health")
 async def health_check():
+    """Health check with Firebase status."""
+    firebase_ok = False
+    firebase_error = ""
+    try:
+        from app.core.firebase import get_firebase_app
+        get_firebase_app()
+        firebase_ok = True
+    except Exception as e:
+        firebase_error = str(e)
+
     return {
-        "status": "stable" if not IMPORT_ERROR else "degraded",
-        "import_error": IMPORT_ERROR,
-        "routers_loaded": ROUTERS_LOADED,
-        "python_version": sys.version,
+        "status": "healthy",
+        "firebase": "connected" if firebase_ok else f"error: {firebase_error}",
         "env_check": {
-            "has_json": bool(os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")),
+            "has_service_account_json": bool(os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON", "")),
+            "project_id": settings.FIREBASE_PROJECT_ID,
         }
     }
 
+
 @app.get("/api/v1/debug/routes")
 async def debug_routes():
-    return {"routes": [r.path for r in app.routes], "error": bool(IMPORT_ERROR)}
+    return {"routes": [r.path for r in app.routes]}
 
 
 
