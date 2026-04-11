@@ -22,12 +22,20 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement;
-    const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    const target = e.target;
+    const { name, value } = target;
+    
+    let finalValue: string | number | boolean = value;
+
+    if (target instanceof HTMLInputElement && target.type === 'checkbox') {
+      finalValue = target.checked;
+    } else if (name === 'grade_level' || name === 'required_periods_per_week') {
+      finalValue = parseInt(value);
+    }
     
     setFormData(prev => ({
       ...prev,
-      [name]: (name === 'grade_level' || name === 'required_periods_per_week') ? parseInt(value as string) : val
+      [name]: finalValue
     }));
   };
 

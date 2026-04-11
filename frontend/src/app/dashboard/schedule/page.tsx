@@ -8,10 +8,19 @@ import TimetableGrid from '@/components/TimetableGrid';
 import { useAuth } from '@/components/AuthProvider';
 import { api } from '@/lib/api';
 
+interface Schedule {
+  schedule_id: string;
+  semester: number;
+  status: string;
+  created_at: string;
+  conflict_report: any;
+  assignments: any[];
+}
+
 export default function ScheduleDashboard() {
   const { schoolId } = useAuth();
-  const [schedules, setSchedules] = useState<any[]>([]);
-  const [activeSchedule, setActiveSchedule] = useState<any>(null);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [activeSchedule, setActiveSchedule] = useState<Schedule | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -23,10 +32,10 @@ export default function ScheduleDashboard() {
       setSchedules(res.schedules || []);
       if (res.schedules?.length > 0 && !activeSchedule) {
         // Show the most recently created
-        setActiveSchedule(res.schedules.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]);
+        setActiveSchedule(res.schedules.sort((a: Schedule, b: Schedule) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]);
       }
-    } catch (err) {
-      console.error('Failed to load schedules', err);
+    } catch (_err) {
+      console.error('Failed to load schedules', _err);
     } finally {
       setLoading(false);
     }

@@ -10,10 +10,19 @@ import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import SubjectModal from '@/components/SubjectModal';
 
+interface Subject {
+  subject_id: string;
+  code: string;
+  name: string;
+  grade_level: number;
+  required_periods_per_week: number;
+  is_mandatory?: boolean;
+}
+
 export default function SubjectsRegistry() {
   const { schoolId } = useAuth();
   const router = useRouter();
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -23,8 +32,8 @@ export default function SubjectsRegistry() {
     try {
       const res = await api.get(`/admin/${schoolId}/subjects`);
       setSubjects(res);
-    } catch (err) {
-      console.error('Failed to load subjects', err);
+    } catch (_err) {
+      console.error('Failed to load subjects', _err);
     } finally {
       setLoading(false);
     }

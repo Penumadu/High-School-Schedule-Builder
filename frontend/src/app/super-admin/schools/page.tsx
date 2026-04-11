@@ -8,10 +8,19 @@ import SchoolProvisionModal from '@/components/SchoolProvisionModal';
 import { useAuth } from '@/components/AuthProvider';
 import { api } from '@/lib/api';
 
+interface School {
+  school_id: string;
+  school_name?: string;
+  name?: string;
+  subscription_tier: string;
+  status: string;
+  created_at: string;
+}
+
 export default function SchoolsRegistry() {
   const { setRole, setSchoolId } = useAuth();
   const router = useRouter();
-  const [_schools, _setSchools] = useState<any[]>([]);
+  const [_schools, _setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,8 +30,8 @@ export default function SchoolsRegistry() {
     try {
       const res = await api.get('/system/schools');
       _setSchools(res.schools || []);
-    } catch (err) {
-      console.error('Failed to load schools', err);
+    } catch (_err) {
+      console.error('Failed to load schools', _err);
     } finally {
       setLoading(false);
     }
@@ -43,8 +52,8 @@ export default function SchoolsRegistry() {
     try {
       await api.put(`/system/schools/${schoolId}/status`, { status: newStatus });
       fetchSchools();
-    } catch (err) {
-      console.error('Failed to update status', err);
+    } catch (_err) {
+      console.error('Failed to update status', _err);
     }
   };
 
@@ -127,7 +136,7 @@ export default function SchoolsRegistry() {
                           {school.status}
                         </span>
                       </td>
-                      <td>{new Date(school.created_at).toLocaleDateString()}</td>
+                      <td>{school.created_at ? new Date(school.created_at).toLocaleDateString() : 'N/A'}</td>
                       <td>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           <button 
