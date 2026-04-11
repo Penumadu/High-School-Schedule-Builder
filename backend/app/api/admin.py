@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 from typing import List
 import uuid
 import io
-import pandas as pd
+
 
 from app.core.auth import get_current_user, require_role
 from app.core.firebase import get_firestore_client
@@ -56,6 +56,7 @@ async def download_template(
     else:
         raise HTTPException(status_code=400, detail="Invalid import type")
 
+    import pandas as pd
     df = pd.DataFrame(samples, columns=columns)
     
     # Write to Excel in memory
