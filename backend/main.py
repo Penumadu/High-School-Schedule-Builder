@@ -52,7 +52,7 @@ async def startup_event():
         logger.warning(f"⚠️ Firebase initialization deferred: {e}")
 
 
-@app.get("/")
+@app.get(f"{settings.API_V1_PREFIX}/")
 async def root():
     return {
         "app": settings.APP_NAME,
@@ -62,7 +62,7 @@ async def root():
     }
 
 
-@app.get("/health")
+@app.get(f"{settings.API_V1_PREFIX}/health")
 async def health_check():
     """Health check with Firebase status."""
     firebase_ok = False
