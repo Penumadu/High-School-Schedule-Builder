@@ -38,7 +38,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export default function Sidebar() {
-  const { role, user } = useAuth();
+  const { role, user, schoolId } = useAuth();
   const pathname = usePathname();
 
   const filteredItems = NAV_ITEMS.filter((item) => {
