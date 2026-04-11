@@ -1,6 +1,6 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
@@ -12,9 +12,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase (prevent duplicate initialization)
-let app;
-let auth: any;
-let db: any;
+let app: any;
+let auth: Auth;
+let db: Firestore;
 
 try {
   if (getApps().length === 0) {
@@ -24,9 +24,9 @@ try {
       db = getFirestore(app);
     } else {
       console.warn("Firebase API key is missing. Initializing in MOCK mode.");
-      app = null;
-      auth = { currentUser: null }; // Mock auth
-      db = null;
+      app = null as any;
+      auth = { currentUser: null } as unknown as Auth;
+      db = null as unknown as Firestore;
     }
   } else {
     app = getApps()[0];
@@ -35,8 +35,9 @@ try {
   }
 } catch (error) {
   console.error("Firebase initialization failed:", error);
-  auth = { currentUser: null };
-  db = null;
+  // Re-cast for cases where we must return a minimal object for SSR/Mock
+  auth = { currentUser: null } as unknown as Auth;
+  db = null as unknown as Firestore;
 }
 
 export { app, auth, db };

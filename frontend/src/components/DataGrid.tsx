@@ -2,21 +2,27 @@
 
 import React, { useState } from 'react';
 
-interface Column {
-  key: string;
+interface Column<T> {
+  key: keyof T | string;
   label: string;
-  render?: (value: any, row: any) => React.ReactNode;
+  render?: (value: any, row: T) => React.ReactNode;
 }
 
-interface DataGridProps {
-  columns: Column[];
-  data: any[];
+interface DataGridProps<T> {
+  columns: Column<T>[];
+  data: T[];
   searchPlaceholder?: string;
-  onRowClick?: (row: any) => void;
-  actions?: (row: any) => React.ReactNode;
+  onRowClick?: (row: T) => void;
+  actions?: (row: T) => React.ReactNode;
 }
 
-export default function DataGrid({ columns, data, searchPlaceholder = 'Search...', onRowClick, actions }: DataGridProps) {
+export default function DataGrid<T extends Record<string, any>>({ 
+  columns, 
+  data, 
+  searchPlaceholder = 'Search...', 
+  onRowClick, 
+  actions 
+}: DataGridProps<T>) {
   const [search, setSearch] = useState('');
 
   const filteredData = data.filter((row) => {

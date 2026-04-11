@@ -51,7 +51,7 @@ export default function SubjectsRegistry() {
     { 
       key: 'is_mandatory', 
       label: 'Requirement Type',
-      render: (val: any) => val ? (
+      render: (val: boolean) => val ? (
         <span style={{ color: 'var(--success-700)', background: 'var(--success-100)', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
           Mandatory
         </span>
