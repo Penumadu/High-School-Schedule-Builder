@@ -70,6 +70,21 @@ export default function Sidebar() {
               </Link>
             );
           })}
+
+          {typeof window !== 'undefined' && sessionStorage.getItem('acting_role') && (
+            <button
+              onClick={() => {
+                sessionStorage.removeItem('acting_role');
+                sessionStorage.removeItem('acting_school_id');
+                window.location.href = '/super-admin/schools';
+              }}
+              className={styles.navItem}
+              style={{ border: 'none', background: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', marginTop: 'var(--space-md)', color: 'var(--text-error)' }}
+            >
+              <span className={styles.navIcon}>🔙</span>
+              <span className={styles.navLabel}>Exit Management</span>
+            </button>
+          )}
         </div>
       </nav>
 
