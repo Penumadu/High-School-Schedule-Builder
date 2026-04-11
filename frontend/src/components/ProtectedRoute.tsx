@@ -25,10 +25,19 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
             if (!allowedRoles.includes('SUPER_ADMIN')) {
                 router.push('/super-admin');
             }
-        } else if (role === 'PRINCIPAL' || role === 'COORDINATOR') {
-        else if (role === 'TEACHER') router.push('/teacher');
-        else if (role === 'STUDENT') router.push('/student');
-        else router.push('/login');
+        } 
+        else if (role === 'PRINCIPAL' || role === 'COORDINATOR') {
+          router.push('/dashboard');
+        }
+        else if (role === 'TEACHER') {
+          router.push('/teacher');
+        }
+        else if (role === 'STUDENT') {
+          router.push('/student');
+        }
+        else {
+          router.push('/login');
+        }
       }
     }
   }, [user, role, loading, router, allowedRoles]);
