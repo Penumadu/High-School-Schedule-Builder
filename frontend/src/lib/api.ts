@@ -5,7 +5,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ||
 
 interface RequestOptions {
   method?: string;
-  body?: any;
+  body?: unknown;
   headers?: Record<string, string>;
 }
 
@@ -20,7 +20,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   };
 }
 
-export async function apiRequest<T = any>(
+export async function apiRequest<T = unknown>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
@@ -38,14 +38,14 @@ export async function apiRequest<T = any>(
     throw new Error(error.detail || `HTTP ${response.status}`);
   }
 
-  return response.json();
+  return response.json() as Promise<T>;
 }
 
 export async function apiUpload(
   endpoint: string,
   file: File,
   params: Record<string, string> = {}
-): Promise<any> {
+): Promise<unknown> {
   const user = auth.currentUser;
   const token = user ? await user.getIdToken() : '';
 
@@ -71,12 +71,12 @@ export async function apiUpload(
 
 // Convenience methods
 export const api = {
-  get: <T = any>(endpoint: string) => apiRequest<T>(endpoint),
-  post: <T = any>(endpoint: string, body: any) =>
+  get: <T = unknown>(endpoint: string) => apiRequest<T>(endpoint),
+  post: <T = unknown>(endpoint: string, body: unknown) =>
     apiRequest<T>(endpoint, { method: 'POST', body }),
-  put: <T = any>(endpoint: string, body: any) =>
+  put: <T = unknown>(endpoint: string, body: unknown) =>
     apiRequest<T>(endpoint, { method: 'PUT', body }),
-  delete: <T = any>(endpoint: string) =>
+  delete: <T = unknown>(endpoint: string) =>
     apiRequest<T>(endpoint, { method: 'DELETE' }),
   upload: apiUpload,
 };
