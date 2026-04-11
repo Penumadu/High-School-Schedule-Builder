@@ -19,21 +19,28 @@ def get_firebase_app():
     # Priority 1: Full JSON string (Easiest for Vercel)
     if settings.FIREBASE_SERVICE_ACCOUNT_JSON:
         try:
+            # Check if already initialized to prevent "App already exists" errors
+            if firebase_admin._apps:
+                _app = firebase_admin.get_app()
+                return _app
+
             # Try parsing directly
-            content = settings.FIREBASE_SERVICE_ACCOUNT_JSON
+            content = settings.FIREBASE_SERVICE_ACCOUNT_JSON.strip()
             try:
                 info = json.loads(content)
             except json.JSONDecodeError:
-                # If it fails, common issue is escaped newlines or literal backslashes
-                # This fixes the "Invalid \escape" error by ensuring backslashes are handled correctly
-                content = content.replace('\n', '\\n').replace('\r', '\\r')
+                # Common issue: escaped newlines or literal backslashes from Vercel env vars
+                content = content.replace('\\n', '\n').replace('\\r', '\r')
                 info = json.loads(content)
             
             cred = credentials.Certificate(info)
             _app = firebase_admin.initialize_app(cred)
             return _app
         except Exception as e:
-            print(f"CRITICAL: Error parsing FIREBASE_SERVICE_ACCOUNT_JSON: {e}")
+            print(f"CRITICAL: Firebase initialization failed: {e}")
+            # Re-check if it was initialized by another thread/request in the meantime
+            if firebase_admin._apps:
+                return firebase_admin.get_app()
             raise RuntimeError(f"Failed to initialize Firebase with environment JSON: {e}")
 
     # Priority 2: Individual Environment Variables
