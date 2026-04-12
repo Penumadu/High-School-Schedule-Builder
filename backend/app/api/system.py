@@ -135,10 +135,10 @@ async def provision_school(
         import uuid
         for subj_doc in master_subjects:
             subj_data = subj_doc.to_dict()
-            new_subj_id = f"subj_{uuid.uuid4().hex[:8]}"
+            code = subj_data.get('code', 'unknown')
             target_ref = db.collection("schools").document(request.school_id) \
-                .collection("subjects").document(new_subj_id)
-            batch.set(target_ref, subj_data)
+                .collection("subjects").document(code)
+            batch.set(target_ref, subj_data, merge=True)
             count += 1
             if count % 400 == 0:
                 batch.commit()

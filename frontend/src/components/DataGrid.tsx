@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 interface Column<T> {
   key: keyof T | string;
@@ -43,7 +43,7 @@ export default function DataGrid<T extends Record<string, any>>({
     }
   };
 
-  const filteredData = React.useMemo(() => {
+  const filteredData = useMemo(() => {
     if (!Array.isArray(data)) return [];
     
     let result = [...data];

@@ -26,36 +26,23 @@ def force_sync_subjects():
     for school in schools:
         school_id = school.id
         print(f"Force Syncing school: {school_id}...")
-        
-        # 1. Delete all existing subjects
         subjs_ref = db.collection("schools").document(school_id).collection("subjects")
-        docs = subjs_ref.stream()
-        batch = db.batch()
-        deleted_count = 0
-        for doc in docs:
-            batch.delete(doc.reference)
-            deleted_count += 1
-            if deleted_count % 400 == 0:
-                batch.commit()
-                batch = db.batch()
-        batch.commit()
-        print(f"Deleted {deleted_count} existing subjects from {school_id}.")
         
-        # 2. Add all master subjects
+        # Optimized Upsert: Only write if needed, use course code as ID
         batch = db.batch()
-        added_count = 0
+        count = 0
         for subj in master_subjects:
-            new_id = f"subj_{uuid.uuid4().hex[:8]}"
-            doc_ref = subjs_ref.document(new_id)
-            batch.set(doc_ref, subj)
-            added_count += 1
-            if added_count % 400 == 0:
+            code = subj.get('code', 'unknown')
+            # Using the code as the ID avoids duplicates and the need for deletions
+            doc_ref = subjs_ref.document(code)
+            batch.set(doc_ref, subj, merge=True)
+            count += 1
+            if count % 400 == 0:
                 batch.commit()
                 batch = db.batch()
         
-        if added_count > 0:
-            batch.commit()
-            print(f"Successfully added {added_count} master subjects to {school_id}.")
+        batch.commit()
+        print(f"Successfully synced/merged {count} master subjects to {school_id}.")
 
 if __name__ == "__main__":
     force_sync_subjects()
