@@ -415,15 +415,15 @@ for item in raw_data:
         email = f"{safe_first}.{safe_last}@school.edu"
         
         processed.append({
-            "teacher_id": f"default_{len(processed)}",
             "first_name": first_name,
             "last_name": last_name,
-            "email": email,
-            "specializations": list(set(filtered_specs)), # Truly secondary items only
-            "primary_subject_name": primary_name,
             "primary_subject_code": primary_code,
+            "primary_subject_name": primary_name,
+            "email": email,
+            "specializations": list(set(filtered_specs)),
             "max_periods_per_week": 25,
-            "is_active": True
+            "is_active": True,
+            "teacher_id": f"default_{len(processed)}"
         })
 
 with open('/Users/sahasrapenumadu/Documents/Srini Learning/Srini Projects/School Schedule Builder/frontend/src/data/default_teachers.json', 'w') as f:
