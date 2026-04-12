@@ -46,6 +46,21 @@ export default function StaffRegistry() {
     { key: 'first_name', label: 'First Name' },
     { key: 'last_name', label: 'Last Name' },
     { 
+      key: 'primary_subject_name', 
+      label: 'Subject', 
+      width: '250px',
+      render: (name: string, row: any) => (
+        <div>
+          <div>{name}</div>
+          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
+            {(row.specializations || [])
+              .filter(s => s !== row.primary_subject_code && s !== name)
+              .map(s => <span key={s} className="badge badge-primary" style={{ fontSize: '10px', padding: '2px 6px' }}>{s}</span>)}
+          </div>
+        </div>
+      )
+    },
+    { 
       key: 'primary_subject_code', 
       label: 'Teaching Code',
       width: '120px',
@@ -61,19 +76,7 @@ export default function StaffRegistry() {
         </span>
       ) : <span style={{ color: 'var(--text-muted)' }}>-</span>
     },
-    { key: 'primary_subject_name', label: 'Subject', width: '180px' },
     { key: 'email', label: 'Email', width: '220px' },
-    { 
-      key: 'specializations', 
-      label: 'Specializations',
-      render: (specs: string[], row: any) => (
-        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-          {(specs || [])
-            .filter(s => s !== row.primary_subject_code) // Divide: remove code from general specs
-            .map(s => <span key={s} className="badge badge-primary">{s}</span>)}
-        </div>
-      )
-    },
     { key: 'max_periods_per_week', label: 'Max Periods' },
     { 
       key: 'is_active', 

@@ -75,8 +75,8 @@
     "primary_subject_name": "Canadian & World Studies",
     "email": "kevin.leblanc@school.edu",
     "specializations": [
-      "World Studies",
-      "Canadian"
+      "Canadian",
+      "World Studies"
     ],
     "max_periods_per_week": 25,
     "is_active": true,
@@ -195,8 +195,8 @@
     "email": "jennie.dineen@school.edu",
     "specializations": [
       "English",
-      "Canadian",
       "Moderns",
+      "Canadian",
       "World Studies"
     ],
     "max_periods_per_week": 25,
@@ -268,8 +268,8 @@
     "primary_subject_name": "Religion/Physical Education",
     "email": "patrick.gamble@school.edu",
     "specializations": [
-      "Physical Education",
-      "Religion"
+      "Religion",
+      "Physical Education"
     ],
     "max_periods_per_week": 25,
     "is_active": true,
@@ -326,9 +326,9 @@
     "primary_subject_name": "Canadian & World Studies/Careers",
     "email": "k.degruijterformrjameshibbert@school.edu",
     "specializations": [
-      "World Studies",
       "Canadian",
-      "Careers"
+      "Careers",
+      "World Studies"
     ],
     "max_periods_per_week": 25,
     "is_active": true,
@@ -352,8 +352,8 @@
     "primary_subject_name": "Canadian & World Studies",
     "email": "kathleen.jacobs@school.edu",
     "specializations": [
-      "World Studies",
-      "Canadian"
+      "Canadian",
+      "World Studies"
     ],
     "max_periods_per_week": 25,
     "is_active": true,
@@ -366,8 +366,8 @@
     "primary_subject_name": "Science/Cooperative Education",
     "email": "sandra.jurinic@school.edu",
     "specializations": [
-      "Cooperative Education",
-      "Science"
+      "Science",
+      "Cooperative Education"
     ],
     "max_periods_per_week": 25,
     "is_active": true,
@@ -402,8 +402,8 @@
     "primary_subject_name": "Canadian & World Studies",
     "email": "david.kennedy@school.edu",
     "specializations": [
-      "World Studies",
-      "Canadian"
+      "Canadian",
+      "World Studies"
     ],
     "max_periods_per_week": 25,
     "is_active": true,
@@ -499,8 +499,8 @@
     "primary_subject_name": "Religion/Math",
     "email": "landon.gabrieleformsmelaniemeagher@school.edu",
     "specializations": [
-      "Math",
-      "Religion"
+      "Religion",
+      "Math"
     ],
     "max_periods_per_week": 25,
     "is_active": true,
@@ -513,8 +513,8 @@
     "primary_subject_name": "Canadian & World Studies",
     "email": "joseph.melfi@school.edu",
     "specializations": [
-      "World Studies",
-      "Canadian"
+      "Canadian",
+      "World Studies"
     ],
     "max_periods_per_week": 25,
     "is_active": true,
@@ -599,9 +599,9 @@
     "primary_subject_name": "Canadian & World Studies/ESL",
     "email": "michael.muszak@school.edu",
     "specializations": [
-      "World Studies",
       "Canadian",
-      "ESL"
+      "ESL",
+      "World Studies"
     ],
     "max_periods_per_week": 25,
     "is_active": true,
@@ -636,9 +636,9 @@
     "primary_subject_name": "Canadian & World Studies/English",
     "email": "samantha.onuska@school.edu",
     "specializations": [
-      "World Studies",
       "Canadian",
-      "English"
+      "English",
+      "World Studies"
     ],
     "max_periods_per_week": 25,
     "is_active": true,
@@ -651,8 +651,8 @@
     "primary_subject_name": "Canadian & World Studies",
     "email": "brian.owen@school.edu",
     "specializations": [
-      "World Studies",
-      "Canadian"
+      "Canadian",
+      "World Studies"
     ],
     "max_periods_per_week": 25,
     "is_active": true,
@@ -911,5 +911,79 @@
     "max_periods_per_week": 25,
     "is_active": true,
     "teacher_id": "default_75"
+  },
+  {
+    "first_name": "Tara",
+    "last_name": "Thompson",
+    "primary_subject_code": "MDM4U",
+    "primary_subject_name": "Math",
+    "email": "tara.thompson@school.edu",
+    "specializations": [],
+    "max_periods_per_week": 25,
+    "is_active": true,
+    "teacher_id": "default_76"
+  },
+  {
+    "first_name": "Aelah",
+    "last_name": "Thomson",
+    "primary_subject_code": "SNC1D",
+    "primary_subject_name": "English/Moderns/Science",
+    "email": "aelah.thomson@school.edu",
+    "specializations": [
+      "English",
+      "Science",
+      "Moderns"
+    ],
+    "max_periods_per_week": 25,
+    "is_active": true,
+    "teacher_id": "default_77"
+  },
+  {
+    "first_name": "Emily",
+    "last_name": "Thurner",
+    "primary_subject_code": "CLU3M",
+    "primary_subject_name": "English / Canadian & World Studies",
+    "email": "emily.thurner@school.edu",
+    "specializations": [
+      "English",
+      "Canadian",
+      "World Studies"
+    ],
+    "max_periods_per_week": 25,
+    "is_active": true,
+    "teacher_id": "default_78"
+  },
+  {
+    "first_name": "Lyndsay",
+    "last_name": "Timmins",
+    "primary_subject_code": "ALC1O",
+    "primary_subject_name": "Arts",
+    "email": "lyndsay.timmins@school.edu",
+    "specializations": [],
+    "max_periods_per_week": 25,
+    "is_active": true,
+    "teacher_id": "default_79"
+  },
+  {
+    "first_name": "Helena",
+    "last_name": "Tucci",
+    "primary_subject_code": "SCH3U",
+    "primary_subject_name": "Science",
+    "email": "helena.tucci@school.edu",
+    "specializations": [],
+    "max_periods_per_week": 25,
+    "is_active": true,
+    "teacher_id": "default_80"
+  },
+  {
+    "first_name": "Sara",
+    "last_name": "Vella",
+    "primary_subject_code": "MCV4U",
+    "primary_subject_name": "Math",
+    "email": "sara.vella@school.edu",
+    "specializations": [],
+    "max_periods_per_week": 25,
+    "is_active": true,
+    "teacher_id": "default_81"
   }
 ]

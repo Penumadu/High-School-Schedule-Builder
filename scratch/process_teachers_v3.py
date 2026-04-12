@@ -377,6 +377,36 @@ raw_data = [
     "teacher": "Ms. Tanya Tatti",
     "subject": "Physical Education",
     "subject_code": "PAF4O"
+  },
+  {
+    "teacher": "Ms. Tara Thompson",
+    "subject": "Math",
+    "subject_code": "MDM4U"
+  },
+  {
+    "teacher": "Ms. Aelah Thomson",
+    "subject": "English/Moderns/Science",
+    "subject_code": "SNC1D"
+  },
+  {
+    "teacher": "Ms. Emily Thurner",
+    "subject": "English / Canadian & World Studies",
+    "subject_code": "CLU3M"
+  },
+  {
+    "teacher": "Ms. Lyndsay Timmins",
+    "subject": "Arts",
+    "subject_code": "ALC1O"
+  },
+  {
+    "teacher": "Ms. Helena Tucci",
+    "subject": "Science",
+    "subject_code": "SCH3U"
+  },
+  {
+    "teacher": "Ms. Sara Vella",
+    "subject": "Math",
+    "subject_code": "MCV4U"
   }
 ]
 
