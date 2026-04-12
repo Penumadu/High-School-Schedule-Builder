@@ -26,7 +26,8 @@ export default function DataGrid<T extends Record<string, any>>({
   onRowClick, 
   actions,
   onFilteredCount,
-  countLabel
+  countLabel,
+  topActions
 }: DataGridProps<T>) {
   const [search, setSearch] = useState('');
 
