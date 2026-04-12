@@ -84,11 +84,30 @@ export default function SubjectsRegistry() {
       key: 'facility_type', 
       label: 'Facility',
       width: '100px',
-      render: (val: string) => (
-        <span className="badge badge-primary" style={{ fontSize: '11px', padding: '2px 8px' }}>
-          {val}
-        </span>
-      )
+      render: (val: string) => {
+        const colors: Record<string, string> = {
+          'REGULAR': 'var(--primary-500)',
+          'LAB': '#8b5cf6', // Violet
+          'GYM': '#f59e0b', // Amber
+          'ART': '#ec4899', // Pink
+          'SHOP': '#10b981', // Emerald
+          'MUSIC': '#3b82f6', // Bright Blue
+          'DRAMA': '#f43f5e', // Rose
+        };
+        const color = colors[val] || 'var(--primary-500)';
+        return (
+          <span className="badge" style={{ 
+            fontSize: '10px', 
+            padding: '2px 8px', 
+            background: `${color}20`, 
+            color: color,
+            border: `1px solid ${color}40`,
+            fontWeight: '800'
+          }}>
+            {val}
+          </span>
+        );
+      }
     },
     { 
       key: 'is_mandatory', 
