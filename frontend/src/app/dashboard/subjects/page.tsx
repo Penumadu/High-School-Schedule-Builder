@@ -62,18 +62,18 @@ export default function SubjectsRegistry() {
 
   const columns = [
     { key: 'code', label: 'Code', width: '90px' },
-    { key: 'name', label: 'Subject', width: '200px' },
+    { key: 'name', label: 'Subject', width: '220px' },
     { key: 'grade_level', label: 'Grade', width: '90px' },
     { key: 'credits', label: 'Cr', width: '60px' },
     { key: 'level', label: 'Level', width: '100px' },
-    { key: 'department', label: 'Dept', width: '120px' },
+    { key: 'department', label: 'Dept', width: '140px' },
     { 
       key: 'prerequisites', 
       label: 'Prereq',
-      width: '150px',
+      width: '180px',
       render: (val: string) => (
         <div style={{ 
-          maxWidth: '150px', 
+          maxWidth: '180px', 
           overflow: 'hidden', 
           textOverflow: 'ellipsis', 
           whiteSpace: 'nowrap' 
@@ -87,7 +87,7 @@ export default function SubjectsRegistry() {
       label: 'Facil',
       width: '110px',
       render: (val: string) => (
-        <span className="badge badge-primary" style={{ fontSize: '10px' }}>
+        <span className="badge badge-primary" style={{ fontSize: '11px', padding: '2px 8px' }}>
           {val}
         </span>
       )
@@ -96,13 +96,13 @@ export default function SubjectsRegistry() {
     { 
       key: 'is_mandatory', 
       label: 'Type',
-      width: '100px',
+      width: '110px',
       render: (val: boolean) => val ? (
-        <span style={{ color: 'var(--success-700)', background: 'var(--success-100)', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+        <span className="badge badge-success" style={{ fontSize: '11px' }}>
           Mandatory
         </span>
       ) : (
-        <span style={{ color: 'var(--text-muted)', background: '#f0f0f0', padding: '2px 8px', borderRadius: '4px', fontSize: '12px' }}>
+        <span className="badge" style={{ fontSize: '11px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-glass)' }}>
           Optional
         </span>
       )
