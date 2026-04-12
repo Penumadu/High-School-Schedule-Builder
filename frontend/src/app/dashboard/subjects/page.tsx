@@ -51,29 +51,27 @@ export default function SubjectsRegistry() {
   }, [schoolId]);
 
   const handleRowClick = (subject: Subject) => {
-    setEditingSubject(subject);
-    setIsModalOpen(true);
+    router.push(`/dashboard/subjects/${subject.subject_id}`);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setEditingSubject(null);
   };
 
   const columns = [
-    { key: 'code', label: 'Course Code', width: '110px' },
-    { key: 'name', label: 'Subject Name', width: '220px' },
-    { key: 'grade_level', label: 'Grade Level', width: '100px' },
-    { key: 'credits', label: 'Credits', width: '90px' },
-    { key: 'level', label: 'Course Level', width: '120px' },
-    { key: 'department', label: 'Department', width: '150px' },
+    { key: 'code', label: 'Course Code', width: '100px' },
+    { key: 'name', label: 'Subject Name', width: '200px' },
+    { key: 'grade_level', label: 'Grade Level', width: '90px' },
+    { key: 'credits', label: 'Credits', width: '80px' },
+    { key: 'level', label: 'Course Level', width: '110px' },
+    { key: 'department', label: 'Department', width: '130px' },
     { 
       key: 'prerequisites', 
       label: 'Prerequisites',
-      width: '180px',
+      width: '120px',
       render: (val: string) => (
         <div style={{ 
-          maxWidth: '180px', 
+          maxWidth: '120px', 
           overflow: 'hidden', 
           textOverflow: 'ellipsis', 
           whiteSpace: 'nowrap' 
@@ -85,18 +83,18 @@ export default function SubjectsRegistry() {
     { 
       key: 'facility_type', 
       label: 'Facility',
-      width: '110px',
+      width: '100px',
       render: (val: string) => (
         <span className="badge badge-primary" style={{ fontSize: '11px', padding: '2px 8px' }}>
           {val}
         </span>
       )
     },
-    { key: 'required_periods_per_week', label: 'Periods/Week', width: '110px' },
+    { key: 'required_periods_per_week', label: 'Periods/Week', width: '100px' },
     { 
       key: 'is_mandatory', 
       label: 'Course Type',
-      width: '120px',
+      width: '110px',
       render: (val: boolean) => val ? (
         <span className="badge badge-success" style={{ fontSize: '11px' }}>
           Mandatory
