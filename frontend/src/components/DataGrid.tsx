@@ -48,6 +48,40 @@ export default function DataGrid<T extends Record<string, any>>({
 
   return (
     <div className="glass-card" style={{ padding: 'var(--space-md)', maxWidth: '100%', overflow: 'hidden' }}>
+      <style jsx>{`
+        .scroll-container {
+          overflow-x: auto;
+          border-radius: var(--radius-sm);
+          padding-bottom: 8px;
+        }
+        .scroll-container::-webkit-scrollbar {
+          height: 8px;
+        }
+        .scroll-container::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 4px;
+        }
+        .scroll-container::-webkit-scrollbar-thumb {
+          background: rgba(99, 102, 241, 0.3);
+          border-radius: 4px;
+        }
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+          background: rgba(99, 102, 241, 0.5);
+        }
+        
+        .sticky-col {
+          position: sticky;
+          left: 0;
+          z-index: 10;
+          background: #0d1117 !important;
+          border-right: 2px solid var(--border-glass) !important;
+        }
+        
+        thead th.sticky-col {
+          z-index: 11;
+        }
+      `}</style>
+
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -77,12 +111,18 @@ export default function DataGrid<T extends Record<string, any>>({
         </div>
       </div>
 
-      <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-sm)' }}>
-        <table className="data-table" style={{ minWidth: '100%', tableLayout: 'fixed' }}>
+      <div className="scroll-container">
+        <table className="data-table" style={{ minWidth: '1000px', tableLayout: 'fixed' }}>
           <thead>
             <tr>
-              {columns.map((col) => (
-                <th key={col.key} style={{ width: col.width }}>{col.label}</th>
+              {columns.map((col, idx) => (
+                <th key={col.key} className={idx < 2 ? 'sticky-col' : ''} style={{ 
+                  width: col.width,
+                  left: idx === 0 ? 0 : (idx === 1 ? columns[0].width : undefined),
+                  zIndex: idx < 2 ? 11 : 1
+                }}>
+                  {col.label}
+                </th>
               ))}
               {actions && <th style={{ width: '100px' }}>Actions</th>}
             </tr>
@@ -101,8 +141,15 @@ export default function DataGrid<T extends Record<string, any>>({
                   onClick={() => onRowClick && onRowClick(row)}
                   style={{ cursor: onRowClick ? 'pointer' : 'default' }}
                 >
-                  {columns.map((col) => (
-                    <td key={col.key} style={{ width: col.width, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {columns.map((col, colIdx) => (
+                    <td key={col.key} className={colIdx < 2 ? 'sticky-col' : ''} style={{ 
+                      width: col.width, 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap',
+                      left: colIdx === 0 ? 0 : (colIdx === 1 ? columns[0].width : undefined),
+                      zIndex: colIdx < 2 ? 10 : 1
+                    }}>
                       {col.render ? col.render(row[col.key], row) : row[col.key]}
                     </td>
                   ))}
