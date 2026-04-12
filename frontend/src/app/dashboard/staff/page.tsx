@@ -48,6 +48,7 @@ export default function StaffRegistry() {
     { 
       key: 'primary_subject_code', 
       label: 'Teaching Code',
+      width: '120px',
       render: (code: string) => code && code !== 'N/A' ? (
         <span className="badge" style={{ 
           background: 'rgba(99, 102, 241, 0.1)', 
@@ -60,7 +61,8 @@ export default function StaffRegistry() {
         </span>
       ) : <span style={{ color: 'var(--text-muted)' }}>-</span>
     },
-    { key: 'email', label: 'Email' },
+    { key: 'primary_subject_name', label: 'Subject', width: '180px' },
+    { key: 'email', label: 'Email', width: '220px' },
     { 
       key: 'specializations', 
       label: 'Specializations',
