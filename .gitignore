@@ -28,6 +28,3 @@ frontend/.next/
 .project
 .pydevproject
 .settings/
-
-# Scratch/Temporary Scripts
-scratch/
