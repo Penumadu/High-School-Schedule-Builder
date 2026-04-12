@@ -6,6 +6,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/components/AuthProvider';
 import { api } from '@/lib/api';
+import defaultSubjects from '@/data/default_subjects.json';
 
 export default function EditSubjectPage() {
   const { schoolId } = useAuth();
@@ -32,28 +33,35 @@ export default function EditSubjectPage() {
   useEffect(() => {
     const fetchSubject = async () => {
       if (!schoolId || !subjectId) return;
+      
+      let data = [];
       try {
         const res = await api.get(`/admin/${schoolId}/subjects`);
-        const subject = res.find((s: any) => s.subject_id === subjectId || s.id === subjectId);
-        if (subject) {
-          setFormData({
-            name: subject.name || '',
-            code: subject.code || '',
-            grade_level: subject.grade_level || 'Grade 10',
-            credits: subject.credits || '1 Credit',
-            level: subject.level || 'Open',
-            department: subject.department || 'The Arts',
-            prerequisites: subject.prerequisites || '',
-            required_periods_per_week: subject.required_periods_per_week || 5,
-            facility_type: subject.facility_type || 'REGULAR',
-            is_mandatory: !!subject.is_mandatory
-          });
-        }
-      } catch (err: any) {
-        setError('Failed to load subject data');
-      } finally {
-        setLoading(false);
+        data = res && res.length > 0 ? res : defaultSubjects;
+      } catch (err) {
+        console.warn('API fetch failed, falling back to master catalogue', err);
+        data = defaultSubjects;
       }
+
+      const subject = data.find((s: any) => s.subject_id === subjectId || s.id === subjectId);
+      if (subject) {
+        setFormData({
+          name: subject.name || '',
+          code: subject.code || '',
+          grade_level: subject.grade_level || 'Grade 10',
+          credits: subject.credits || '1 Credit',
+          level: subject.level || 'Open',
+          department: subject.department || 'The Arts',
+          prerequisites: subject.prerequisites || '',
+          required_periods_per_week: subject.required_periods_per_week || 5,
+          facility_type: subject.facility_type || 'REGULAR',
+          is_mandatory: !!subject.is_mandatory
+        });
+        setError(''); // Clear any previous errors
+      } else {
+        setError('Subject record not found in catalogue');
+      }
+      setLoading(false);
     };
 
     fetchSubject();

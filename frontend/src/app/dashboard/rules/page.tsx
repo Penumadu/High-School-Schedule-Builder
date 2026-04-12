@@ -6,26 +6,32 @@ import DashboardLayout from '@/components/DashboardLayout';
 import DataGrid from '@/components/DataGrid';
 import { useAuth } from '@/components/AuthProvider';
 import { api } from '@/lib/api';
-import RuleModal from '@/components/RuleModal';
+import { useRouter } from 'next/navigation';
 
 export default function RulesRegistry() {
   const { schoolId } = useAuth();
+  const router = useRouter();
   const [rules, setRules] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [teacherMap, setTeacherMap] = useState<Record<string, string>>({});
 
   const fetchData = async () => {
     if (!schoolId) return;
     setLoading(true);
     try {
-      // 1. Fetch subjects first to map IDs to names
+      // 1. Fetch subjects
       const subRes = await api.get(`/admin/${schoolId}/subjects`);
       const subMap: Record<string, string> = {};
       subRes.forEach((s: any) => { subMap[s.subject_id] = s.name; });
       setSubjects(subMap);
 
-      // 2. Fetch rules
+      // 2. Fetch teachers
+      const teachRes = await api.get(`/admin/${schoolId}/staff`);
+      const tMap: Record<string, string> = {};
+      (teachRes || []).forEach((t: any) => { tMap[t.teacher_id] = `${t.first_name} ${t.last_name}`; });
+      setTeacherMap(tMap);
+
+      // 3. Fetch rules
       const ruleRes = await api.get(`/admin/${schoolId}/rules`);
       setRules(ruleRes);
     } catch (err) {
@@ -39,7 +45,8 @@ export default function RulesRegistry() {
     fetchData();
   }, [schoolId]);
 
-  const handleDelete = async (ruleId: string) => {
+  const handleDelete = async (e: React.MouseEvent, ruleId: string) => {
+    e.stopPropagation(); // Don't trigger row click
     if (!confirm('Are you sure you want to delete this rule?')) return;
     try {
       await api.delete(`/admin/${schoolId}/rules/${ruleId}`);
@@ -51,37 +58,67 @@ export default function RulesRegistry() {
 
   const translateLogic = (node: any): string => {
     if (!node) return '';
-    if (node.prerequisite) {
-      const subName = subjects[node.prerequisite] || node.prerequisite;
-      return `${subName} ${node.operator || '>='} ${node.value}%`;
-    }
+    
+    // Recursive Group Logic
     if (node.condition && node.rules) {
       const parts = node.rules.map((r: any) => translateLogic(r));
       return `(${parts.join(` ${node.condition} `)})`;
     }
-    return 'Invalid Rule';
+
+    // Leaf Logic
+    switch (node.type) {
+      case 'ACADEMIC':
+        const subName = subjects[node.prerequisite] || node.prerequisite;
+        return `${subName} ${node.operator || '>='} ${node.value}%`;
+      case 'TEACHER':
+        const teaName = teacherMap[node.teacher_id] || node.teacher_id;
+        return `Taught by: ${teaName}`;
+      case 'PERIOD':
+        return `Period ${node.period} only`;
+      default:
+        // Legacy fallback
+        if (node.prerequisite) {
+           const sName = subjects[node.prerequisite] || node.prerequisite;
+           return `${sName} ${node.operator || '>='} ${node.value}%`;
+        }
+        return 'Invalid Rule';
+    }
   };
 
   const columns = [
     { 
       key: 'target_subject_id', 
       label: 'Target Subject',
-      render: (id: string) => <strong style={{ color: 'var(--primary-400)' }}>{subjects[id] || id}</strong>
+      render: (id: string) => (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <strong style={{ color: 'var(--primary-400)' }}>{subjects[id] || id}</strong>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{id}</span>
+        </div>
+      )
     },
     { 
       key: 'logic_tree', 
       label: 'Academic Prerequisite Logic',
       render: (tree: any) => (
-        <code style={{ fontSize: '13px', background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: '4px' }}>
+        <div style={{ 
+          fontSize: '13px', 
+          background: 'rgba(255,255,255,0.03)', 
+          padding: '8px 12px', 
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--border-glass)',
+          color: 'var(--text-secondary)',
+          fontFamily: 'var(--font-mono)',
+          lineHeight: '1.4'
+        }}>
           {translateLogic(tree)}
-        </code>
+        </div>
       )
     },
     {
       key: 'actions',
       label: 'Actions',
       render: (_: any, row: any) => (
-        <button className="btn btn-secondary btn-sm" onClick={() => handleDelete(row.rule_id)}>
+        <button className="btn btn-secondary btn-sm" onClick={(e) => handleDelete(e, row.rule_id)}>
           Delete
         </button>
       )
@@ -92,7 +129,7 @@ export default function RulesRegistry() {
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Academic Rules Engine">
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+          <button className="btn btn-primary" onClick={() => router.push('/dashboard/rules/new')}>
             + Create New Rule
           </button>
         </div>
@@ -104,17 +141,7 @@ export default function RulesRegistry() {
             columns={columns} 
             data={rules} 
             searchPlaceholder="Search rules by subject..." 
-          />
-        )}
-
-        {isModalOpen && (
-          <RuleModal 
-            schoolId={schoolId} 
-            onClose={() => setIsModalOpen(false)} 
-            onSuccess={() => {
-              setIsModalOpen(false);
-              fetchData();
-            }} 
+            onRowClick={(row) => router.push(`/dashboard/rules/${row.rule_id}`)}
           />
         )}
       </DashboardLayout>

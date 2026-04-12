@@ -1,0 +1,34 @@
+[
+  {
+    "room_id": "default_rm101",
+    "name": "General Classroom 101",
+    "code": "RM-101",
+    "capacity": 30,
+    "facility_type": "REGULAR",
+    "is_gym": false
+  },
+  {
+    "room_id": "default_rm102",
+    "name": "General Classroom 102",
+    "code": "RM-102",
+    "capacity": 30,
+    "facility_type": "REGULAR",
+    "is_gym": false
+  },
+  {
+    "room_id": "default_lab1",
+    "name": "Chemistry Lab 1",
+    "code": "LAB-01",
+    "capacity": 24,
+    "facility_type": "LAB",
+    "is_gym": false
+  },
+  {
+    "room_id": "default_gym_main",
+    "name": "Main Gymnasium",
+    "code": "GYM-MAIN",
+    "capacity": 100,
+    "facility_type": "GYM",
+    "is_gym": true
+  }
+]

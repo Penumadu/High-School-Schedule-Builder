@@ -23,10 +23,12 @@ export default function Classrooms() {
     setLoading(true);
     try {
       const res = await api.get(`/admin/${schoolId}/classrooms`);
-      setClassrooms(res);
-      setFilteredCount(res.length);
+      setClassrooms(res || []);
+      setFilteredCount(res?.length || 0);
     } catch (err) {
       console.error('Failed to load classrooms', err);
+      setClassrooms([]);
+      setFilteredCount(0);
     } finally {
       setLoading(false);
     }
@@ -35,6 +37,10 @@ export default function Classrooms() {
   useEffect(() => {
     fetchClassrooms();
   }, [schoolId]);
+
+  const handleRowClick = (room: any) => {
+    router.push(`/dashboard/classrooms/${room.room_id}`);
+  };
 
   const columns = [
     { key: 'code', label: 'Room Code' },
@@ -62,6 +68,7 @@ export default function Classrooms() {
             data={classrooms} 
             searchPlaceholder="Search rooms..." 
             onFilteredCount={setFilteredCount}
+            onRowClick={handleRowClick}
             countLabel={filteredCount === classrooms.length ? `${classrooms.length} Total Rooms` : `Showing ${filteredCount} of ${classrooms.length}`}
             topActions={
               <div style={{ display: 'flex', gap: '12px' }}>

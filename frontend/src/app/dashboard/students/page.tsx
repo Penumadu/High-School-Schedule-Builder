@@ -23,10 +23,12 @@ export default function Students() {
     setLoading(true);
     try {
       const res = await api.get(`/admin/${schoolId}/students`);
-      setStudents(res);
-      setFilteredCount(res.length);
+      setStudents(res || []);
+      setFilteredCount(res?.length || 0);
     } catch (err) {
       console.error('Failed to load students', err);
+      setStudents([]);
+      setFilteredCount(0);
     } finally {
       setLoading(false);
     }
@@ -35,6 +37,10 @@ export default function Students() {
   useEffect(() => {
     fetchStudents();
   }, [schoolId]);
+
+  const handleRowClick = (student: any) => {
+    router.push(`/dashboard/students/${student.student_id}`);
+  };
 
   const columns = [
     { key: 'student_id', label: 'Student ID' },
@@ -72,6 +78,7 @@ export default function Students() {
             data={students} 
             searchPlaceholder="Search students..." 
             onFilteredCount={setFilteredCount}
+            onRowClick={handleRowClick}
             countLabel={filteredCount === students.length ? `${students.length} Students Total` : `Showing ${filteredCount} of ${students.length}`}
             topActions={
               <div style={{ display: 'flex', gap: '12px' }}>

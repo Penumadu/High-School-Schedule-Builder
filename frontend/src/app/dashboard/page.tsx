@@ -7,7 +7,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { api } from '@/lib/api';
 
 export default function DashboardLanding() {
-  const { user, schoolId, role } = useAuth();
+  const { user, schoolId } = useAuth();
   const [stats, setStats] = useState({
     staff: 0,
     students: 0,
@@ -18,7 +18,11 @@ export default function DashboardLanding() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!schoolId) return;
+      if (!schoolId) {
+        setLoading(false);
+        return;
+      }
+      
       try {
         const [staffRes, studentsRes, subjectsRes, roomsRes] = await Promise.all([
           api.get(`/admin/${schoolId}/staff`),
@@ -28,10 +32,10 @@ export default function DashboardLanding() {
         ]);
         
         setStats({
-          staff: staffRes.length || 0,
-          students: studentsRes.length || 0,
-          subjects: subjectsRes.length || 0,
-          classrooms: roomsRes.length || 0,
+          staff: staffRes?.length || 0,
+          students: studentsRes?.length || 0,
+          subjects: subjectsRes?.length || 0,
+          classrooms: roomsRes?.length || 0,
         });
       } catch (err) {
         console.error('Failed to load dashboard stats', err);

@@ -9,7 +9,6 @@ import { api } from '@/lib/api';
 
 import { useRouter } from 'next/navigation';
 import SubjectModal from '@/components/SubjectModal';
-import defaultSubjects from '@/data/default_subjects.json';
 
 interface Subject {
   subject_id: string;
@@ -38,14 +37,12 @@ export default function SubjectsRegistry() {
     setLoading(true);
     try {
       const res = await api.get(`/admin/${schoolId}/subjects`);
-      // Fallback to default data if the database is empty (common in Demo/Quota Exceeded)
-      const data = res && res.length > 0 ? res : defaultSubjects;
-      setSubjects(data);
-      setFilteredCount(data.length);
+      setSubjects(res || []);
+      setFilteredCount(res?.length || 0);
     } catch (err) {
-      console.error('Failed to load subjects, falling back to defaults', err);
-      setSubjects(defaultSubjects as Subject[]);
-      setFilteredCount(defaultSubjects.length);
+      console.error('Failed to load subjects', err);
+      setSubjects([]);
+      setFilteredCount(0);
     } finally {
       setLoading(false);
     }

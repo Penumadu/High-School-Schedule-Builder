@@ -11,6 +11,8 @@ class TeacherCreate(BaseModel):
     first_name: str
     last_name: str
     email: str
+    subject: str
+    subject_code: str
     specializations: List[str] = Field(default_factory=list)
     max_periods_per_week: int = Field(default=25, ge=1, le=40)
     off_times: List[int] = Field(default_factory=list, description="Period indices (1-indexed) where teacher is busy")
@@ -20,6 +22,8 @@ class TeacherUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     email: Optional[str] = None
+    subject: Optional[str] = None
+    subject_code: Optional[str] = None
     specializations: Optional[List[str]] = None
     max_periods_per_week: Optional[int] = None
     is_active: Optional[bool] = None
@@ -32,6 +36,8 @@ class TeacherResponse(BaseModel):
     first_name: str
     last_name: str
     email: str
+    subject: str
+    subject_code: str
     specializations: List[str]
     max_periods_per_week: int
     is_active: bool = True
@@ -82,12 +88,12 @@ class SubjectResponse(BaseModel):
 
 # ---------- CLASSROOMS ----------
 
-class ClassroomCreate(BaseModel):
-    name: str = Field(..., description="e.g. 'Main Gym'")
-    code: str = Field(..., description="e.g. 'RM101' or 'B-12'")
-    capacity: int = Field(ge=1, le=500)
-    facility_type: str = Field(default="REGULAR", description="e.g. REGULAR, LAB, GYM")
-    is_gym: bool = False
+class ClassroomUpdate(BaseModel):
+    name: Optional[str] = None
+    code: Optional[str] = None
+    capacity: Optional[int] = None
+    facility_type: Optional[str] = None
+    is_gym: Optional[bool] = None
 
 
 class ClassroomResponse(BaseModel):
@@ -108,6 +114,15 @@ class StudentCreate(BaseModel):
     grade_level: int = Field(ge=9, le=12)
     historical_grades: Dict[str, float] = Field(default_factory=dict)
     requested_subjects: List[str] = Field(default_factory=list)
+
+
+class StudentUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    grade_level: Optional[int] = None
+    historical_grades: Optional[Dict[str, float]] = None
+    requested_subjects: Optional[List[str]] = None
 
 
 class StudentResponse(BaseModel):
@@ -142,6 +157,11 @@ class RuleResponse(BaseModel):
     rule_id: str
     target_subject_id: str
     logic_tree: Dict[str, Any]
+
+
+class RuleUpdate(BaseModel):
+    target_subject_id: Optional[str] = None
+    logic_tree: Optional[Dict[str, Any]] = None
 
 
 # ---------- VALIDATION / IMPORT ----------

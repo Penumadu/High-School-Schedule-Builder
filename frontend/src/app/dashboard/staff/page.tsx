@@ -9,7 +9,6 @@ import { api } from '@/lib/api';
 
 import { useRouter } from 'next/navigation';
 import StaffModal from '@/components/StaffModal';
-import defaultTeachers from '@/data/default_teachers.json';
 
 export default function StaffRegistry() {
   const { schoolId } = useAuth();
@@ -17,6 +16,7 @@ export default function StaffRegistry() {
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<any>(null);
   const [filteredCount, setFilteredCount] = useState<number>(0);
 
   const fetchStaff = async () => {
@@ -24,14 +24,12 @@ export default function StaffRegistry() {
     setLoading(true);
     try {
       const res = await api.get(`/admin/${schoolId}/staff`);
-      // Fallback to default data if the database is empty (common in Demo/Quota Exceeded)
-      const data = res && res.length > 0 ? res : defaultTeachers;
-      setStaff(data);
-      setFilteredCount(data.length);
+      setStaff(res || []);
+      setFilteredCount(res?.length || 0);
     } catch (err) {
-      console.error('Failed to load staff, falling back to defaults', err);
-      setStaff(defaultTeachers);
-      setFilteredCount(defaultTeachers.length);
+      console.error('Failed to load staff', err);
+      setStaff([]);
+      setFilteredCount(0);
     } finally {
       setLoading(false);
     }
@@ -41,6 +39,15 @@ export default function StaffRegistry() {
     fetchStaff();
   }, [schoolId]);
 
+  const handleRowClick = (staffMember: any) => {
+    router.push(`/dashboard/staff/${staffMember.teacher_id}`);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingStaff(null);
+  };
+
   const columns = [
     // ... existing column definitions
     { key: 'first_name', label: 'First Name' },
@@ -48,33 +55,36 @@ export default function StaffRegistry() {
     { 
       key: 'subject', 
       label: 'Subject', 
-      width: '250px',
-      render: (name: string, row: any) => (
-        <div>
-          <div style={{ fontWeight: 500 }}>{name}</div>
-          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
-            {(row.specializations || [])
-              .filter(s => s !== row.subject_code && s !== name)
-              .map(s => <span key={s} className="badge badge-primary" style={{ fontSize: '10px', padding: '2px 6px' }}>{s}</span>)}
-          </div>
+      width: '240px',
+      render: (val: string) => (
+        <div style={{ display: 'flex', gap: '4px', flexWrap: 'nowrap', overflow: 'hidden' }}>
+          {(val || "").split(', ').map(s => (
+            <span key={s} className="badge badge-primary" style={{ fontSize: '10px', padding: '2px 6px', whiteSpace: 'nowrap' }}>
+              {s}
+            </span>
+          ))}
         </div>
       )
     },
     { 
       key: 'subject_code', 
-      label: 'Teaching Code',
-      width: '120px',
-      render: (code: string) => code && code !== 'N/A' ? (
-        <span className="badge" style={{ 
-          background: 'rgba(99, 102, 241, 0.1)', 
-          color: 'var(--primary-400)',
-          border: '1px solid var(--primary-500)',
-          fontWeight: 'bold',
-          fontSize: '11px'
-        }}>
-          {code}
-        </span>
-      ) : <span style={{ color: 'var(--text-muted)' }}>-</span>
+      label: 'Subject Code',
+      width: '180px',
+      render: (val: string) => (
+        <div style={{ display: 'flex', gap: '4px', flexWrap: 'nowrap', overflow: 'hidden' }}>
+          {(val || "").split(', ').map(code => (
+            <span key={code} className="badge" style={{ 
+              background: 'rgba(99, 102, 241, 0.1)', 
+              color: 'var(--primary-400)',
+              border: '1px solid var(--primary-500)',
+              fontWeight: 'bold',
+              fontSize: '11px'
+            }}>
+              {code}
+            </span>
+          ))}
+        </div>
+      )
     },
     { key: 'email', label: 'Email', width: '220px' },
     { key: 'max_periods_per_week', label: 'Max Periods' },
@@ -100,13 +110,17 @@ export default function StaffRegistry() {
             data={staff} 
             searchPlaceholder="Search staff by name or email..." 
             onFilteredCount={setFilteredCount}
+            onRowClick={handleRowClick}
             countLabel={filteredCount === staff.length ? `${staff.length} Teachers Total` : `Showing ${filteredCount} of ${staff.length}`}
             topActions={
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=staff')}>
                   📥 Import Staff
                 </button>
-                <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                <button className="btn btn-primary" onClick={() => {
+                  setEditingStaff(null);
+                  setIsModalOpen(true);
+                }}>
                   + Add Staff Member
                 </button>
               </div>
@@ -116,10 +130,11 @@ export default function StaffRegistry() {
 
         {isModalOpen && (
           <StaffModal 
-            schoolId={schoolId} 
-            onClose={() => setIsModalOpen(false)} 
+            schoolId={schoolId!} 
+            initialData={editingStaff}
+            onClose={closeModal} 
             onSuccess={() => {
-              setIsModalOpen(false);
+              closeModal();
               fetchStaff();
             }} 
           />

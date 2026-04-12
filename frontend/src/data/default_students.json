@@ -1,0 +1,20 @@
+[
+  {
+    "student_id": "default_std1",
+    "first_name": "Johnny",
+    "last_name": "Appleseed",
+    "email": "j.appleseed@school.edu",
+    "grade_level": 10,
+    "requested_subjects": ["ENG2D", "MPM2D", "SNC2D", "HRE2O", "PPL2O", "ADA2O"],
+    "last_schedule_email_status": "DELIVERED"
+  },
+  {
+    "student_id": "default_std2",
+    "first_name": "Sarah",
+    "last_name": "Smith",
+    "email": "s.smith@school.edu",
+    "grade_level": 9,
+    "requested_subjects": ["ENG1D", "MTH1W", "SNC1W", "HRE1O", "CGC1W", "FSF1D"],
+    "last_schedule_email_status": "PENDING"
+  }
+]

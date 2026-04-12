@@ -19,6 +19,8 @@ export default function SuperAdminDashboard() {
       try {
         const res = await api.get('/system/schools');
         const schools = res.schools || [];
+        const total = res.total || 0;
+        
         setStats({
           totalSchools: res.total || 0,
           activeSchools: schools.filter((s: any) => s.status === 'ACTIVE').length,

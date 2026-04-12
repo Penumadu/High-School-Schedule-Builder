@@ -137,6 +137,44 @@ class ScheduleSolver:
             "rules": rules,
         }
 
+    def _get_assignment_constraints(self, node: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extract non-academic constraints (Teacher/Period) from a logic tree.
+        Returns a simplified map of { 'allowed_teachers': set(), 'allowed_periods': set() }.
+        This is a pre-processor for the solver variables.
+        """
+        if not node: return {}
+        
+        # Leaf Node
+        if node.get("type") == "TEACHER":
+            return {"allowed_teachers": {node.get("teacher_id")}}
+        if node.get("type") == "PERIOD":
+            return {"allowed_periods": {node.get("period")}}
+        
+        # Group Node
+        if "condition" in node:
+            res_list = [self._get_assignment_constraints(r) for r in node.get("rules", [])]
+            combined = {"allowed_teachers": set(), "allowed_periods": set()}
+            
+            if node["condition"] == "AND":
+                # Intersection logic (Must meet ALL)
+                for r in res_list:
+                    if "allowed_teachers" in r:
+                        if not combined["allowed_teachers"]: combined["allowed_teachers"] = r["allowed_teachers"]
+                        else: combined["allowed_teachers"] &= r["allowed_teachers"]
+                    if "allowed_periods" in r:
+                        if not combined["allowed_periods"]: combined["allowed_periods"] = r["allowed_periods"]
+                        else: combined["allowed_periods"] &= r["allowed_periods"]
+            else:
+                # Union logic (Can meet ANY)
+                for r in res_list:
+                    if "allowed_teachers" in r: combined["allowed_teachers"] |= r["allowed_teachers"]
+                    if "allowed_periods" in r: combined["allowed_periods"] |= r["allowed_periods"]
+            
+            return {k: v for k, v in combined.items() if v}
+            
+        return {}
+
     def generate(self, semester: int) -> ScheduleGenerateResponse:
         """Run the CP-SAT solver and save results to Firestore."""
         from ortools.sat.python import cp_model
@@ -162,21 +200,44 @@ class ScheduleSolver:
         room_idx = {r["room_id"]: i for i, r in enumerate(classrooms)}
         period_names = [f"Period_{p+1}" for p in range(num_periods)]
 
-        # Build subject → qualified teachers mapping
+        # Build subject → qualified teachers mapping (Now with Rule Enforcement!)
         subject_teachers: Dict[int, List[int]] = {}
+        subject_period_restriction: Dict[int, List[int]] = {} # p+1 values
+
         for si, subj in enumerate(subjects):
-            qualified = []
+            subj_id = subj["subject_id"]
+            rule = rules.get(subj_id)
+            
+            # Get specific assignment constraints from the rules engine
+            constraints = self._get_assignment_constraints(rule)
+            req_teacher_ids = constraints.get("allowed_teachers", set())
+            req_periods = constraints.get("allowed_periods", set())
+
+            qualified_idx = []
             for ti, teacher in enumerate(teachers):
+                t_id = teacher["teacher_id"]
                 specs = teacher.get("specializations", [])
-                # Check for matches against ID, Name, or Code
-                if (subj["subject_id"] in specs or 
-                    subj.get("name", "") in specs or 
-                    subj.get("code", "") in specs):
-                    qualified.append(ti)
-            # If no one is specifically qualified, allow all teachers
-            if not qualified:
-                qualified = list(range(len(teachers)))
-            subject_teachers[si] = qualified
+                
+                # Rule 1: If rule specifies teachers, you MUST be one of them
+                if req_teacher_ids and t_id not in req_teacher_ids:
+                    continue
+                
+                # Rule 2: Specialization match (only if no specific teacher is required)
+                if not req_teacher_ids:
+                    if (subj_id not in specs and 
+                        subj.get("name", "") not in specs and 
+                        subj.get("code", "") not in specs):
+                        continue
+                
+                qualified_idx.append(ti)
+
+            # Fallback: if no one is specifically qualified, allow all (unless restricted by rule)
+            if not qualified_idx and not req_teacher_ids:
+                qualified_idx = list(range(len(teachers)))
+                
+            subject_teachers[si] = qualified_idx
+            if req_periods:
+                subject_period_restriction[si] = list(req_periods)
 
         # Build subject → student enrollment mapping (with Academic Rule Enforcement)
         subject_students: Dict[int, List[int]] = {}
@@ -288,8 +349,12 @@ class ScheduleSolver:
                     if len(sec_students) > room_cap:
                         continue  # skip rooms too small for this section
 
-                    for p in range(num_p):
-                        x[sec_i, t, r, p] = model.NewBoolVar(f"x_sec{sec_i}_t{t}_r{r}_p{p}")
+                    # Period lock rule check
+                    if si in subject_period_restriction:
+                        if (p + 1) not in subject_period_restriction[si]:
+                            continue
+
+                    x[sec_i, t, r, p] = model.NewBoolVar(f"x_sec{sec_i}_t{t}_r{r}_p{p}")
 
         # ── HARD CONSTRAINTS ──
 

@@ -116,12 +116,8 @@ async def update_teacher(
     user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL")),
 ):
     ref = _school_ref(school_id).collection("teachers").document(teacher_id)
-    doc = ref.get()
-    if not doc.exists:
-        raise HTTPException(status_code=404, detail="Teacher not found")
-
     update_data = {k: v for k, v in update.model_dump().items() if v is not None}
-    ref.update(update_data)
+    ref.set(update_data, merge=True)
 
     updated = ref.get().to_dict()
     return TeacherResponse(teacher_id=teacher_id, **updated)
@@ -159,12 +155,8 @@ async def update_subject(
     user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL")),
 ):
     ref = _school_ref(school_id).collection("subjects").document(subject_id)
-    doc = ref.get()
-    if not doc.exists:
-        raise HTTPException(status_code=404, detail="Subject not found")
-
     update_data = {k: v for k, v in update.model_dump().items() if v is not None}
-    ref.update(update_data)
+    ref.set(update_data, merge=True)
 
     updated = ref.get().to_dict()
     return SubjectResponse(subject_id=subject_id, **updated)
@@ -183,7 +175,19 @@ async def delete_subject(
     return {"message": f"Subject '{subject_id}' deleted"}
 
 
-# ──────────────────────── CLASSROOMS ────────────────────────
+@router.put("/{school_id}/classrooms/{room_id}", response_model=ClassroomResponse)
+async def update_classroom(
+    school_id: str,
+    room_id: str,
+    update: ClassroomUpdate,
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL")),
+):
+    ref = _school_ref(school_id).collection("classrooms").document(room_id)
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    ref.set(update_data, merge=True)
+
+    updated = ref.get().to_dict()
+    return ClassroomResponse(room_id=room_id, **updated)
 
 @router.get("/{school_id}/classrooms", response_model=List[ClassroomResponse])
 async def list_classrooms(
@@ -207,7 +211,20 @@ async def create_classroom(
     return ClassroomResponse(room_id=room_id, **data)
 
 
-# ──────────────────────── STUDENTS ────────────────────────
+@router.put("/{school_id}/students/{student_id}", response_model=StudentResponse)
+async def update_student(
+    school_id: str,
+    student_id: str,
+    update: StudentUpdate,
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL")),
+):
+    ref = _school_ref(school_id).collection("students").document(student_id)
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    ref.set(update_data, merge=True)
+
+    updated = ref.get().to_dict()
+    # Handle potentially missing grade_level in response construction if needed
+    return StudentResponse(student_id=student_id, **updated)
 
 @router.get("/{school_id}/students", response_model=List[StudentResponse])
 async def list_students(
@@ -257,6 +274,34 @@ async def create_rule(
     data = rule.model_dump()
     _school_ref(school_id).collection("rules").document(rule_id).set(data)
     return RuleResponse(rule_id=rule_id, **data)
+
+
+@router.get("/{school_id}/rules/{rule_id}", response_model=RuleResponse)
+async def get_rule(
+    school_id: str,
+    rule_id: str,
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),
+):
+    ref = _school_ref(school_id).collection("rules").document(rule_id)
+    doc = ref.get()
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail="Rule not found")
+    return RuleResponse(rule_id=doc.id, **doc.to_dict())
+
+
+@router.put("/{school_id}/rules/{rule_id}", response_model=RuleResponse)
+async def update_rule(
+    school_id: str,
+    rule_id: str,
+    update: RuleUpdate,
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL")),
+):
+    ref = _school_ref(school_id).collection("rules").document(rule_id)
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    ref.set(update_data, merge=True)
+    
+    updated = ref.get().to_dict()
+    return RuleResponse(rule_id=rule_id, **updated)
 
 
 @router.delete("/{school_id}/rules/{rule_id}")
