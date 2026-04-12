@@ -37,10 +37,14 @@ export default function SubjectsRegistry() {
     setLoading(true);
     try {
       const res = await api.get(`/admin/${schoolId}/subjects`);
-      setSubjects(res);
-      setFilteredCount(res.length);
-    } catch (_err) {
-      console.error('Failed to load subjects', _err);
+      // Fallback to default data if the database is empty (common in Demo/Quota Exceeded)
+      const data = res && res.length > 0 ? res : defaultSubjects;
+      setSubjects(data);
+      setFilteredCount(data.length);
+    } catch (err) {
+      console.error('Failed to load subjects, falling back to defaults', err);
+      setSubjects(defaultSubjects as Subject[]);
+      setFilteredCount(defaultSubjects.length);
     } finally {
       setLoading(false);
     }
