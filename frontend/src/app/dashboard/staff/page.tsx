@@ -64,9 +64,11 @@ export default function StaffRegistry() {
     { 
       key: 'specializations', 
       label: 'Specializations',
-      render: (specs: string[]) => (
+      render: (specs: string[], row: any) => (
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-          {(specs || []).map(s => <span key={s} className="badge badge-primary">{s}</span>)}
+          {(specs || [])
+            .filter(s => s !== row.primary_subject_code) // Divide: remove code from general specs
+            .map(s => <span key={s} className="badge badge-primary">{s}</span>)}
         </div>
       )
     },

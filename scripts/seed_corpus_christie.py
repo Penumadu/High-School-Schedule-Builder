@@ -39,12 +39,28 @@ def seed_data():
         print(f"Error seeding subjects: {e}")
 
     # 2. Seed Teachers
-    print("Seeding teachers...")
+    print("Cleanup & Seeding teachers...")
     try:
         with open('frontend/src/data/default_teachers.json', 'r') as f:
             teachers = json.load(f)
         
         teachers_ref = school_ref.collection('teachers')
+        
+        # WIPE existing teachers first to remove manual entries
+        print("Wiping old teacher records...")
+        old_docs = teachers_ref.stream()
+        delete_batch = db.batch()
+        del_count = 0
+        for doc in old_docs:
+            delete_batch.delete(doc.reference)
+            del_count += 1
+            if del_count % 400 == 0:
+                delete_batch.commit()
+                delete_batch = db.batch()
+        delete_batch.commit()
+        print(f"Deleted {del_count} old teacher records.")
+
+        # SEED fresh data
         batch = db.batch()
         count = 0
         for t in teachers:
