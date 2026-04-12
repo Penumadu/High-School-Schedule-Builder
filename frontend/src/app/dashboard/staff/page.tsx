@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 
 import { useRouter } from 'next/navigation';
 import StaffModal from '@/components/StaffModal';
+import defaultTeachers from '@/data/default_teachers.json';
 
 export default function StaffRegistry() {
   const { schoolId } = useAuth();
@@ -23,10 +24,14 @@ export default function StaffRegistry() {
     setLoading(true);
     try {
       const res = await api.get(`/admin/${schoolId}/staff`);
-      setStaff(res);
-      setFilteredCount(res.length);
+      // Fallback to default data if the database is empty (common in Demo/Quota Exceeded)
+      const data = res && res.length > 0 ? res : defaultTeachers;
+      setStaff(data);
+      setFilteredCount(data.length);
     } catch (err) {
-      console.error('Failed to load staff', err);
+      console.error('Failed to load staff, falling back to defaults', err);
+      setStaff(defaultTeachers);
+      setFilteredCount(defaultTeachers.length);
     } finally {
       setLoading(false);
     }
@@ -64,7 +69,7 @@ export default function StaffRegistry() {
 
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
-      <DashboardLayout title="Staff Registry">
+      <DashboardLayout title="Teachers Registry">
         {loading ? (
           <div className="skeleton" style={{ height: '400px', borderRadius: 'var(--radius-lg)' }} />
         ) : (

@@ -20,7 +20,7 @@ const NAV_ITEMS: NavItem[] = [
 
   // Principal / Coordinator
   { label: 'Dashboard', href: '/dashboard', icon: '📊', roles: ['PRINCIPAL', 'COORDINATOR'] },
-  { label: 'Staff', href: '/dashboard/staff', icon: '👨‍🏫', roles: ['PRINCIPAL', 'COORDINATOR'] },
+  { label: 'Teachers', href: '/dashboard/staff', icon: '👨‍🏫', roles: ['PRINCIPAL', 'COORDINATOR'] },
   { label: 'Subjects', href: '/dashboard/subjects', icon: '📚', roles: ['PRINCIPAL', 'COORDINATOR'] },
   { label: 'Classrooms', href: '/dashboard/classrooms', icon: '🚪', roles: ['PRINCIPAL'] },
   { label: 'Students', href: '/dashboard/students', icon: '🎓', roles: ['PRINCIPAL', 'COORDINATOR'] },
