@@ -15,6 +15,7 @@ interface DataGridProps<T> {
   onRowClick?: (row: T) => void;
   actions?: (row: T) => React.ReactNode;
   onFilteredCount?: (count: number) => void;
+  countLabel?: string;
 }
 
 export default function DataGrid<T extends Record<string, any>>({ 
@@ -23,7 +24,8 @@ export default function DataGrid<T extends Record<string, any>>({
   searchPlaceholder = 'Search...', 
   onRowClick, 
   actions,
-  onFilteredCount
+  onFilteredCount,
+  countLabel
 }: DataGridProps<T>) {
   const [search, setSearch] = useState('');
 
@@ -43,15 +45,22 @@ export default function DataGrid<T extends Record<string, any>>({
 
   return (
     <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-lg)' }}>
-        <div className="search-bar" style={{ width: '300px' }}>
-          <span className="search-icon">🔍</span>
-          <input 
-            type="text" 
-            placeholder={searchPlaceholder} 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="search-bar" style={{ width: '320px' }}>
+            <span className="search-icon">🔍</span>
+            <input 
+              type="text" 
+              placeholder={searchPlaceholder} 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          {countLabel && (
+            <span className="badge badge-primary" style={{ fontSize: '13px', padding: '6px 14px' }}>
+              {countLabel}
+            </span>
+          )}
         </div>
       </div>
 

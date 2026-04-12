@@ -65,12 +65,7 @@ export default function StaffRegistry() {
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Staff Registry">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span className="badge badge-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
-              {filteredCount === staff.length ? `${staff.length} Teachers Registered` : `Showing ${filteredCount} of ${staff.length} Teachers`}
-            </span>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px' }}>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=staff')}>
               📥 Import Staff
@@ -89,6 +84,7 @@ export default function StaffRegistry() {
             data={staff} 
             searchPlaceholder="Search staff by name or email..." 
             onFilteredCount={setFilteredCount}
+            countLabel={filteredCount === staff.length ? `${staff.length} Teachers Total` : `Showing ${filteredCount} of ${staff.length}`}
           />
         )}
 
