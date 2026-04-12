@@ -84,7 +84,7 @@ export default function DataGrid<T extends Record<string, any>>({
 
       <div style={{ 
         display: 'flex', 
-        justifyContent: 'space-between', 
+        justifyContent: 'flex-start', 
         alignItems: 'center', 
         marginBottom: 'var(--space-md)', 
         flexWrap: 'wrap', 
@@ -105,9 +105,9 @@ export default function DataGrid<T extends Record<string, any>>({
               {countLabel}
             </span>
           )}
-        </div>
-        <div style={{ flexShrink: 0 }}>
-          {topActions}
+          <div style={{ display: 'flex', gap: '8px', marginLeft: '12px' }}>
+             {topActions}
+          </div>
         </div>
       </div>
 
