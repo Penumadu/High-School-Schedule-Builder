@@ -90,7 +90,6 @@ export default function SubjectsRegistry() {
         </span>
       )
     },
-    { key: 'required_periods_per_week', label: 'Periods/Week', width: '100px' },
     { 
       key: 'is_mandatory', 
       label: 'Course Type',
