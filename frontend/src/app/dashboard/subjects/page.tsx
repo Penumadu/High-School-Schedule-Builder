@@ -61,15 +61,15 @@ export default function SubjectsRegistry() {
   };
 
   const columns = [
-    { key: 'code', label: 'Code', width: '90px' },
-    { key: 'name', label: 'Subject', width: '220px' },
-    { key: 'grade_level', label: 'Grade', width: '90px' },
-    { key: 'credits', label: 'Cr', width: '60px' },
-    { key: 'level', label: 'Level', width: '100px' },
-    { key: 'department', label: 'Dept', width: '140px' },
+    { key: 'code', label: 'Course Code', width: '110px' },
+    { key: 'name', label: 'Subject Name', width: '220px' },
+    { key: 'grade_level', label: 'Grade Level', width: '100px' },
+    { key: 'credits', label: 'Credits', width: '90px' },
+    { key: 'level', label: 'Course Level', width: '120px' },
+    { key: 'department', label: 'Department', width: '150px' },
     { 
       key: 'prerequisites', 
-      label: 'Prereq',
+      label: 'Prerequisites',
       width: '180px',
       render: (val: string) => (
         <div style={{ 
@@ -84,7 +84,7 @@ export default function SubjectsRegistry() {
     },
     { 
       key: 'facility_type', 
-      label: 'Facil',
+      label: 'Facility',
       width: '110px',
       render: (val: string) => (
         <span className="badge badge-primary" style={{ fontSize: '11px', padding: '2px 8px' }}>
@@ -92,11 +92,11 @@ export default function SubjectsRegistry() {
         </span>
       )
     },
-    { key: 'required_periods_per_week', label: 'Per', width: '60px' },
+    { key: 'required_periods_per_week', label: 'Periods/Week', width: '110px' },
     { 
       key: 'is_mandatory', 
-      label: 'Type',
-      width: '110px',
+      label: 'Course Type',
+      width: '120px',
       render: (val: boolean) => val ? (
         <span className="badge badge-success" style={{ fontSize: '11px' }}>
           Mandatory
