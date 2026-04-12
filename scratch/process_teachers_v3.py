@@ -447,8 +447,8 @@ for item in raw_data:
         processed.append({
             "first_name": first_name,
             "last_name": last_name,
-            "primary_subject_code": primary_code,
-            "primary_subject_name": primary_name,
+            "subject": primary_name,
+            "subject_code": primary_code,
             "email": email,
             "specializations": list(set(filtered_specs)),
             "max_periods_per_week": 25,

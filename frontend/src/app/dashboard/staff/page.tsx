@@ -46,22 +46,22 @@ export default function StaffRegistry() {
     { key: 'first_name', label: 'First Name' },
     { key: 'last_name', label: 'Last Name' },
     { 
-      key: 'primary_subject_name', 
+      key: 'subject', 
       label: 'Subject', 
       width: '250px',
       render: (name: string, row: any) => (
         <div>
-          <div>{name}</div>
+          <div style={{ fontWeight: 500 }}>{name}</div>
           <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
             {(row.specializations || [])
-              .filter(s => s !== row.primary_subject_code && s !== name)
+              .filter(s => s !== row.subject_code && s !== name)
               .map(s => <span key={s} className="badge badge-primary" style={{ fontSize: '10px', padding: '2px 6px' }}>{s}</span>)}
           </div>
         </div>
       )
     },
     { 
-      key: 'primary_subject_code', 
+      key: 'subject_code', 
       label: 'Teaching Code',
       width: '120px',
       render: (code: string) => code && code !== 'N/A' ? (
