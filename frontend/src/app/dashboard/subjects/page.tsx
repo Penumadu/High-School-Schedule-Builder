@@ -29,6 +29,7 @@ export default function SubjectsRegistry() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
   const [filteredCount, setFilteredCount] = useState<number>(0);
 
   const fetchSubjects = async () => {
@@ -49,6 +50,16 @@ export default function SubjectsRegistry() {
     fetchSubjects();
   }, [schoolId]);
 
+  const handleRowClick = (subject: Subject) => {
+    setEditingSubject(subject);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingSubject(null);
+  };
+
   const columns = [
     { key: 'code', label: 'Code' },
     { key: 'name', label: 'Subject' },
@@ -56,6 +67,8 @@ export default function SubjectsRegistry() {
     { key: 'credits', label: 'Credits' },
     { key: 'level', label: 'Level' },
     { key: 'department', label: 'Department' },
+    { key: 'prerequisites', label: 'Prerequisites' },
+    { key: 'facility_type', label: 'Facility' },
     { key: 'required_periods_per_week', label: 'Periods/Week' },
     { 
       key: 'is_mandatory', 
@@ -83,6 +96,7 @@ export default function SubjectsRegistry() {
             data={subjects} 
             searchPlaceholder="Search subjects by name or code..." 
             onFilteredCount={setFilteredCount}
+            onRowClick={handleRowClick}
             countLabel={filteredCount === subjects.length ? `${subjects.length} Total Subjects` : `Showing ${filteredCount} of ${subjects.length}`}
             topActions={
               <div style={{ display: 'flex', gap: '12px' }}>
@@ -99,10 +113,11 @@ export default function SubjectsRegistry() {
 
         {isModalOpen && (
           <SubjectModal 
-            schoolId={schoolId} 
-            onClose={() => setIsModalOpen(false)} 
+            schoolId={schoolId!} 
+            initialData={editingSubject}
+            onClose={closeModal} 
             onSuccess={() => {
-              setIsModalOpen(false);
+              closeModal();
               fetchSubjects();
             }} 
           />

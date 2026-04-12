@@ -7,22 +7,23 @@ interface SubjectModalProps {
   schoolId: string;
   onClose: () => void;
   onSuccess: () => void;
+  initialData?: any;
 }
 
-export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectModalProps) {
+export default function SubjectModal({ schoolId, onClose, onSuccess, initialData }: SubjectModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
-    name: '',
-    code: '',
-    grade_level: 'Grade 10',
-    credits: '1 Credit',
-    level: 'Open',
-    department: 'The Arts',
-    prerequisites: '',
-    required_periods_per_week: 5,
-    facility_type: 'REGULAR',
-    is_mandatory: false
+    name: initialData?.name || '',
+    code: initialData?.code || '',
+    grade_level: initialData?.grade_level || 'Grade 10',
+    credits: initialData?.credits || '1 Credit',
+    level: initialData?.level || 'Open',
+    department: initialData?.department || 'The Arts',
+    prerequisites: initialData?.prerequisites || '',
+    required_periods_per_week: initialData?.required_periods_per_week || 5,
+    facility_type: initialData?.facility_type || 'REGULAR',
+    is_mandatory: initialData?.is_mandatory || false
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -49,10 +50,14 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
     setError('');
 
     try {
-      await api.post(`/admin/${schoolId}/subjects`, formData);
+      if (initialData?.id) {
+        await api.put(`/admin/${schoolId}/subjects/${initialData.id}`, formData);
+      } else {
+        await api.post(`/admin/${schoolId}/subjects`, formData);
+      }
       onSuccess();
     } catch (err: any) {
-      setError(err.message || 'Failed to add subject');
+      setError(err.message || 'Failed to save subject');
       setLoading(false);
     }
   };
@@ -61,7 +66,7 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
     <div className="modal-overlay">
       <div className="modal-content glass-card" style={{ maxWidth: '600px', width: '90%' }}>
         <div className="modal-header">
-          <h2 className="modal-title">Add New Subject</h2>
+          <h2 className="modal-title">{initialData ? 'Edit Subject' : 'Add New Subject'}</h2>
           <button className="modal-close" onClick={onClose}>&times;</button>
         </div>
 
@@ -205,7 +210,7 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px', borderTop: '1px solid var(--border-glass)', paddingTop: '20px' }}>
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Adding...' : 'Add Subject'}
+              {loading ? 'Saving...' : (initialData ? 'Save Changes' : 'Add Subject')}
             </button>
           </div>
         </form>
