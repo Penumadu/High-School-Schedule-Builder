@@ -24,23 +24,46 @@ export default function DataGrid<T extends Record<string, any>>({
   columns, 
   data, 
   searchPlaceholder = 'Search...', 
-  onRowClick, 
-  actions,
   onFilteredCount,
+  onRowClick,
+  actions,
   countLabel,
   topActions
 }: DataGridProps<T>) {
   const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  const filteredData = data.filter((row) => {
-    if (!search) return true;
-    const searchLower = search.toLowerCase();
-    return Object.values(row).some((val) => 
-      String(val).toLowerCase().includes(searchLower)
-    );
-  });
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortOrder('asc');
+    }
+  };
 
-  React.useEffect(() => {
+  const filteredData = data
+    .filter((row) => {
+      const searchLower = search.toLowerCase();
+      return columns.some((col) => {
+        const value = row[col.key];
+        return value && String(value).toLowerCase().includes(searchLower);
+      });
+    })
+    .sort((a, b) => {
+      if (!sortKey) return 0;
+      
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+
+      if (aVal === bVal) return 0;
+      
+      const comparison = String(aVal).localeCompare(String(bVal), undefined, { numeric: true });
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+  useEffect(() => {
     if (onFilteredCount) {
       onFilteredCount(filteredData.length);
     }
@@ -80,6 +103,23 @@ export default function DataGrid<T extends Record<string, any>>({
         thead th.sticky-col {
           z-index: 11;
         }
+
+        .sort-icon {
+          display: inline-block;
+          margin-left: 8px;
+          font-size: 10px;
+          opacity: 0.5;
+          transition: transform 0.2s;
+        }
+        
+        th:hover .sort-icon {
+          opacity: 1;
+        }
+        
+        th.active-sort .sort-icon {
+          opacity: 1;
+          color: var(--primary-400);
+        }
       `}</style>
 
       <div style={{ 
@@ -89,7 +129,7 @@ export default function DataGrid<T extends Record<string, any>>({
         marginBottom: '20px', 
         flexWrap: 'wrap', 
         gap: '16px',
-        minHeight: '44px' // Stabilize height to prevent "shaky" shifts
+        minHeight: '44px'
       }}>
         <div style={{ 
           display: 'flex', 
@@ -131,15 +171,29 @@ export default function DataGrid<T extends Record<string, any>>({
         <table className="data-table" style={{ minWidth: '1000px', tableLayout: 'fixed' }}>
           <thead>
             <tr>
-              {columns.map((col, idx) => (
-                <th key={col.key} className={idx < 2 ? 'sticky-col' : ''} style={{ 
-                  width: col.width,
-                  left: idx === 0 ? 0 : (idx === 1 ? columns[0].width : undefined),
-                  zIndex: idx < 2 ? 11 : 1
-                }}>
-                  {col.label}
-                </th>
-              ))}
+              {columns.map((col, idx) => {
+                const isActive = sortKey === col.key;
+                return (
+                  <th 
+                    key={col.key} 
+                    className={`${idx < 2 ? 'sticky-col' : ''} ${isActive ? 'active-sort' : ''}`}
+                    onClick={() => handleSort(col.key as string)}
+                    style={{ 
+                      width: col.width,
+                      cursor: 'pointer',
+                      left: idx === 0 ? 0 : (idx === 1 ? columns[0].width : undefined),
+                      zIndex: idx < 2 ? 11 : 1
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      {col.label}
+                      <span className="sort-icon">
+                        {isActive ? (sortOrder === 'asc' ? '▲' : '▼') : '↕'}
+                      </span>
+                    </div>
+                  </th>
+                );
+              })}
               {actions && <th style={{ width: '100px' }}>Actions</th>}
             </tr>
           </thead>
