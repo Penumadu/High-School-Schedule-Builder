@@ -47,10 +47,17 @@ export default function DataGrid<T extends Record<string, any>>({
   }, [filteredData.length, onFilteredCount]);
 
   return (
-    <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div className="search-bar" style={{ width: '320px' }}>
+    <div className="glass-card" style={{ padding: 'var(--space-md)', maxWidth: '100%', overflow: 'hidden' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: 'var(--space-md)', 
+        flexWrap: 'wrap', 
+        gap: '16px' 
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div className="search-bar" style={{ width: '220px' }}>
             <span className="search-icon">🔍</span>
             <input 
               type="text" 
@@ -60,12 +67,12 @@ export default function DataGrid<T extends Record<string, any>>({
             />
           </div>
           {countLabel && (
-            <span className="badge badge-primary" style={{ fontSize: '13px', padding: '6px 14px' }}>
+            <span className="badge badge-primary" style={{ fontSize: '12px', padding: '4px 12px' }}>
               {countLabel}
             </span>
           )}
         </div>
-        <div>
+        <div style={{ flexShrink: 0 }}>
           {topActions}
         </div>
       </div>

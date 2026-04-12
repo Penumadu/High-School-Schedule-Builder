@@ -61,19 +61,19 @@ export default function SubjectsRegistry() {
   };
 
   const columns = [
-    { key: 'code', label: 'Code', width: '100px' },
-    { key: 'name', label: 'Subject', width: '250px' },
-    { key: 'grade_level', label: 'Grade', width: '100px' },
-    { key: 'credits', label: 'Credits', width: '100px' },
-    { key: 'level', label: 'Level', width: '120px' },
-    { key: 'department', label: 'Department', width: '150px' },
+    { key: 'code', label: 'Code', width: '90px' },
+    { key: 'name', label: 'Subject', width: '200px' },
+    { key: 'grade_level', label: 'Grade', width: '90px' },
+    { key: 'credits', label: 'Cr', width: '60px' },
+    { key: 'level', label: 'Level', width: '100px' },
+    { key: 'department', label: 'Dept', width: '120px' },
     { 
       key: 'prerequisites', 
-      label: 'Prerequisites',
-      width: '200px',
+      label: 'Prereq',
+      width: '150px',
       render: (val: string) => (
         <div style={{ 
-          maxWidth: '200px', 
+          maxWidth: '150px', 
           overflow: 'hidden', 
           textOverflow: 'ellipsis', 
           whiteSpace: 'nowrap' 
@@ -84,18 +84,19 @@ export default function SubjectsRegistry() {
     },
     { 
       key: 'facility_type', 
-      label: 'Facility',
-      width: '120px',
+      label: 'Facil',
+      width: '110px',
       render: (val: string) => (
-        <span className={`badge ${val === 'REGULAR' ? 'badge-primary' : 'badge-accent'}`}>
+        <span className="badge badge-primary" style={{ fontSize: '10px' }}>
           {val}
         </span>
       )
     },
-    { key: 'required_periods_per_week', label: 'Periods', width: '80px' },
+    { key: 'required_periods_per_week', label: 'Per', width: '60px' },
     { 
       key: 'is_mandatory', 
       label: 'Type',
+      width: '100px',
       render: (val: boolean) => val ? (
         <span style={{ color: 'var(--success-700)', background: 'var(--success-100)', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
           Mandatory
