@@ -141,18 +141,28 @@ export default function DataGrid<T extends Record<string, any>>({
                   onClick={() => onRowClick && onRowClick(row)}
                   style={{ cursor: onRowClick ? 'pointer' : 'default' }}
                 >
-                  {columns.map((col, colIdx) => (
-                    <td key={col.key} className={colIdx < 2 ? 'sticky-col' : ''} style={{ 
-                      width: col.width, 
-                      overflow: 'hidden', 
-                      textOverflow: 'ellipsis', 
-                      whiteSpace: 'nowrap',
-                      left: colIdx === 0 ? 0 : (colIdx === 1 ? columns[0].width : undefined),
-                      zIndex: colIdx < 2 ? 10 : 1
-                    }}>
-                      {col.render ? col.render(row[col.key], row) : row[col.key]}
-                    </td>
-                  ))}
+                  {columns.map((col, colIdx) => {
+                    const value = row[col.key];
+                    const tooltip = typeof value === 'string' || typeof value === 'number' ? String(value) : undefined;
+                    
+                    return (
+                      <td 
+                        key={col.key} 
+                        className={colIdx < 2 ? 'sticky-col' : ''} 
+                        title={tooltip}
+                        style={{ 
+                          width: col.width, 
+                          overflow: 'hidden', 
+                          textOverflow: 'ellipsis', 
+                          whiteSpace: 'nowrap',
+                          left: colIdx === 0 ? 0 : (colIdx === 1 ? columns[0].width : undefined),
+                          zIndex: colIdx < 2 ? 10 : 1
+                        }}
+                      >
+                        {col.render ? col.render(value, row) : value}
+                      </td>
+                    );
+                  })}
                   {actions && <td>{actions(row)}</td>}
                 </tr>
               ))
