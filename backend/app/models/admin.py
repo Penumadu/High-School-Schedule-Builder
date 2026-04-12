@@ -53,6 +53,19 @@ class SubjectCreate(BaseModel):
     is_mandatory: bool = Field(default=False, description="If true, all students in the grade are enrolled")
 
 
+class SubjectUpdate(BaseModel):
+    name: Optional[str] = None
+    code: Optional[str] = None
+    grade_level: Optional[str] = None
+    credits: Optional[str] = None
+    level: Optional[str] = None
+    department: Optional[str] = None
+    prerequisites: Optional[str] = None
+    required_periods_per_week: Optional[int] = None
+    facility_type: Optional[str] = None
+    is_mandatory: Optional[bool] = None
+
+
 class SubjectResponse(BaseModel):
     subject_id: str
     name: str

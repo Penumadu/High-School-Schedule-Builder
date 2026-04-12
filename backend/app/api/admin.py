@@ -11,7 +11,7 @@ from app.core.auth import get_current_user, require_role
 from app.core.firebase import get_firestore_client
 from app.models.admin import (
     TeacherCreate, TeacherUpdate, TeacherResponse,
-    SubjectCreate, SubjectResponse,
+    SubjectCreate, SubjectUpdate, SubjectResponse,
     ClassroomCreate, ClassroomResponse,
     StudentCreate, StudentResponse,
     RuleCreate, RuleResponse,
@@ -149,6 +149,25 @@ async def create_subject(
     data = subject.model_dump()
     _school_ref(school_id).collection("subjects").document(subject_id).set(data)
     return SubjectResponse(subject_id=subject_id, **data)
+
+
+@router.put("/{school_id}/subjects/{subject_id}", response_model=SubjectResponse)
+async def update_subject(
+    school_id: str,
+    subject_id: str,
+    update: SubjectUpdate,
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL")),
+):
+    ref = _school_ref(school_id).collection("subjects").document(subject_id)
+    doc = ref.get()
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail="Subject not found")
+
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    ref.update(update_data)
+
+    updated = ref.get().to_dict()
+    return SubjectResponse(subject_id=subject_id, **updated)
 
 
 @router.delete("/{school_id}/subjects/{subject_id}")
