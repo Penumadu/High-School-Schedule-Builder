@@ -43,25 +43,40 @@ export default function DataGrid<T extends Record<string, any>>({
     }
   };
 
-  const filteredData = data
-    .filter((row) => {
-      const searchLower = search.toLowerCase();
-      return columns.some((col) => {
-        const value = row[col.key];
-        return value && String(value).toLowerCase().includes(searchLower);
-      });
-    })
-    .sort((a, b) => {
-      if (!sortKey) return 0;
-      
-      const aVal = a[sortKey];
-      const bVal = b[sortKey];
+  const filteredData = React.useMemo(() => {
+    if (!Array.isArray(data)) return [];
+    
+    let result = [...data];
 
-      if (aVal === bVal) return 0;
-      
-      const comparison = String(aVal).localeCompare(String(bVal), undefined, { numeric: true });
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
+    // Filter
+    if (search) {
+      const searchLower = search.toLowerCase();
+      result = result.filter((row: any) => 
+        columns.some((col) => {
+          const val = row[col.key];
+          return val !== null && val !== undefined && String(val).toLowerCase().includes(searchLower);
+        })
+      );
+    }
+
+    // Sort
+    if (sortKey) {
+      result.sort((a: any, b: any) => {
+        const aVal = a[sortKey] ?? '';
+        const bVal = b[sortKey] ?? '';
+
+        if (aVal === bVal) return 0;
+        
+        const comparison = String(aVal).localeCompare(String(bVal), undefined, { 
+          numeric: true, 
+          sensitivity: 'base' 
+        });
+        return sortOrder === 'asc' ? comparison : -comparison;
+      });
+    }
+
+    return result;
+  }, [data, search, sortKey, sortOrder, columns]);
 
   useEffect(() => {
     if (onFilteredCount) {

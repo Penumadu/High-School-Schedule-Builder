@@ -42,13 +42,14 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const filteredItems = NAV_ITEMS.filter((item) => {
-    if (item.roles.includes(role)) return true;
+    // If we have an "acting_role" override in the context, use it to gate access
+    const activeRole = role; 
     
-    // If we are a SUPER_ADMIN and have a school selected, also show Principal/Coordinator items
-    if (role === 'SUPER_ADMIN' && (item.roles.includes('PRINCIPAL') || item.roles.includes('COORDINATOR'))) {
-      const activeSchoolId = typeof window !== 'undefined' ? (schoolId || sessionStorage.getItem('acting_school_id')) : schoolId;
-      return !!activeSchoolId;
-    }
+    // Simple direct check: Does the current active role have permission for this item?
+    if (item.roles.includes(activeRole)) return true;
+    
+    // Special Case: Super Admin should see Platform items unless they are specifically in "Management Mode"
+    // Management Mode is handled by AuthProvider switching the context role to PRINCIPAL.
     
     return false;
   });
