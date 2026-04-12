@@ -61,15 +61,38 @@ export default function SubjectsRegistry() {
   };
 
   const columns = [
-    { key: 'code', label: 'Code' },
-    { key: 'name', label: 'Subject' },
-    { key: 'grade_level', label: 'Grade' },
-    { key: 'credits', label: 'Credits' },
-    { key: 'level', label: 'Level' },
-    { key: 'department', label: 'Department' },
-    { key: 'prerequisites', label: 'Prerequisites' },
-    { key: 'facility_type', label: 'Facility' },
-    { key: 'required_periods_per_week', label: 'Periods/Week' },
+    { key: 'code', label: 'Code', width: '100px' },
+    { key: 'name', label: 'Subject', width: '250px' },
+    { key: 'grade_level', label: 'Grade', width: '100px' },
+    { key: 'credits', label: 'Credits', width: '100px' },
+    { key: 'level', label: 'Level', width: '120px' },
+    { key: 'department', label: 'Department', width: '150px' },
+    { 
+      key: 'prerequisites', 
+      label: 'Prerequisites',
+      width: '200px',
+      render: (val: string) => (
+        <div style={{ 
+          maxWidth: '200px', 
+          overflow: 'hidden', 
+          textOverflow: 'ellipsis', 
+          whiteSpace: 'nowrap' 
+        }} title={val}>
+          {val || '-'}
+        </div>
+      )
+    },
+    { 
+      key: 'facility_type', 
+      label: 'Facility',
+      width: '120px',
+      render: (val: string) => (
+        <span className={`badge ${val === 'REGULAR' ? 'badge-primary' : 'badge-accent'}`}>
+          {val}
+        </span>
+      )
+    },
+    { key: 'required_periods_per_week', label: 'Periods', width: '80px' },
     { 
       key: 'is_mandatory', 
       label: 'Type',

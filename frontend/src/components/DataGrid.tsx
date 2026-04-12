@@ -6,6 +6,7 @@ interface Column<T> {
   key: keyof T | string;
   label: string;
   render?: (value: any, row: T) => React.ReactNode;
+  width?: string;
 }
 
 interface DataGridProps<T> {
@@ -69,14 +70,14 @@ export default function DataGrid<T extends Record<string, any>>({
         </div>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table className="data-table">
+      <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-sm)' }}>
+        <table className="data-table" style={{ minWidth: '100%', tableLayout: 'fixed' }}>
           <thead>
             <tr>
               {columns.map((col) => (
-                <th key={col.key}>{col.label}</th>
+                <th key={col.key} style={{ width: col.width }}>{col.label}</th>
               ))}
-              {actions && <th>Actions</th>}
+              {actions && <th style={{ width: '100px' }}>Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -94,7 +95,7 @@ export default function DataGrid<T extends Record<string, any>>({
                   style={{ cursor: onRowClick ? 'pointer' : 'default' }}
                 >
                   {columns.map((col) => (
-                    <td key={col.key}>
+                    <td key={col.key} style={{ width: col.width, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {col.render ? col.render(row[col.key], row) : row[col.key]}
                     </td>
                   ))}
