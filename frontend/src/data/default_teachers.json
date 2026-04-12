@@ -5,21 +5,25 @@
     "last_name": "Oikawa",
     "email": "alison.oikawa@school.edu",
     "specializations": [
+      "SNC1W",
       "Science"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "SNC1W"
   },
   {
     "teacher_id": "default_1",
     "first_name": "Ms.",
     "last_name": "Lucy Ambroszkiewicz",
-    "email": "ms..lucyambroszkiewicz@school.edu",
+    "email": "ms.lucyambroszkiewicz@school.edu",
     "specializations": [
+      "SNC1W",
       "Science"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "SNC1W"
   },
   {
     "teacher_id": "default_2",
@@ -27,10 +31,12 @@
     "last_name": "Ambrowzkiewicz",
     "email": "lucy.ambrowzkiewicz@school.edu",
     "specializations": [
-      "Science"
+      "Science",
+      "SNC2D"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "SNC2D"
   },
   {
     "teacher_id": "default_3",
@@ -38,10 +44,12 @@
     "last_name": "Betlej",
     "email": "ashley.betlej@school.edu",
     "specializations": [
+      "BBI2O",
       "Business"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "BBI2O"
   },
   {
     "teacher_id": "default_4",
@@ -49,10 +57,12 @@
     "last_name": "Biturajac",
     "email": "robert.biturajac@school.edu",
     "specializations": [
-      "Physical Education"
+      "Physical Education",
+      "PPL4OM"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "PPL4OM"
   },
   {
     "teacher_id": "default_5",
@@ -61,10 +71,12 @@
     "email": "ashley.black@school.edu",
     "specializations": [
       "Phys. Ed",
+      "CGC1W",
       "Geography"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "CGC1W"
   },
   {
     "teacher_id": "default_6",
@@ -72,11 +84,13 @@
     "last_name": "Le Blanc",
     "email": "kevin.leblanc@school.edu",
     "specializations": [
+      "World Studies",
       "Canadian",
-      "World Studies"
+      "CHC2D"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "CHC2D"
   },
   {
     "teacher_id": "default_7",
@@ -84,10 +98,12 @@
     "last_name": "Boccalon",
     "email": "david.boccalon@school.edu",
     "specializations": [
-      "Technology"
+      "Technology",
+      "TIJ1O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "TIJ1O"
   },
   {
     "teacher_id": "default_8",
@@ -95,10 +111,12 @@
     "last_name": "Brown",
     "email": "lena.brown@school.edu",
     "specializations": [
-      "Math"
+      "Math",
+      "MCR3UA"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "MCR3UA"
   },
   {
     "teacher_id": "default_9",
@@ -106,10 +124,12 @@
     "last_name": "Vander Burgt",
     "email": "natalie.vanderburgt@school.edu",
     "specializations": [
+      "HRE1O",
       "Religion"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "HRE1O"
   },
   {
     "teacher_id": "default_10",
@@ -118,10 +138,12 @@
     "email": "taras.cap@school.edu",
     "specializations": [
       "Math",
-      "Science"
+      "Science",
+      "MHF4UE"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "MHF4UE"
   },
   {
     "teacher_id": "default_11",
@@ -129,10 +151,12 @@
     "last_name": "Clarke",
     "email": "elizabeth.clarke@school.edu",
     "specializations": [
+      "GLC2O",
       "Guidance"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "GLC2O"
   },
   {
     "teacher_id": "default_12",
@@ -140,10 +164,12 @@
     "last_name": "Clipa",
     "email": "irina.clipa@school.edu",
     "specializations": [
-      "Math"
+      "Math",
+      "MPM2D"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "MPM2D"
   },
   {
     "teacher_id": "default_13",
@@ -152,10 +178,12 @@
     "email": "emily.dasilva@school.edu",
     "specializations": [
       "English",
+      "ENG1D",
       "Moderns"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "ENG1D"
   },
   {
     "teacher_id": "default_14",
@@ -163,21 +191,25 @@
     "last_name": "Delamere",
     "email": "tristan.delamere@school.edu",
     "specializations": [
-      "Physical Education"
+      "Physical Education",
+      "PAF3OF"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "PAF3OF"
   },
   {
     "teacher_id": "default_15",
     "first_name": "Carmela",
     "last_name": "Renzone (for Ms. Nicole Dimas)",
-    "email": "carmela.renzone(forms.nicoledimas)@school.edu",
+    "email": "carmela.renzoneformsnicoledimas@school.edu",
     "specializations": [
+      "SCH4U",
       "Science"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "SCH4U"
   },
   {
     "teacher_id": "default_16",
@@ -185,24 +217,28 @@
     "last_name": "Dineen",
     "email": "jennie.dineen@school.edu",
     "specializations": [
+      "World Studies",
+      "ENG2D",
       "English",
       "Moderns",
-      "Canadian",
-      "World Studies"
+      "Canadian"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "ENG2D"
   },
   {
     "teacher_id": "default_17",
     "first_name": "Michael",
     "last_name": "Kussman (for Mr. Jeff Eves)",
-    "email": "michael.kussman(formr.jeffeves)@school.edu",
+    "email": "michael.kussmanformrjeffeves@school.edu",
     "specializations": [
-      "Religion"
+      "Religion",
+      "HRE2O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "HRE2O"
   },
   {
     "teacher_id": "default_18",
@@ -210,10 +246,12 @@
     "last_name": "Fama",
     "email": "brett.fama@school.edu",
     "specializations": [
-      "English"
+      "English",
+      "ENG4U1"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "ENG4U1"
   },
   {
     "teacher_id": "default_19",
@@ -221,10 +259,12 @@
     "last_name": "Fiscaletti",
     "email": "natalie.fiscaletti@school.edu",
     "specializations": [
+      "BAT4M",
       "Business"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "BAT4M"
   },
   {
     "teacher_id": "default_20",
@@ -233,10 +273,12 @@
     "email": "jennifer.dafonte@school.edu",
     "specializations": [
       "English",
+      "FSF1D",
       "Moderns"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "FSF1D"
   },
   {
     "teacher_id": "default_21",
@@ -244,10 +286,12 @@
     "last_name": "Francis",
     "email": "darren.francis@school.edu",
     "specializations": [
+      "BBB4M",
       "Business"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "BBB4M"
   },
   {
     "teacher_id": "default_22",
@@ -255,11 +299,13 @@
     "last_name": "Gamble",
     "email": "patrick.gamble@school.edu",
     "specializations": [
-      "Religion",
-      "Physical Education"
+      "Physical Education",
+      "HRE4M",
+      "Religion"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "HRE4M"
   },
   {
     "teacher_id": "default_23",
@@ -267,10 +313,12 @@
     "last_name": "Gear",
     "email": "vanessa.gear@school.edu",
     "specializations": [
-      "Special Education"
+      "Special Education",
+      "GLE1O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "GLE1O"
   },
   {
     "teacher_id": "default_24",
@@ -278,10 +326,12 @@
     "last_name": "Goulart",
     "email": "gabriel.goulart@school.edu",
     "specializations": [
-      "Technology"
+      "Technology",
+      "TPJ2O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "TPJ2O"
   },
   {
     "teacher_id": "default_25",
@@ -289,10 +339,12 @@
     "last_name": "Griffin",
     "email": "donna.griffin@school.edu",
     "specializations": [
-      "Technology"
+      "Technology",
+      "TPJ3M1"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "TPJ3M1"
   },
   {
     "teacher_id": "default_26",
@@ -300,23 +352,27 @@
     "last_name": "Hawrylak",
     "email": "katelyn.hawrylak@school.edu",
     "specializations": [
+      "SBI4U",
       "Science"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "SBI4U"
   },
   {
     "teacher_id": "default_27",
     "first_name": "K.",
     "last_name": "De Gruijter (for Mr. James Hibbert)",
-    "email": "k..degruijter(formr.jameshibbert)@school.edu",
+    "email": "k.degruijterformrjameshibbert@school.edu",
     "specializations": [
-      "Canadian",
+      "CHV2O",
+      "Careers",
       "World Studies",
-      "Careers"
+      "Canadian"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "CHV2O"
   },
   {
     "teacher_id": "default_28",
@@ -324,10 +380,12 @@
     "last_name": "Iantorno",
     "email": "alexandra.iantorno@school.edu",
     "specializations": [
-      "Arts"
+      "Arts",
+      "AVI1O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "AVI1O"
   },
   {
     "teacher_id": "default_29",
@@ -335,11 +393,13 @@
     "last_name": "Jacobs",
     "email": "kathleen.jacobs@school.edu",
     "specializations": [
-      "Canadian",
-      "World Studies"
+      "CGW4U",
+      "World Studies",
+      "Canadian"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "CGW4U"
   },
   {
     "teacher_id": "default_30",
@@ -348,10 +408,12 @@
     "email": "sandra.jurinic@school.edu",
     "specializations": [
       "Science",
+      "COOP",
       "Cooperative Education"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "COOP"
   },
   {
     "teacher_id": "default_31",
@@ -359,10 +421,12 @@
     "last_name": "Karniej",
     "email": "richard.karniej@school.edu",
     "specializations": [
-      "Technology"
+      "Technology",
+      "TPJ4M1"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "TPJ4M1"
   },
   {
     "teacher_id": "default_32",
@@ -370,10 +434,12 @@
     "last_name": "Kelenc",
     "email": "valerie.kelenc@school.edu",
     "specializations": [
+      "GLC2O",
       "Guidance"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "GLC2O"
   },
   {
     "teacher_id": "default_33",
@@ -381,22 +447,26 @@
     "last_name": "Kennedy",
     "email": "david.kennedy@school.edu",
     "specializations": [
+      "World Studies",
       "Canadian",
-      "World Studies"
+      "CHY4U"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "CHY4U"
   },
   {
     "teacher_id": "default_34",
     "first_name": "Deanna",
     "last_name": "O'Donnell Leclerc",
-    "email": "deanna.o'donnellleclerc@school.edu",
+    "email": "deanna.odonnellleclerc@school.edu",
     "specializations": [
-      "Arts"
+      "Arts",
+      "ADA4M1"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "ADA4M1"
   },
   {
     "teacher_id": "default_35",
@@ -404,10 +474,12 @@
     "last_name": "Leslie",
     "email": "sandra.leslie@school.edu",
     "specializations": [
-      "Religion"
+      "Religion",
+      "HRE3M"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "HRE3M"
   },
   {
     "teacher_id": "default_36",
@@ -415,21 +487,25 @@
     "last_name": "MacDonald",
     "email": "christine.macdonald@school.edu",
     "specializations": [
-      "Special Education"
+      "Special Education",
+      "K-Code"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "K-Code"
   },
   {
     "teacher_id": "default_37",
     "first_name": "Jessica",
     "last_name": "Barry (for Ms. Bonnie March)",
-    "email": "jessica.barry(forms.bonniemarch)@school.edu",
+    "email": "jessica.barryformsbonniemarch@school.edu",
     "specializations": [
-      "Technology"
+      "Technology",
+      "TCJ2O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "TCJ2O"
   },
   {
     "teacher_id": "default_38",
@@ -437,10 +513,12 @@
     "last_name": "Martin",
     "email": "andrea.martin@school.edu",
     "specializations": [
-      "Physical Education"
+      "Physical Education",
+      "PPL1O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "PPL1O"
   },
   {
     "teacher_id": "default_39",
@@ -449,10 +527,12 @@
     "email": "tammy.maxwell@school.edu",
     "specializations": [
       "English",
+      "FSF2D",
       "Moderns"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "FSF2D"
   },
   {
     "teacher_id": "default_40",
@@ -461,22 +541,26 @@
     "email": "lauren.may@school.edu",
     "specializations": [
       "Math",
+      "MCR3U",
       "Religion"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "MCR3U"
   },
   {
     "teacher_id": "default_41",
     "first_name": "Landon",
     "last_name": "Gabriele (for Ms. Melanie Meagher)",
-    "email": "landon.gabriele(forms.melaniemeagher)@school.edu",
+    "email": "landon.gabrieleformsmelaniemeagher@school.edu",
     "specializations": [
+      "Math",
       "Religion",
-      "Math"
+      "HRE2O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "HRE2O"
   },
   {
     "teacher_id": "default_42",
@@ -484,11 +568,13 @@
     "last_name": "Melfi",
     "email": "joseph.melfi@school.edu",
     "specializations": [
-      "Canadian",
-      "World Studies"
+      "CIA4U",
+      "World Studies",
+      "Canadian"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "CIA4U"
   },
   {
     "teacher_id": "default_43",
@@ -496,10 +582,12 @@
     "last_name": "Mikitzel",
     "email": "lisa.mikitzel@school.edu",
     "specializations": [
-      "Science"
+      "Science",
+      "SPH4U"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "SPH4U"
   },
   {
     "teacher_id": "default_44",
@@ -507,10 +595,12 @@
     "last_name": "Miklavcic",
     "email": "nadia.miklavcic@school.edu",
     "specializations": [
+      "FSF4U",
       "French"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "FSF4U"
   },
   {
     "teacher_id": "default_45",
@@ -518,10 +608,12 @@
     "last_name": "Miller",
     "email": "suzanne.miller@school.edu",
     "specializations": [
+      "GLE2O",
       "Special Education"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "GLE2O"
   },
   {
     "teacher_id": "default_46",
@@ -529,10 +621,12 @@
     "last_name": "Milne",
     "email": "karen.milne@school.edu",
     "specializations": [
-      "Arts"
+      "Arts",
+      "AVI4M1"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "AVI4M1"
   },
   {
     "teacher_id": "default_47",
@@ -540,11 +634,12 @@
     "last_name": "La Monaca",
     "email": "vanessa.lamonaca@school.edu",
     "specializations": [
-      "N",
-      "A"
+      "A",
+      "N"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "N/A"
   },
   {
     "teacher_id": "default_48",
@@ -553,10 +648,12 @@
     "email": "erica.murdoch@school.edu",
     "specializations": [
       "English",
+      "ENG3U",
       "Moderns"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "ENG3U"
   },
   {
     "teacher_id": "default_49",
@@ -564,12 +661,14 @@
     "last_name": "Muszak",
     "email": "michael.muszak@school.edu",
     "specializations": [
-      "Canadian",
+      "ESL",
+      "ESLAO",
       "World Studies",
-      "ESL"
+      "Canadian"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "ESLAO"
   },
   {
     "teacher_id": "default_50",
@@ -577,21 +676,25 @@
     "last_name": "Nobili",
     "email": "steven.nobili@school.edu",
     "specializations": [
-      "Special Education"
+      "Special Education",
+      "GLE3O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "GLE3O"
   },
   {
     "teacher_id": "default_51",
     "first_name": "Simon",
     "last_name": "O'Carroll",
-    "email": "simon.o'carroll@school.edu",
+    "email": "simon.ocarroll@school.edu",
     "specializations": [
-      "Religion"
+      "Religion",
+      "HRT3M"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "HRT3M"
   },
   {
     "teacher_id": "default_52",
@@ -599,12 +702,14 @@
     "last_name": "Onuska",
     "email": "samantha.onuska@school.edu",
     "specializations": [
-      "Canadian",
+      "English",
       "World Studies",
-      "English"
+      "Canadian",
+      "ENG1D"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "ENG1D"
   },
   {
     "teacher_id": "default_53",
@@ -612,11 +717,13 @@
     "last_name": "Owen",
     "email": "brian.owen@school.edu",
     "specializations": [
+      "World Studies",
       "Canadian",
-      "World Studies"
+      "CHW3M"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "CHW3M"
   },
   {
     "teacher_id": "default_54",
@@ -624,10 +731,12 @@
     "last_name": "Ozanic",
     "email": "janice.ozanic@school.edu",
     "specializations": [
-      "Math"
+      "Math",
+      "MTH1W"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "MTH1W"
   },
   {
     "teacher_id": "default_55",
@@ -635,10 +744,12 @@
     "last_name": "Page",
     "email": "natalie.page@school.edu",
     "specializations": [
-      "Physical Education"
+      "Physical Education",
+      "PPL2O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "PPL2O"
   },
   {
     "teacher_id": "default_56",
@@ -646,22 +757,26 @@
     "last_name": "Papa",
     "email": "david.papa@school.edu",
     "specializations": [
+      "GLC2O",
       "Guidance"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "GLC2O"
   },
   {
     "teacher_id": "default_57",
     "first_name": "Sonia",
     "last_name": "Clarke (for Ms. Alyssa Parovel)",
-    "email": "sonia.clarke(forms.alyssaparovel)@school.edu",
+    "email": "sonia.clarkeformsalyssaparovel@school.edu",
     "specializations": [
       "English",
+      "NBE3U",
       "Moderns"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "NBE3U"
   },
   {
     "teacher_id": "default_58",
@@ -669,10 +784,12 @@
     "last_name": "Petti",
     "email": "roberto.petti@school.edu",
     "specializations": [
-      "Technology"
+      "Technology",
+      "TGJ2O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "TGJ2O"
   },
   {
     "teacher_id": "default_59",
@@ -680,10 +797,12 @@
     "last_name": "Pierias",
     "email": "myra.pierias@school.edu",
     "specializations": [
+      "HRE1O",
       "Religion"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "HRE1O"
   },
   {
     "teacher_id": "default_60",
@@ -691,10 +810,12 @@
     "last_name": "Pinto",
     "email": "jessica.pinto@school.edu",
     "specializations": [
-      "French"
+      "French",
+      "FSF3U"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "FSF3U"
   },
   {
     "teacher_id": "default_61",
@@ -702,21 +823,25 @@
     "last_name": "Provost",
     "email": "linsey.provost@school.edu",
     "specializations": [
-      "Science"
+      "Science",
+      "SNC2D"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "SNC2D"
   },
   {
     "teacher_id": "default_62",
     "first_name": "Carina",
     "last_name": "Cino (for Ms. Diana Purdie)",
-    "email": "carina.cino(forms.dianapurdie)@school.edu",
+    "email": "carina.cinoformsdianapurdie@school.edu",
     "specializations": [
+      "HRE4M",
       "Religion"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "HRE4M"
   },
   {
     "teacher_id": "default_63",
@@ -725,10 +850,12 @@
     "email": "athena.rasile@school.edu",
     "specializations": [
       "Math",
+      "MAT1L",
       "Special Education"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "MAT1L"
   },
   {
     "teacher_id": "default_64",
@@ -736,22 +863,26 @@
     "last_name": "Rehel",
     "email": "kelly.rehel@school.edu",
     "specializations": [
-      "English"
+      "English",
+      "ENG4C"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "ENG4C"
   },
   {
     "teacher_id": "default_65",
     "first_name": "Meghan",
     "last_name": "Romao-Penacho",
-    "email": "meghan.romao-penacho@school.edu",
+    "email": "meghan.romaopenacho@school.edu",
     "specializations": [
       "Physical Education",
-      "English"
+      "English",
+      "PPL3O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "PPL3O"
   },
   {
     "teacher_id": "default_66",
@@ -759,10 +890,12 @@
     "last_name": "Runco",
     "email": "rosamelia.runco@school.edu",
     "specializations": [
+      "GLE4O",
       "Special Education"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "GLE4O"
   },
   {
     "teacher_id": "default_67",
@@ -770,10 +903,12 @@
     "last_name": "Rutkowski",
     "email": "heather.rutkowski@school.edu",
     "specializations": [
+      "SVN3E",
       "Science"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "SVN3E"
   },
   {
     "teacher_id": "default_68",
@@ -781,10 +916,12 @@
     "last_name": "Sandhu",
     "email": "kelli.sandhu@school.edu",
     "specializations": [
+      "BMI3C",
       "Business"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "BMI3C"
   },
   {
     "teacher_id": "default_69",
@@ -792,10 +929,12 @@
     "last_name": "Sarjas",
     "email": "teresa.sarjas@school.edu",
     "specializations": [
-      "English"
+      "English",
+      "ENG2P"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "ENG2P"
   },
   {
     "teacher_id": "default_70",
@@ -803,10 +942,12 @@
     "last_name": "Siemiginowski",
     "email": "deborah.siemiginowski@school.edu",
     "specializations": [
-      "Math"
+      "Math",
+      "MAP4C"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "MAP4C"
   },
   {
     "teacher_id": "default_71",
@@ -814,10 +955,12 @@
     "last_name": "Smith",
     "email": "vernon.smith@school.edu",
     "specializations": [
+      "SNC1W",
       "Science"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "SNC1W"
   },
   {
     "teacher_id": "default_72",
@@ -826,10 +969,12 @@
     "email": "francis.spadafora@school.edu",
     "specializations": [
       "Co-op",
+      "AVI2O",
       "Arts"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "AVI2O"
   },
   {
     "teacher_id": "default_73",
@@ -837,10 +982,12 @@
     "last_name": "Stangherlin",
     "email": "krista.stangherlin@school.edu",
     "specializations": [
-      "Science"
+      "Science",
+      "SBI3U"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "SBI3U"
   },
   {
     "teacher_id": "default_74",
@@ -848,10 +995,12 @@
     "last_name": "Symington",
     "email": "kathleen.symington@school.edu",
     "specializations": [
+      "ENG4U",
       "English"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "ENG4U"
   },
   {
     "teacher_id": "default_75",
@@ -859,79 +1008,11 @@
     "last_name": "Tatti",
     "email": "tanya.tatti@school.edu",
     "specializations": [
-      "Physical Education"
+      "Physical Education",
+      "PAF4O"
     ],
     "max_periods_per_week": 25,
-    "is_active": true
-  },
-  {
-    "teacher_id": "default_76",
-    "first_name": "Tara",
-    "last_name": "Thompson",
-    "email": "tara.thompson@school.edu",
-    "specializations": [
-      "Math"
-    ],
-    "max_periods_per_week": 25,
-    "is_active": true
-  },
-  {
-    "teacher_id": "default_77",
-    "first_name": "Aelah",
-    "last_name": "Thomson",
-    "email": "aelah.thomson@school.edu",
-    "specializations": [
-      "English",
-      "Moderns",
-      "Science"
-    ],
-    "max_periods_per_week": 25,
-    "is_active": true
-  },
-  {
-    "teacher_id": "default_78",
-    "first_name": "Emily",
-    "last_name": "Thurner",
-    "email": "emily.thurner@school.edu",
-    "specializations": [
-      "English",
-      "Canadian",
-      "World Studies"
-    ],
-    "max_periods_per_week": 25,
-    "is_active": true
-  },
-  {
-    "teacher_id": "default_79",
-    "first_name": "Lyndsay",
-    "last_name": "Timmins",
-    "email": "lyndsay.timmins@school.edu",
-    "specializations": [
-      "Arts"
-    ],
-    "max_periods_per_week": 25,
-    "is_active": true
-  },
-  {
-    "teacher_id": "default_80",
-    "first_name": "Helena",
-    "last_name": "Tucci",
-    "email": "helena.tucci@school.edu",
-    "specializations": [
-      "Science"
-    ],
-    "max_periods_per_week": 25,
-    "is_active": true
-  },
-  {
-    "teacher_id": "default_81",
-    "first_name": "Sara",
-    "last_name": "Vella",
-    "email": "sara.vella@school.edu",
-    "specializations": [
-      "Math"
-    ],
-    "max_periods_per_week": 25,
-    "is_active": true
+    "is_active": true,
+    "primary_subject_code": "PAF4O"
   }
 ]
