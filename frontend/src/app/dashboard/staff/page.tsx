@@ -45,6 +45,21 @@ export default function StaffRegistry() {
     // ... existing column definitions
     { key: 'first_name', label: 'First Name' },
     { key: 'last_name', label: 'Last Name' },
+    { 
+      key: 'primary_subject_code', 
+      label: 'Teaching Code',
+      render: (code: string) => code && code !== 'N/A' ? (
+        <span className="badge" style={{ 
+          background: 'rgba(99, 102, 241, 0.1)', 
+          color: 'var(--primary-400)',
+          border: '1px solid var(--primary-500)',
+          fontWeight: 'bold',
+          fontSize: '11px'
+        }}>
+          {code}
+        </span>
+      ) : <span style={{ color: 'var(--text-muted)' }}>-</span>
+    },
     { key: 'email', label: 'Email' },
     { 
       key: 'specializations', 
