@@ -60,10 +60,10 @@ export default function SubjectsRegistry() {
 
   const columns = [
     { key: 'code', label: 'Course Code', width: '100px' },
-    { key: 'name', label: 'Subject Name', width: '200px' },
-    { key: 'grade_level', label: 'Grade Level', width: '90px' },
-    { key: 'credits', label: 'Credits', width: '80px' },
-    { key: 'level', label: 'Course Level', width: '110px' },
+    { key: 'name', label: 'Subject Name', width: '180px' },
+    { key: 'grade_level', label: 'Grade Level', width: '140px' },
+    { key: 'credits', label: 'Credits', width: '120px' },
+    { key: 'level', label: 'Course Level', width: '150px' },
     { key: 'department', label: 'Department', width: '130px' },
     { 
       key: 'prerequisites', 
