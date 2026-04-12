@@ -14,7 +14,11 @@ interface Subject {
   subject_id: string;
   code: string;
   name: string;
-  grade_level: number;
+  grade_level: string;
+  credits: string;
+  level: string;
+  department: string;
+  prerequisites: string;
   required_periods_per_week: number;
   is_mandatory?: boolean;
 }
@@ -44,13 +48,16 @@ export default function SubjectsRegistry() {
   }, [schoolId]);
 
   const columns = [
-    { key: 'code', label: 'Course Code' },
-    { key: 'name', label: 'Subject Name' },
+    { key: 'code', label: 'Code' },
+    { key: 'name', label: 'Subject' },
     { key: 'grade_level', label: 'Grade' },
+    { key: 'credits', label: 'Credits' },
+    { key: 'level', label: 'Level' },
+    { key: 'department', label: 'Department' },
     { key: 'required_periods_per_week', label: 'Periods/Week' },
     { 
       key: 'is_mandatory', 
-      label: 'Requirement Type',
+      label: 'Type',
       render: (val: boolean) => val ? (
         <span style={{ color: 'var(--success-700)', background: 'var(--success-100)', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
           Mandatory
@@ -66,13 +73,20 @@ export default function SubjectsRegistry() {
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Subject Catalog">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginBottom: '20px' }}>
-          <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=subjects')}>
-            📥 Import Subjects
-          </button>
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-            + Add Subject
-          </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span className="badge badge-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
+              {subjects.length} Total Subjects
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=subjects')}>
+              📥 Import Subjects
+            </button>
+            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+              + Add Subject
+            </button>
+          </div>
         </div>
 
         {loading ? (

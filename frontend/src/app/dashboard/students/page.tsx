@@ -62,13 +62,20 @@ export default function Students() {
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Student Roster">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginBottom: '20px' }}>
-          <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=students')}>
-            📥 Import Students
-          </button>
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-            + Add Student
-          </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span className="badge badge-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
+              {students.length} Students Registered
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=students')}>
+              📥 Import Students
+            </button>
+            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+              + Add Student
+            </button>
+          </div>
         </div>
 
         {loading ? (

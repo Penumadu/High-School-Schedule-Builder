@@ -15,13 +15,17 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
   const [formData, setFormData] = useState({
     name: '',
     code: '',
-    grade_level: 10,
+    grade_level: 'Grade 10',
+    credits: '1 Credit',
+    level: 'Open',
+    department: 'The Arts',
+    prerequisites: '',
     required_periods_per_week: 5,
     facility_type: 'REGULAR',
     is_mandatory: false
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const target = e.target;
     const { name, value } = target;
     
@@ -29,7 +33,7 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
 
     if (target instanceof HTMLInputElement && target.type === 'checkbox') {
       finalValue = target.checked;
-    } else if (name === 'grade_level' || name === 'required_periods_per_week') {
+    } else if (name === 'required_periods_per_week') {
       finalValue = parseInt(value);
     }
     
@@ -55,7 +59,7 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content glass-card" style={{ maxWidth: '500px' }}>
+      <div className="modal-content glass-card" style={{ maxWidth: '600px', width: '90%' }}>
         <div className="modal-header">
           <h2 className="modal-title">Add New Subject</h2>
           <button className="modal-close" onClick={onClose}>&times;</button>
@@ -63,15 +67,15 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
 
         {error && <div className="toast error" style={{ position: 'relative', marginBottom: '16px' }}>{error}</div>}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', gap: '16px' }}>
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Subject Code</label>
+              <label className="form-label">Course Code</label>
               <input 
                 type="text" 
                 name="code" 
                 className="form-input" 
-                placeholder="e.g. MATH101"
+                placeholder="e.g. ADA2O1"
                 value={formData.code} 
                 onChange={handleChange} 
                 required 
@@ -83,7 +87,7 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
                 type="text" 
                 name="name" 
                 className="form-input" 
-                placeholder="e.g. Algebra II"
+                placeholder="e.g. Drama"
                 value={formData.name} 
                 onChange={handleChange} 
                 required 
@@ -93,22 +97,84 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
 
           <div style={{ display: 'flex', gap: '16px' }}>
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Grade Level</label>
+              <label className="form-label">Grade</label>
               <select 
                 name="grade_level" 
                 className="form-select" 
                 value={formData.grade_level} 
                 onChange={handleChange}
               >
-                <option value={9}>Grade 9</option>
-                <option value={10}>Grade 10</option>
-                <option value={11}>Grade 11</option>
-                <option value={12}>Grade 12</option>
+                <option value="Grade 9">Grade 9</option>
+                <option value="Grade 10">Grade 10</option>
+                <option value="Grade 11">Grade 11</option>
+                <option value="Grade 12">Grade 12</option>
               </select>
             </div>
-
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Required Facility</label>
+              <label className="form-label">Credits</label>
+              <input 
+                type="text" 
+                name="credits" 
+                className="form-input" 
+                placeholder="e.g. 1 Credit"
+                value={formData.credits} 
+                onChange={handleChange} 
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label className="form-label">Level</label>
+              <input 
+                type="text" 
+                name="level" 
+                className="form-input" 
+                placeholder="e.g. Open"
+                value={formData.level} 
+                onChange={handleChange} 
+              />
+            </div>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label className="form-label">Department</label>
+              <input 
+                type="text" 
+                name="department" 
+                className="form-input" 
+                placeholder="e.g. The Arts"
+                value={formData.department} 
+                onChange={handleChange} 
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Pre-requisites</label>
+            <textarea 
+              name="prerequisites" 
+              className="form-input" 
+              placeholder="List any course codes..."
+              value={formData.prerequisites} 
+              onChange={handleChange}
+              rows={2}
+              style={{ resize: 'vertical', minHeight: '60px' }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label className="form-label">Periods/Week</label>
+              <input 
+                type="number" 
+                name="required_periods_per_week" 
+                className="form-input" 
+                min="1" max="10" 
+                value={formData.required_periods_per_week} 
+                onChange={handleChange} 
+              />
+            </div>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label className="form-label">Facility</label>
               <select 
                 name="facility_type" 
                 className="form-select" 
@@ -122,19 +188,7 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Required Periods per Week</label>
-            <input 
-              type="number" 
-              name="required_periods_per_week" 
-              className="form-input" 
-              min="1" max="10" 
-              value={formData.required_periods_per_week} 
-              onChange={handleChange} 
-            />
-          </div>
-
-          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
+          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <input 
               type="checkbox" 
               name="is_mandatory" 
@@ -148,7 +202,7 @@ export default function SubjectModal({ schoolId, onClose, onSuccess }: SubjectMo
             </label>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', borderTop: '1px solid var(--border-glass)', paddingTop: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px', borderTop: '1px solid var(--border-glass)', paddingTop: '20px' }}>
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading ? 'Adding...' : 'Add Subject'}

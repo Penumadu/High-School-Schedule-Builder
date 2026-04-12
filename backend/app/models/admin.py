@@ -41,9 +41,13 @@ class TeacherResponse(BaseModel):
 # ---------- SUBJECTS ----------
 
 class SubjectCreate(BaseModel):
-    name: str
-    code: str = Field(..., description="e.g. 'MATH101' or 'SCI-9'")
-    grade_level: int = Field(ge=9, le=12)
+    name: str = Field(..., description="Subject name from JSON")
+    code: str = Field(..., description="Course Code from JSON")
+    grade_level: str = Field(..., description="Grade from JSON (e.g. 'Grade 10')")
+    credits: str = Field(default="1 Credit", description="Credits from JSON")
+    level: str = Field(default="Open", description="Level from JSON")
+    department: str = Field(default="General", description="Department from JSON")
+    prerequisites: str = Field(default="", description="Pre-requisites from JSON")
     required_periods_per_week: int = Field(default=5, ge=1, le=10)
     facility_type: str = Field(default="REGULAR", description="e.g. REGULAR, LAB, GYM")
     is_mandatory: bool = Field(default=False, description="If true, all students in the grade are enrolled")
@@ -53,8 +57,12 @@ class SubjectResponse(BaseModel):
     subject_id: str
     name: str
     code: str
-    grade_level: int
-    required_periods_per_week: int
+    grade_level: str
+    credits: str = "1 Credit"
+    level: str = "Open"
+    department: str = "General"
+    prerequisites: str = ""
+    required_periods_per_week: int = 5
     facility_type: str = "REGULAR"
     is_mandatory: bool = False
 

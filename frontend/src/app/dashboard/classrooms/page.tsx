@@ -52,13 +52,20 @@ export default function Classrooms() {
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Classrooms">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginBottom: '20px' }}>
-          <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=classrooms')}>
-            📥 Import Classrooms
-          </button>
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-            + Add Classroom
-          </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span className="badge badge-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
+              {classrooms.length} Classrooms
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=classrooms')}>
+              📥 Import Classrooms
+            </button>
+            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+              + Add Classroom
+            </button>
+          </div>
         </div>
 
         {loading ? (

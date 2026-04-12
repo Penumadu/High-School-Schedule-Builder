@@ -85,15 +85,20 @@ export default function SchoolsRegistry() {
     <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
       <DashboardLayout title="School Registry">
         <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-lg)' }}>
-            <div className="search-bar" style={{ width: '300px' }}>
-              <span className="search-icon">🔍</span>
-              <input 
-                type="text" 
-                placeholder="Search schools..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div className="search-bar" style={{ width: '300px' }}>
+                <span className="search-icon">🔍</span>
+                <input 
+                  type="text" 
+                  placeholder="Search schools..." 
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              <span className="badge badge-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
+                {_schools.length} Schools Registered
+              </span>
             </div>
             <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
               + Add New School

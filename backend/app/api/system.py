@@ -127,6 +127,28 @@ async def provision_school(
     db.collection("schools").document(request.school_id) \
         .collection("users").document(principal_uid).set(user_profile)
 
+    # 5. Pre-populate Subjects from Master Catalogue
+    try:
+        master_subjects = db.collection("master_subjects").stream()
+        batch = db.batch()
+        count = 0
+        import uuid
+        for subj_doc in master_subjects:
+            subj_data = subj_doc.to_dict()
+            new_subj_id = f"subj_{uuid.uuid4().hex[:8]}"
+            target_ref = db.collection("schools").document(request.school_id) \
+                .collection("subjects").document(new_subj_id)
+            batch.set(target_ref, subj_data)
+            count += 1
+            if count % 400 == 0:
+                batch.commit()
+                batch = db.batch()
+        batch.commit()
+        message += f" Catalogue initialized with {count} master subjects."
+    except Exception as e:
+        print(f"Failed to copy master subjects: {e}")
+        message += " (Warning: Master catalogue failed to initialize)"
+
     return ProvisionResponse(
         school_id=request.school_id,
         school_name=request.school_name,

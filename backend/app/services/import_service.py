@@ -13,7 +13,7 @@ class ImportService:
     """Handles Excel validation and Firestore batch writes."""
 
     STAFF_COLUMNS = ["first_name", "last_name", "email", "specializations", "max_periods_per_week", "off_times"]
-    SUBJECT_COLUMNS = ["code", "name", "grade_level", "required_periods_per_week", "facility_type", "is_mandatory"]
+    SUBJECT_COLUMNS = ["code", "name", "grade_level", "credits", "level", "department", "prerequisites", "required_periods_per_week", "facility_type", "is_mandatory"]
     STUDENT_COLUMNS = ["first_name", "last_name", "email", "grade_level", "requested_subjects"]
     CLASSROOM_COLUMNS = ["code", "name", "capacity", "facility_type"]
 
@@ -63,9 +63,11 @@ class ImportService:
         df = self._read_file(contents, filename)
         errors = []
         
-        missing_cols = [c for c in self.SUBJECT_COLUMNS if c not in df.columns]
+        # We'll be more flexible with missing columns for now, just checking core ones
+        core_cols = ["code", "name", "grade_level"]
+        missing_cols = [c for c in core_cols if c not in df.columns]
         if missing_cols:
-            errors.append(ValidationError(row=0, field="schema", message=f"Missing: {missing_cols}"))
+            errors.append(ValidationError(row=0, field="schema", message=f"Missing core columns: {missing_cols}"))
             return ValidationReport(total_rows=len(df), valid_rows=0, errors=errors, warnings=[], is_valid=False)
 
         for idx, row in df.iterrows():
@@ -73,9 +75,9 @@ class ImportService:
             if pd.isna(row.get("code")) or not str(row["code"]).strip():
                 errors.append(ValidationError(row=row_num, field="code", message="Course code required"))
             
-            grade = row.get("grade_level")
-            if pd.isna(grade) or not (9 <= int(grade) <= 12):
-                errors.append(ValidationError(row=row_num, field="grade_level", message="Grade must be 9-12"))
+            grade = str(row.get("grade_level", ""))
+            if not grade or grade == "nan":
+                errors.append(ValidationError(row=row_num, field="grade_level", message="Grade level required"))
 
         valid_rows = len(df) - len(errors)
         return ValidationReport(total_rows=len(df), valid_rows=max(0, valid_rows), errors=errors, warnings=[], is_valid=not errors)
@@ -148,7 +150,11 @@ class ImportService:
                 doc_data = {
                     "code": str(item.get("code", "")),
                     "name": item.get("name", ""),
-                    "grade_level": int(item.get("grade_level", 9)),
+                    "grade_level": str(item.get("grade_level", "Grade 9")),
+                    "credits": str(item.get("credits", "1 Credit")),
+                    "level": str(item.get("level", "Open")),
+                    "department": str(item.get("department", "General")),
+                    "prerequisites": str(item.get("prerequisites", "")),
                     "required_periods_per_week": int(item.get("required_periods_per_week", 5)),
                     "facility_type": item.get("facility_type", "REGULAR"),
                     "is_mandatory": str(item.get("is_mandatory", "No")).lower() in ["yes", "true", "1"]
