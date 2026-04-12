@@ -65,17 +65,6 @@ export default function StaffRegistry() {
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Staff Registry">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=staff')}>
-              📥 Import Staff
-            </button>
-            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-              + Add Staff Member
-            </button>
-          </div>
-        </div>
-
         {loading ? (
           <div className="skeleton" style={{ height: '400px', borderRadius: 'var(--radius-lg)' }} />
         ) : (
@@ -85,6 +74,16 @@ export default function StaffRegistry() {
             searchPlaceholder="Search staff by name or email..." 
             onFilteredCount={setFilteredCount}
             countLabel={filteredCount === staff.length ? `${staff.length} Teachers Total` : `Showing ${filteredCount} of ${staff.length}`}
+            topActions={
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=staff')}>
+                  📥 Import Staff
+                </button>
+                <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                  + Add Staff Member
+                </button>
+              </div>
+            }
           />
         )}
 

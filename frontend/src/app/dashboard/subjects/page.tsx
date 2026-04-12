@@ -75,17 +75,6 @@ export default function SubjectsRegistry() {
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Subject Catalog">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=subjects')}>
-              📥 Import Subjects
-            </button>
-            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-              + Add Subject
-            </button>
-          </div>
-        </div>
-
         {loading ? (
           <div className="skeleton" style={{ height: '400px', borderRadius: 'var(--radius-lg)' }} />
         ) : (
@@ -95,6 +84,16 @@ export default function SubjectsRegistry() {
             searchPlaceholder="Search subjects by name or code..." 
             onFilteredCount={setFilteredCount}
             countLabel={filteredCount === subjects.length ? `${subjects.length} Total Subjects` : `Showing ${filteredCount} of ${subjects.length}`}
+            topActions={
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=subjects')}>
+                  📥 Import Subjects
+                </button>
+                <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                  + Add Subject
+                </button>
+              </div>
+            }
           />
         )}
 

@@ -54,17 +54,6 @@ export default function Classrooms() {
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Classrooms">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=classrooms')}>
-              📥 Import Classrooms
-            </button>
-            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-              + Add Classroom
-            </button>
-          </div>
-        </div>
-
         {loading ? (
           <div className="skeleton" style={{ height: '400px', borderRadius: 'var(--radius-lg)' }} />
         ) : (
@@ -74,6 +63,16 @@ export default function Classrooms() {
             searchPlaceholder="Search rooms..." 
             onFilteredCount={setFilteredCount}
             countLabel={filteredCount === classrooms.length ? `${classrooms.length} Total Rooms` : `Showing ${filteredCount} of ${classrooms.length}`}
+            topActions={
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=classrooms')}>
+                  📥 Import Classrooms
+                </button>
+                <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                  + Add Classroom
+                </button>
+              </div>
+            }
           />
         )}
 

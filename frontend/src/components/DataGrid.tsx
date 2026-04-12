@@ -16,6 +16,7 @@ interface DataGridProps<T> {
   actions?: (row: T) => React.ReactNode;
   onFilteredCount?: (count: number) => void;
   countLabel?: string;
+  topActions?: React.ReactNode;
 }
 
 export default function DataGrid<T extends Record<string, any>>({ 
@@ -61,6 +62,9 @@ export default function DataGrid<T extends Record<string, any>>({
               {countLabel}
             </span>
           )}
+        </div>
+        <div>
+          {topActions}
         </div>
       </div>
 

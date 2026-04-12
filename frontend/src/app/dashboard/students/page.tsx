@@ -64,17 +64,6 @@ export default function Students() {
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Student Roster">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=students')}>
-              📥 Import Students
-            </button>
-            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-              + Add Student
-            </button>
-          </div>
-        </div>
-
         {loading ? (
           <div className="skeleton" style={{ height: '400px', borderRadius: 'var(--radius-lg)' }} />
         ) : (
@@ -84,6 +73,16 @@ export default function Students() {
             searchPlaceholder="Search students..." 
             onFilteredCount={setFilteredCount}
             countLabel={filteredCount === students.length ? `${students.length} Students Total` : `Showing ${filteredCount} of ${students.length}`}
+            topActions={
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button className="btn btn-secondary" onClick={() => router.push('/dashboard/import?type=students')}>
+                  📥 Import Students
+                </button>
+                <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                  + Add Student
+                </button>
+              </div>
+            }
           />
         )}
 
