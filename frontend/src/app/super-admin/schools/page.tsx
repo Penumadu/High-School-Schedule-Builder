@@ -97,7 +97,7 @@ export default function SchoolsRegistry() {
                 />
               </div>
               <span className="badge badge-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
-                {_schools.length} Schools Registered
+                {filteredSchools.length === _schools.length ? `${_schools.length} Schools Registered` : `Showing ${filteredSchools.length} of ${_schools.length} Schools`}
               </span>
             </div>
             <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>

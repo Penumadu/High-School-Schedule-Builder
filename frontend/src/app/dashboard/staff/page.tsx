@@ -16,6 +16,7 @@ export default function StaffRegistry() {
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filteredCount, setFilteredCount] = useState<number>(0);
 
   const fetchStaff = async () => {
     if (!schoolId) return;
@@ -23,6 +24,7 @@ export default function StaffRegistry() {
     try {
       const res = await api.get(`/admin/${schoolId}/staff`);
       setStaff(res);
+      setFilteredCount(res.length);
     } catch (err) {
       console.error('Failed to load staff', err);
     } finally {
@@ -66,7 +68,7 @@ export default function StaffRegistry() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span className="badge badge-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
-              {staff.length} Teachers Registered
+              {filteredCount === staff.length ? `${staff.length} Teachers Registered` : `Showing ${filteredCount} of ${staff.length} Teachers`}
             </span>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
@@ -86,6 +88,7 @@ export default function StaffRegistry() {
             columns={columns} 
             data={staff} 
             searchPlaceholder="Search staff by name or email..." 
+            onFilteredCount={setFilteredCount}
           />
         )}
 

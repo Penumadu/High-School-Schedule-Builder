@@ -16,6 +16,7 @@ export default function Classrooms() {
   const [classrooms, setClassrooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filteredCount, setFilteredCount] = useState<number>(0);
 
   const fetchClassrooms = async () => {
     if (!schoolId) return;
@@ -23,6 +24,7 @@ export default function Classrooms() {
     try {
       const res = await api.get(`/admin/${schoolId}/classrooms`);
       setClassrooms(res);
+      setFilteredCount(res.length);
     } catch (err) {
       console.error('Failed to load classrooms', err);
     } finally {
@@ -55,7 +57,7 @@ export default function Classrooms() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span className="badge badge-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
-              {classrooms.length} Classrooms
+              {filteredCount === classrooms.length ? `${classrooms.length} Classrooms` : `Showing ${filteredCount} of ${classrooms.length} Rooms`}
             </span>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
@@ -75,6 +77,7 @@ export default function Classrooms() {
             columns={columns} 
             data={classrooms} 
             searchPlaceholder="Search rooms..." 
+            onFilteredCount={setFilteredCount}
           />
         )}
 

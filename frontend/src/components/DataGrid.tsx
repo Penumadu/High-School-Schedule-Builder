@@ -14,6 +14,7 @@ interface DataGridProps<T> {
   searchPlaceholder?: string;
   onRowClick?: (row: T) => void;
   actions?: (row: T) => React.ReactNode;
+  onFilteredCount?: (count: number) => void;
 }
 
 export default function DataGrid<T extends Record<string, any>>({ 
@@ -21,7 +22,8 @@ export default function DataGrid<T extends Record<string, any>>({
   data, 
   searchPlaceholder = 'Search...', 
   onRowClick, 
-  actions 
+  actions,
+  onFilteredCount
 }: DataGridProps<T>) {
   const [search, setSearch] = useState('');
 
@@ -32,6 +34,12 @@ export default function DataGrid<T extends Record<string, any>>({
       String(val).toLowerCase().includes(searchLower)
     );
   });
+
+  React.useEffect(() => {
+    if (onFilteredCount) {
+      onFilteredCount(filteredData.length);
+    }
+  }, [filteredData.length, onFilteredCount]);
 
   return (
     <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>

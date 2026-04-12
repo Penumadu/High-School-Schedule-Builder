@@ -16,6 +16,7 @@ export default function Students() {
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filteredCount, setFilteredCount] = useState<number>(0);
 
   const fetchStudents = async () => {
     if (!schoolId) return;
@@ -23,6 +24,7 @@ export default function Students() {
     try {
       const res = await api.get(`/admin/${schoolId}/students`);
       setStudents(res);
+      setFilteredCount(res.length);
     } catch (err) {
       console.error('Failed to load students', err);
     } finally {
@@ -65,7 +67,7 @@ export default function Students() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span className="badge badge-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
-              {students.length} Students Registered
+              {filteredCount === students.length ? `${students.length} Students Registered` : `Showing ${filteredCount} of ${students.length} Students`}
             </span>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
@@ -85,6 +87,7 @@ export default function Students() {
             columns={columns} 
             data={students} 
             searchPlaceholder="Search students..." 
+            onFilteredCount={setFilteredCount}
           />
         )}
 

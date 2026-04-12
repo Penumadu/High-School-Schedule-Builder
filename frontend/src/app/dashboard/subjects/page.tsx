@@ -29,6 +29,7 @@ export default function SubjectsRegistry() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filteredCount, setFilteredCount] = useState<number>(0);
 
   const fetchSubjects = async () => {
     if (!schoolId) return;
@@ -36,6 +37,7 @@ export default function SubjectsRegistry() {
     try {
       const res = await api.get(`/admin/${schoolId}/subjects`);
       setSubjects(res);
+      setFilteredCount(res.length);
     } catch (_err) {
       console.error('Failed to load subjects', _err);
     } finally {
@@ -76,7 +78,7 @@ export default function SubjectsRegistry() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span className="badge badge-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
-              {subjects.length} Total Subjects
+              {filteredCount === subjects.length ? `${subjects.length} Total Subjects` : `Showing ${filteredCount} of ${subjects.length} Subjects`}
             </span>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
@@ -96,6 +98,7 @@ export default function SubjectsRegistry() {
             columns={columns} 
             data={subjects} 
             searchPlaceholder="Search subjects by name or code..." 
+            onFilteredCount={setFilteredCount}
           />
         )}
 
