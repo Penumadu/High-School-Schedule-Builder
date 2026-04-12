@@ -91,7 +91,7 @@ export default function DataGrid<T extends Record<string, any>>({
         gap: '16px' 
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <div className="search-bar" style={{ width: '220px' }}>
+          <div className="search-bar" style={{ width: '320px' }}>
             <span className="search-icon">🔍</span>
             <input 
               type="text" 
