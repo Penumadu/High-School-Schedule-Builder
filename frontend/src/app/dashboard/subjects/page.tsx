@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 
 import { useRouter } from 'next/navigation';
 import SubjectModal from '@/components/SubjectModal';
+import defaultSubjects from '@/data/default_subjects.json';
 
 interface Subject {
   subject_id: string;
