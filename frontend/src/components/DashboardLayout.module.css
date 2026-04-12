@@ -17,7 +17,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--border-glass);
   background: rgba(5, 8, 17, 0.4);
   backdrop-filter: blur(24px);
@@ -60,7 +60,7 @@
 
 .content {
   flex: 1;
-  padding: 16px;
+  padding: 24px 16px;
   composes: fade-in from global;
 }
 

@@ -86,12 +86,18 @@ export default function DataGrid<T extends Record<string, any>>({
         display: 'flex', 
         justifyContent: 'flex-start', 
         alignItems: 'center', 
-        marginBottom: 'var(--space-md)', 
+        marginBottom: '20px', 
         flexWrap: 'wrap', 
-        gap: '16px' 
+        gap: '16px',
+        minHeight: '44px' // Stabilize height to prevent "shaky" shifts
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <div className="search-bar" style={{ width: '320px' }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '16px', 
+          flexWrap: 'wrap' 
+        }}>
+          <div className="search-bar" style={{ width: '320px', margin: 0 }}>
             <span className="search-icon">🔍</span>
             <input 
               type="text" 
@@ -100,12 +106,22 @@ export default function DataGrid<T extends Record<string, any>>({
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          {countLabel && (
-            <span className="badge badge-primary" style={{ fontSize: '12px', padding: '4px 12px' }}>
-              {countLabel}
-            </span>
-          )}
-          <div style={{ display: 'flex', gap: '8px', marginLeft: '12px' }}>
+          
+          <div style={{ minWidth: '150px', display: 'flex', alignItems: 'center' }}>
+            {countLabel && (
+              <span className="badge badge-primary" style={{ 
+                fontSize: '12px', 
+                padding: '6px 14px',
+                whiteSpace: 'nowrap',
+                background: 'rgba(99, 102, 241, 0.15)',
+                border: '1px solid rgba(99, 102, 241, 0.2)'
+              }}>
+                {countLabel}
+              </span>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
              {topActions}
           </div>
         </div>
