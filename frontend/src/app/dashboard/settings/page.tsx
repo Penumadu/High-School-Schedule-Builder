@@ -139,6 +139,28 @@ export default function SchoolSettings() {
               </div>
 
               <div className="form-group">
+                <label className="form-label">Lunch Duration (mins)</label>
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  value={settings?.lunch_duration_mins} 
+                  min={0} max={120}
+                  onChange={e => setSettings(s => s ? {...s, lunch_duration_mins: parseInt(e.target.value)} : null)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Break Duration (mins)</label>
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  value={settings?.break_duration_mins} 
+                  min={0} max={120}
+                  onChange={e => setSettings(s => s ? {...s, break_duration_mins: parseInt(e.target.value)} : null)}
+                />
+              </div>
+
+              <div className="form-group">
                 <label className="form-label">System Notifications</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', height: '44px' }}>
                   <input 

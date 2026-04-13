@@ -22,15 +22,20 @@ export default function ScheduleDashboard() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [activeSchedule, setActiveSchedule] = useState<Schedule | null>(null);
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<any>(null);
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
 
   const fetchSchedules = async () => {
     if (!schoolId) return;
     try {
-      const res = await api.get(`/schedule/${schoolId}/list`);
-      setSchedules(res.schedules || []);
-      if (res.schedules?.length > 0 && !activeSchedule) {
+      const [schedRes, settingsRes] = await Promise.all([
+        api.get(`/schedule/${schoolId}/list`),
+        api.get(`/admin/${schoolId}/settings`)
+      ]);
+      setSchedules(schedRes.schedules || []);
+      setSettings(settingsRes);
+      if (schedRes.schedules?.length > 0 && !activeSchedule) {
         // Show the most recently created
         setActiveSchedule(res.schedules.sort((a: Schedule, b: Schedule) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]);
       }
@@ -154,7 +159,7 @@ export default function ScheduleDashboard() {
             </div>
 
             <ConflictReport report={activeSchedule.conflict_report} />
-            <TimetableGrid assignments={activeSchedule.assignments} />
+            <TimetableGrid assignments={activeSchedule.assignments} settings={settings} />
           </div>
         )}
 
