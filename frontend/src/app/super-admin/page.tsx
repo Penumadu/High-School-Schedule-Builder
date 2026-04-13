@@ -20,17 +20,12 @@ export default function SuperAdminDashboard() {
         const res = await api.get('/system/stats');
         
         setStats({
-          totalSchools: res.total || 0,
-          activeSchools: res.active || 0,
-          suspendedSchools: res.suspended || 0,
+          totalSchools: res.total,
+          activeSchools: res.active,
+          suspendedSchools: res.suspended,
         });
       } catch (err) {
-        console.warn('API unavailable, showing Demo Stat placeholders');
-        setStats({
-          totalSchools: 1,
-          activeSchools: 1,
-          suspendedSchools: 0
-        });
+        console.error('Failed to load stats', err);
       } finally {
         setLoading(false);
       }

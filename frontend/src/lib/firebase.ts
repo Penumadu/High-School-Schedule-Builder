@@ -15,22 +15,12 @@ const firebaseConfig = {
 let app: any;
 let auth: Auth;
 let db: Firestore;
-let isDemoMode = false;
 
 try {
   if (getApps().length === 0) {
-    if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'mock_key') {
-      app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getFirestore(app);
-    } else {
-      console.log("%c 🟢 DEVELOPER PREVIEW: Running in Local Demo Mode", "color: #22c55e; font-weight: bold; font-size: 14px;");
-      console.info("Firebase API keys are missing. Initializing mock data for immediate exploration.");
-      isDemoMode = true;
-      app = null as any;
-      auth = { currentUser: null } as unknown as Auth;
-      db = null as unknown as Firestore;
-    }
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
   } else {
     app = getApps()[0];
     auth = getAuth(app);
@@ -38,9 +28,9 @@ try {
   }
 } catch (error) {
   console.error("Firebase initialization failed:", error);
-  isDemoMode = true;
+  // Re-cast for cases where we must return a minimal object for SSR
   auth = { currentUser: null } as unknown as Auth;
   db = null as unknown as Firestore;
 }
 
-export { app, auth, db, isDemoMode };
+export { app, auth, db };

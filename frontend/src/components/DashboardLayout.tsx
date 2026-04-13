@@ -14,7 +14,7 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children, title }: DashboardLayoutProps) {
-  const { user, role, loading, isDemoMode } = useAuth();
+  const { user, role, loading } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -42,25 +42,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
       <div className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerLeft}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              {title && <h1 className={styles.pageTitle}>{title}</h1>}
-              {isDemoMode && (
-                <div style={{ 
-                  background: 'rgba(34, 197, 94, 0.15)', 
-                  border: '1px solid rgba(34, 197, 94, 0.3)',
-                  color: 'var(--success-400)',
-                  padding: '4px 12px',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}>
-                  <span style={{ fontSize: '14px' }}>🟢</span> DEVELOPER PREVIEW
-                </div>
-              )}
-            </div>
+            {title && <h1 className={styles.pageTitle}>{title}</h1>}
           </div>
           <div className={styles.headerRight}>
             <button onClick={handleLogout} className={`btn btn-secondary btn-sm ${styles.logoutBtn}`}>

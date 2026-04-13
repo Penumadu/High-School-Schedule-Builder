@@ -9,7 +9,6 @@ interface AuthContextType {
   role: string;
   schoolId: string;
   loading: boolean;
-  isDemoMode: boolean;
   setRole: (role: string) => void;
   setSchoolId: (id: string) => void;
 }
@@ -19,7 +18,6 @@ const AuthContext = createContext<AuthContextType>({
   role: '',
   schoolId: '',
   loading: true,
-  isDemoMode: false,
   setRole: () => {},
   setSchoolId: () => {},
 });
@@ -92,7 +90,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role, schoolId, loading, isDemoMode, setRole, setSchoolId }}>
+    <AuthContext.Provider value={{ user, role, schoolId, loading, setRole, setSchoolId }}>
       {children}
     </AuthContext.Provider>
   );
