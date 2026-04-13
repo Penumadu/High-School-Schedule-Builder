@@ -12,18 +12,17 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase (prevent duplicate initialization)
-let app: any;
-let auth: Auth;
-let db: Firestore;
+let isDemoMode = false;
 
 try {
   if (getApps().length === 0) {
-    if (firebaseConfig.apiKey) {
+    if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'mock_key') {
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
       db = getFirestore(app);
     } else {
       console.warn("Firebase API key is missing. Initializing in MOCK mode.");
+      isDemoMode = true;
       app = null as any;
       auth = { currentUser: null } as unknown as Auth;
       db = null as unknown as Firestore;
@@ -35,9 +34,9 @@ try {
   }
 } catch (error) {
   console.error("Firebase initialization failed:", error);
-  // Re-cast for cases where we must return a minimal object for SSR/Mock
+  isDemoMode = true;
   auth = { currentUser: null } as unknown as Auth;
   db = null as unknown as Firestore;
 }
 
-export { app, auth, db };
+export { app, auth, db, isDemoMode };

@@ -1,3 +1,4 @@
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 
@@ -16,12 +17,13 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   if (!user) {
     // Wait up to 2 seconds for auth to initialize
     user = await new Promise((resolve) => {
-      const unsubscribe = auth.onAuthStateChanged((u) => {
+      // Modular syntax: onAuthStateChanged(auth, callback)
+      const unsubscribe = onAuthStateChanged(auth, (u) => {
         unsubscribe();
         resolve(u);
       });
       setTimeout(() => {
-        unsubscribe();
+        if (typeof unsubscribe === 'function') unsubscribe();
         resolve(auth.currentUser);
       }, 2000);
     });

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, isDemoMode } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -33,8 +33,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // If Firebase Auth is not available (missing API keys), trigger Demo Mode
-    if (!auth || !auth.onAuthStateChanged) {
+    // If Firebase Auth is in Demo Mode (missing API keys), trigger mock data
+    if (isDemoMode) {
       console.log("Entering Demo Mode (No Firebase configuration detected)");
       const mockUser = {
         uid: 'demo-user',
@@ -43,8 +43,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         getIdToken: async () => 'mock-token'
       };
       
-      // Update global auth singleton for the API client
-      auth.currentUser = mockUser;
+      // Update global auth singleton for the API client if it's the mock object
+      if (auth && !auth.currentUser) {
+        (auth as any).currentUser = mockUser;
+      }
       
       setUser(mockUser as any);
       setRole('SUPER_ADMIN');
