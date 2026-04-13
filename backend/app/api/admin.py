@@ -333,3 +333,50 @@ async def get_guidance_status(
         "students": students,
         "top_demanded_courses": sorted_demand[:10]
     }
+
+
+@router.get("/{school_id}/export/schedule")
+async def export_master_schedule(
+    school_id: str,
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),
+):
+    """Generate a master Excel export of all published schedules."""
+    import pandas as pd
+    import io
+    from fastapi.responses import StreamingResponse
+    
+    db = get_firestore_client()
+    schedules = db.collection("schools").document(school_id) \
+        .collection("schedules").where("status", "==", "PUBLISHED").stream()
+        
+    rows = []
+    for doc in schedules:
+        data = doc.to_dict()
+        semester = data.get("semester", "1")
+        for asgn in data.get("assignments", []):
+            rows.append({
+                "Semester": semester,
+                "Period": asgn.get("period_name", "").replace("_", " "),
+                "Subject Code": asgn.get("subject_id"),
+                "Teacher ID": asgn.get("teacher_id"),
+                "Room": asgn.get("room_id"),
+                "Enrollment": len(asgn.get("enrolled_student_ids", []))
+            })
+            
+    if not rows:
+        raise HTTPException(status_code=404, detail="No published schedules found to export")
+        
+    df = pd.DataFrame(rows)
+    
+    # Create Excel in memory
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Master Schedule')
+    
+    output.seek(0)
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename=Master_Schedule_{school_id}.xlsx"}
+    )

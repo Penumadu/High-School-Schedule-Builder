@@ -493,3 +493,102 @@ a:hover {
   .stat-grid { grid-template-columns: 1fr; }
 }
 
+/* ─── PRINT STYLES: Official Timetables ─── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+
+  /* Reset layout for print */
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Hide UI elements */
+  nav, 
+  aside, 
+  header, 
+  footer,
+  .sidebar,
+  .top-navbar,
+  .btn,
+  .tab-group,
+  .search-bar,
+  .badge-icon,
+  .skeleton {
+    display: none !important;
+  }
+
+  /* Layout adjustments */
+  main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .glass-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Table styling for thermal/laser printers */
+  .data-table {
+    width: 100% !important;
+    border: 1px solid #ddd !important;
+    color: #000 !important;
+  }
+
+  .data-table thead th {
+    background: #f0f0f0 !important;
+    color: #000 !important;
+    border: 1px solid #ddd !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .data-table tbody td {
+    padding: 12px 15px !important;
+    border: 1px solid #eee !important;
+    color: #000 !important;
+  }
+
+  /* Badge styling in print */
+  .badge {
+    border: 1px solid #000 !important;
+    background: transparent !important;
+    color: #000 !important;
+    padding: 2px 6px !important;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-after: always;
+    display: block;
+    height: 0;
+  }
+
+  /* Header for official look */
+  .print-only-header {
+    display: block !important;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+  }
+
+  .print-only-header h1 {
+    font-size: 24px !important;
+    margin: 0 !important;
+  }
+}
+
+/* Hide print-only header by default */
+.print-only-header {
+  display: none;
+}
