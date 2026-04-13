@@ -17,14 +17,12 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await api.get('/system/schools');
-        const schools = res.schools || [];
-        const total = res.total || 0;
+        const res = await api.get('/system/stats');
         
         setStats({
           totalSchools: res.total || 0,
-          activeSchools: schools.filter((s: any) => s.status === 'ACTIVE').length,
-          suspendedSchools: schools.filter((s: any) => s.status === 'SUSPENDED').length,
+          activeSchools: res.active || 0,
+          suspendedSchools: res.suspended || 0,
         });
       } catch (err) {
         console.error('Failed to load stats', err);

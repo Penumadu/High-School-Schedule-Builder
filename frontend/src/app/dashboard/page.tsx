@@ -24,18 +24,13 @@ export default function DashboardLanding() {
       }
       
       try {
-        const [staffRes, studentsRes, subjectsRes, roomsRes] = await Promise.all([
-          api.get(`/admin/${schoolId}/staff`),
-          api.get(`/admin/${schoolId}/students`),
-          api.get(`/admin/${schoolId}/subjects`),
-          api.get(`/admin/${schoolId}/classrooms`),
-        ]);
+        const statsRes = await api.get<any>(`/admin/${schoolId}/stats`);
         
         setStats({
-          staff: staffRes?.length || 0,
-          students: studentsRes?.length || 0,
-          subjects: subjectsRes?.length || 0,
-          classrooms: roomsRes?.length || 0,
+          staff: statsRes.staff || 0,
+          students: statsRes.students || 0,
+          subjects: statsRes.subjects || 0,
+          classrooms: statsRes.classrooms || 0,
         });
       } catch (err) {
         console.error('Failed to load dashboard stats', err);

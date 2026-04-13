@@ -183,6 +183,29 @@ async def update_school_status(
 
     doc_ref.update({"status": new_status})
     return {"message": f"School '{school_id}' status updated to {new_status}"}
+@router.get("/stats")
+async def get_platform_stats(user: dict = Depends(require_role("SUPER_ADMIN"))):
+    """
+    Optimized platform-wide stats fetch using Firestore Aggregation queries.
+    Prevents O(N) read costs for the Super Admin dashboard.
+    """
+    db = get_firestore_client()
+    schools_ref = db.collection("schools")
+    
+    try:
+        total = schools_ref.count().get()[0][0].value
+        active = schools_ref.where("status", "==", "ACTIVE").count().get()[0][0].value
+        suspended = schools_ref.where("status", "==", "SUSPENDED").count().get()[0][0].value
+        
+        return {
+            "total": total,
+            "active": active,
+            "suspended": suspended
+        }
+    except Exception as e:
+        print(f"Platform stats optimization failed: {e}")
+        return {"total": 0, "active": 0, "suspended": 0}
+
 @router.delete("/schools/{school_id}")
 async def delete_school(
     school_id: str,
