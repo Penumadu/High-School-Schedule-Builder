@@ -234,6 +234,109 @@ async def get_teacher_schedule(
     return {"teacher_id": teacher["teacher_id"], "schedule": my_schedule}
 
 
+@router.get("/admin/{school_id}/attendance/daily")
+async def get_daily_attendance_report(
+    school_id: str,
+    date: str = None, # YYYY-MM-DD
+    user: dict = Depends(require_role("PRINCIPAL", "COORDINATOR")),
+):
+    """Aggregate a list of all students marked absent today/specified date."""
+    import datetime
+    db = get_firestore_client()
+    if not date:
+        date = datetime.date.today().isoformat()
+    
+    # Query all attendance records for this date
+    att_ref = db.collection("schools").document(school_id).collection("attendance")
+    docs = att_ref.where("date", "==", date).stream()
+    
+    absences_by_student = {} # student_id -> [period_names]
+    
+    for doc in docs:
+        data = doc.to_dict()
+        period = data.get("period_name", "Unknown")
+        for sid in data.get("absent_student_ids", []):
+            if sid not in absences_by_student:
+                absences_by_student[sid] = []
+            absences_by_student[sid].append(period)
+            
+    # Enrich with student names
+    report = []
+    for sid, periods in absences_by_student.items():
+        s_doc = db.collection("schools").document(school_id).collection("students").document(sid).get()
+        s_data = s_doc.to_dict() if s_doc.exists else {}
+        report.append({
+            "student_id": sid,
+            "name": f"{s_data.get('first_name', '')} {s_data.get('last_name', '')}",
+            "grade": s_data.get("grade_level"),
+            "periods_absent": periods,
+            "total_periods": len(periods)
+        })
+        
+    return {"date": date, "absentees": report}
+
+
+@router.get("/student/{school_id}/attendance/summary")
+async def get_student_attendance_summary(
+    school_id: str,
+    user: dict = Depends(get_current_user),
+):
+    """Get total absence count and period list for the logged-in student."""
+    db = get_firestore_client()
+    student_uid = user["uid"]
+
+    # 1. Find student_id
+    students = db.collection("schools").document(school_id) \
+        .collection("students").where("user_id", "==", student_uid).stream()
+    
+    student_id = None
+    for doc in students:
+        student_id = doc.id
+        break
+    
+    if not student_id:
+        raise HTTPException(status_code=404, detail="Student profile not found")
+
+    # 2. Query all attendance where student was absent
+    att_ref = db.collection("schools").document(school_id).collection("attendance")
+    docs = att_ref.where("absent_student_ids", "array_contains", student_id).stream()
+    
+    history = []
+    for doc in docs:
+        data = doc.to_dict()
+        history.append({
+            "date": data.get("date"),
+            "period": data.get("period_name"),
+        })
+
+    return {
+        "student_id": student_id,
+        "total_absences": len(history),
+        "history": sorted(history, key=lambda x: x["date"], reverse=True)
+    }
+
+
+@router.get("/teacher/{school_id}/attendance/history")
+async def get_teacher_attendance_history(
+    school_id: str,
+    user: dict = Depends(get_current_user),
+):
+    """Get previous attendance submissions for the logged-in teacher."""
+    db = get_firestore_client()
+    teacher_uid = user["uid"]
+    
+    att_ref = db.collection("schools").document(school_id).collection("attendance")
+    docs = att_ref.where("submitted_by", "==", teacher_uid).stream()
+    
+    history = []
+    for doc in docs:
+        data = doc.to_dict()
+        data["id"] = doc.id
+        history.append(data)
+        
+    return {"history": sorted(history, key=lambda x: x["date"], reverse=True)}
+
+
 @router.post("/teacher/{school_id}/attendance")
 async def submit_attendance(
     school_id: str,
