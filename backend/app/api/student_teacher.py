@@ -11,6 +11,82 @@ router = APIRouter(tags=["Student & Teacher"])
 
 # ──────────────────────── STUDENT ROUTES ────────────────────────
 
+def _evaluate_subject_eligibility(subj_id: str, rules: dict, historical_grades: dict) -> Dict[str, Any]:
+    """Helper to evaluate if a student meets prerequisites for a subject."""
+    if subj_id not in rules:
+        return {"eligible": True, "reason": None}
+    
+    logic = rules[subj_id]
+    conditions = logic.get("rules", [])
+    condition_type = logic.get("condition", "AND")
+
+    results = []
+    for cond in conditions:
+        prereq = cond.get("prerequisite", "")
+        operator = cond.get("operator", ">=")
+        threshold = cond.get("value", 0)
+        actual = historical_grades.get(prereq, None)
+
+        if actual is None:
+            results.append((False, f"Required course {prereq} not found in transcript"))
+        elif operator == ">=" and actual < threshold:
+            results.append((False, f"Grade in {prereq} ({actual}%) is below required {threshold}%"))
+        elif operator == ">" and actual <= threshold:
+            results.append((False, f"Grade in {prereq} ({actual}%) must be higher than {threshold}%"))
+        else:
+            results.append((True, None))
+
+    if condition_type == "AND":
+        passed = all(r[0] for r in results)
+        failed_reasons = [r[1] for r in results if not r[0]]
+        reason = "; ".join(failed_reasons) if not passed else None
+    else:
+        passed = any(r[0] for r in results)
+        reason = "None of the alternate prerequisites met" if not passed else None
+    
+    return {"eligible": passed, "reason": reason}
+
+
+@router.get("/student/{school_id}/eligibility/{student_id}")
+async def get_student_eligibility(
+    school_id: str,
+    student_id: str,
+    user: dict = Depends(get_current_user),
+):
+    """Calculate eligibility for ALL catalog subjects for a specific student."""
+    db = get_firestore_client()
+    school_ref = db.collection("schools").document(school_id)
+
+    # 1. Load data
+    student_doc = school_ref.collection("students").document(student_id).get()
+    if not student_doc.exists:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    student_data = student_doc.to_dict()
+    historical_grades = student_data.get("historical_grades", {})
+    
+    # 2. Load subjects & rules
+    subjects = [d.to_dict() for d in school_ref.collection("subjects").stream()]
+    rules = {}
+    for doc in school_ref.collection("rules").stream():
+        data = doc.to_dict()
+        rules[data.get("target_subject_id", "")] = data.get("logic_tree", {})
+
+    # 3. Calculate for each
+    eligibility_map = {}
+    for subj in subjects:
+        subj_id = subj.get("code") or subj.get("id") # Fallback to id if code missing
+        if not subj_id: continue
+        
+        result = _evaluate_subject_eligibility(subj_id, rules, historical_grades)
+        eligibility_map[subj_id] = result
+
+    return {
+        "student_id": student_id,
+        "eligibility": eligibility_map
+    }
+
+
 @router.post("/rules/validate-student")
 async def validate_student_choices(
     payload: Dict[str, Any],
@@ -18,62 +94,32 @@ async def validate_student_choices(
 ):
     """
     Real-time validation of a student's course choices against the rules engine.
-    Payload: { "student_id": "...", "school_id": "...", "requested_subjects": ["sub_1", ...] }
     """
     db = get_firestore_client()
-    school_id = payload.get("school_id", user.get("school_id", ""))
-    student_id = payload.get("student_id", "")
+    school_id = payload.get("school_id") or user.get("school_id")
+    student_id = payload.get("student_id")
     requested = payload.get("requested_subjects", [])
 
     if not school_id:
         raise HTTPException(status_code=400, detail="school_id is required")
 
     school_ref = db.collection("schools").document(school_id)
-
-    # Load student's historical grades
     student_doc = school_ref.collection("students").document(student_id).get()
-    historical_grades = {}
-    if student_doc.exists:
-        historical_grades = student_doc.to_dict().get("historical_grades", {})
+    historical_grades = student_doc.to_dict().get("historical_grades", {}) if student_doc.exists else {}
 
-    # Load rules
     rules = {}
     for doc in school_ref.collection("rules").stream():
         data = doc.to_dict()
         rules[data.get("target_subject_id", "")] = data.get("logic_tree", {})
 
-    # Validate each requested subject
     rejections = []
     for subj_id in requested:
-        if subj_id in rules:
-            logic = rules[subj_id]
-            conditions = logic.get("rules", [])
-            condition_type = logic.get("condition", "AND")
-
-            results = []
-            for cond in conditions:
-                prereq = cond.get("prerequisite", "")
-                operator = cond.get("operator", ">=")
-                threshold = cond.get("value", 0)
-                actual = historical_grades.get(prereq, None)
-
-                if actual is None:
-                    results.append(False)
-                elif operator == ">=" and actual < threshold:
-                    results.append(False)
-                elif operator == ">" and actual <= threshold:
-                    results.append(False)
-                else:
-                    results.append(True)
-
-            passed = all(results) if condition_type == "AND" else any(results)
-
-            if not passed:
-                rejections.append({
-                    "subject": subj_id,
-                    "reason": f"Grade prerequisite not met for {subj_id}",
-                    "details": logic,
-                })
+        check = _evaluate_subject_eligibility(subj_id, rules, historical_grades)
+        if not check["eligible"]:
+            rejections.append({
+                "subject": subj_id,
+                "reason": check["reason"]
+            })
 
     return {
         "valid": len(rejections) == 0,

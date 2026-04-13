@@ -284,3 +284,52 @@ async def update_school_settings(
     """Update school-specific scheduling policies."""
     _school_ref(school_id).update({"settings": settings})
     return settings
+
+
+# ──────────────────────── GUIDANCE / COURSE SELECTION OVERSIGHT ────────────────────────
+
+@router.get("/{school_id}/guidance/status")
+async def get_guidance_status(
+    school_id: str,
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),
+):
+    """Fetch completion status of student course selections."""
+    db = get_firestore_client()
+    students_ref = _school_ref(school_id).collection("students")
+    
+    docs = students_ref.stream()
+    students = []
+    total = 0
+    submitted = 0
+    
+    course_demand = {} # code -> count
+
+    for doc in docs:
+        data = doc.to_dict()
+        total += 1
+        choices = data.get("requested_subjects", [])
+        has_submitted = len(choices) > 0
+        if has_submitted:
+            submitted += 1
+            for code in choices:
+                course_demand[code] = course_demand.get(code, 0) + 1
+        
+        students.append({
+            "id": doc.id,
+            "name": f"{data.get('first_name', '')} {data.get('last_name', '')}",
+            "grade": data.get("grade_level"),
+            "status": "SUBMITTED" if has_submitted else "PENDING",
+            "choice_count": len(choices)
+        })
+
+    # Sort demand
+    sorted_demand = sorted(course_demand.items(), key=lambda x: x[1], reverse=True)
+
+    return {
+        "total_students": total,
+        "submitted_count": submitted,
+        "pending_count": total - submitted,
+        "completion_rate": (submitted / total * 100) if total > 0 else 0,
+        "students": students,
+        "top_demanded_courses": sorted_demand[:10]
+    }

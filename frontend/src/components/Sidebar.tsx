@@ -24,6 +24,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Subjects', href: '/dashboard/subjects', icon: '📚', roles: ['PRINCIPAL', 'COORDINATOR'] },
   { label: 'Classrooms', href: '/dashboard/classrooms', icon: '🚪', roles: ['PRINCIPAL'] },
   { label: 'Students', href: '/dashboard/students', icon: '🎓', roles: ['PRINCIPAL', 'COORDINATOR'] },
+  { label: 'Guidance Oversight', href: '/dashboard/guidance', icon: '📝', roles: ['PRINCIPAL', 'COORDINATOR'] },
   { label: 'Rules Engine', href: '/dashboard/rules', icon: '⚖️', roles: ['PRINCIPAL', 'COORDINATOR'] },
   { label: 'Import Data', href: '/dashboard/import', icon: '📤', roles: ['PRINCIPAL', 'COORDINATOR'] },
   { label: 'Schedule', href: '/dashboard/schedule', icon: '📅', roles: ['PRINCIPAL', 'COORDINATOR'] },
