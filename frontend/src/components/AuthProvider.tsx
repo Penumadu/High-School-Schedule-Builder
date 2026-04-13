@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, isDemoMode } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -33,28 +33,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // If Firebase Auth is in Demo Mode (missing API keys), trigger mock data
-    if (isDemoMode) {
-      console.log("Entering Demo Mode (No Firebase configuration detected)");
-      const mockUser = {
-        uid: 'demo-user',
-        email: 'admin@demo.edu',
-        displayName: 'Demo Administrator',
-        getIdToken: async () => 'mock-token'
-      };
-      
-      // Update global auth singleton for the API client if it's the mock object
-      if (auth && !auth.currentUser) {
-        (auth as any).currentUser = mockUser;
-      }
-      
-      setUser(mockUser as any);
-      setRole('SUPER_ADMIN');
-      setSchoolId('demo-school');
-      setLoading(false);
-      return;
-    }
-
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);

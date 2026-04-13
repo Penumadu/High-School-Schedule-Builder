@@ -141,7 +141,8 @@ export default function DataGrid<T extends Record<string, any>>({
         display: 'flex', 
         justifyContent: 'flex-start', 
         alignItems: 'center', 
-        marginBottom: '20px', 
+        marginTop: '8px',
+        marginBottom: '24px', 
         flexWrap: 'wrap', 
         gap: '16px',
         minHeight: '44px'

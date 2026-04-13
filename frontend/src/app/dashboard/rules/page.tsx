@@ -14,6 +14,7 @@ export default function RulesRegistry() {
   const [rules, setRules] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<Record<string, string>>({});
   const [teacherMap, setTeacherMap] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     if (!schoolId) return;

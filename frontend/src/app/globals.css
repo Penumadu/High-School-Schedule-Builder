@@ -173,7 +173,7 @@ a:hover {
   background: var(--bg-card-hover);
   border-color: var(--border-glow);
   box-shadow: var(--shadow-primary), var(--shadow-md);
-  transform: translateY(-4px) scale(1.005);
+  transform: translateY(-2px) scale(1.002);
 }
 
 /* ─── BUTTONS ─── */
@@ -427,6 +427,53 @@ a:hover {
   background: rgba(139, 92, 246, 0.15);
   color: var(--accent-400);
   border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+/* ─── MODALS ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn var(--transition-fast);
+}
+
+.modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1001;
+  animation: slideUp var(--transition-base);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-title {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 28px;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+  color: var(--text-primary);
 }
 
 /* ─── TOAST ─── */

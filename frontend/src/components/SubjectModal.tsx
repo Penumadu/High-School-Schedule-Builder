@@ -50,8 +50,9 @@ export default function SubjectModal({ schoolId, onClose, onSuccess, initialData
     setError('');
 
     try {
-      if (initialData?.id) {
-        await api.put(`/admin/${schoolId}/subjects/${initialData.id}`, formData);
+      const targetId = initialData?.subject_id || initialData?.id;
+      if (targetId) {
+        await api.put(`/admin/${schoolId}/subjects/${targetId}`, formData);
       } else {
         await api.post(`/admin/${schoolId}/subjects`, formData);
       }

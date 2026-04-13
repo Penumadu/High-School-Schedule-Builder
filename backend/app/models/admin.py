@@ -88,6 +88,14 @@ class SubjectResponse(BaseModel):
 
 # ---------- CLASSROOMS ----------
 
+class ClassroomCreate(BaseModel):
+    name: str
+    code: str
+    capacity: int = Field(default=30, ge=1, le=500)
+    facility_type: str = Field(default="REGULAR")
+    is_gym: bool = Field(default=False)
+
+
 class ClassroomUpdate(BaseModel):
     name: Optional[str] = None
     code: Optional[str] = None
