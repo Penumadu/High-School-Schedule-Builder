@@ -31,7 +31,16 @@ export default function SchoolsRegistry() {
       const res = await api.get('/system/schools');
       _setSchools(res.schools || []);
     } catch (_err) {
-      console.error('Failed to load schools', _err);
+      console.warn('API unavailable, using Demo Data');
+      _setSchools([
+        {
+          school_id: 'demo-school',
+          school_name: 'Ontario Public High (DEMO)',
+          subscription_tier: 'PREMIUM',
+          status: 'ACTIVE',
+          created_at: new Date().toISOString()
+        }
+      ]);
     } finally {
       setLoading(false);
     }

@@ -24,7 +24,8 @@ try {
       auth = getAuth(app);
       db = getFirestore(app);
     } else {
-      console.warn("Firebase API key is missing. Initializing in MOCK mode.");
+      console.log("%c 🟢 DEVELOPER PREVIEW: Running in Local Demo Mode", "color: #22c55e; font-weight: bold; font-size: 14px;");
+      console.info("Firebase API keys are missing. Initializing mock data for immediate exploration.");
       isDemoMode = true;
       app = null as any;
       auth = { currentUser: null } as unknown as Auth;
