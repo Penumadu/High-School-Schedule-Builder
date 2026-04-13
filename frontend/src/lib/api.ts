@@ -1,5 +1,5 @@
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase';
+import { auth, isDemoMode } from './firebase';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 
                  (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8000/api/v1');
@@ -15,6 +15,13 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   let user = auth.currentUser;
   
   if (!user) {
+    if (isDemoMode) {
+      return {
+        Authorization: 'Bearer mock-token',
+        'Content-Type': 'application/json',
+      };
+    }
+
     // Wait up to 2 seconds for auth to initialize
     user = await new Promise((resolve) => {
       // Modular syntax: onAuthStateChanged(auth, callback)
