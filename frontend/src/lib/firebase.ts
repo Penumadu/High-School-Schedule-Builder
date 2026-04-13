@@ -12,6 +12,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase (prevent duplicate initialization)
+let app: any;
+let auth: Auth;
+let db: Firestore;
 let isDemoMode = false;
 
 try {
