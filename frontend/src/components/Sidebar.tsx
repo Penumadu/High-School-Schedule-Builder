@@ -27,6 +27,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Rules Engine', href: '/dashboard/rules', icon: '⚖️', roles: ['PRINCIPAL', 'COORDINATOR'] },
   { label: 'Import Data', href: '/dashboard/import', icon: '📤', roles: ['PRINCIPAL', 'COORDINATOR'] },
   { label: 'Schedule', href: '/dashboard/schedule', icon: '📅', roles: ['PRINCIPAL', 'COORDINATOR'] },
+  { label: 'Settings', href: '/dashboard/settings', icon: '⚙️', roles: ['PRINCIPAL'] },
 
   // Teacher
   { label: 'My Schedule', href: '/teacher', icon: '📅', roles: ['TEACHER'] },

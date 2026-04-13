@@ -257,3 +257,30 @@ async def get_school_stats(
         # Fallback if Firestore client doesn't support count() in some environments
         print(f"Stats optimization failed: {e}")
         return {"students": 0, "staff": 0, "subjects": 0, "classrooms": 0}
+
+
+# ──────────────────────── SCHOOL SETTINGS ────────────────────────
+
+@router.get("/{school_id}/settings", response_model=dict)
+async def get_school_settings(
+    school_id: str,
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),
+):
+    """Fetch current school settings."""
+    doc = _school_ref(school_id).get()
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail="School not found")
+    
+    data = doc.to_dict()
+    return data.get("settings", {})
+
+
+@router.put("/{school_id}/settings", response_model=dict)
+async def update_school_settings(
+    school_id: str,
+    settings: dict,
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL")),
+):
+    """Update school-specific scheduling policies."""
+    _school_ref(school_id).update({"settings": settings})
+    return settings

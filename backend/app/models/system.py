@@ -18,8 +18,10 @@ class SchoolStatus(str, Enum):
 
 
 class SchoolSettings(BaseModel):
-    periods_per_day: int = Field(default=8, ge=1, le=12)
+    periods_per_day: int = Field(default=4, ge=1, le=12)
     period_duration_mins: int = Field(default=75, ge=30, le=120)
+    max_consecutive_periods: int = Field(default=3, ge=1, le=10)
+    has_mandatory_prep: bool = True
     allow_email_notifications: bool = True
 
 

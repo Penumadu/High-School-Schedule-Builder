@@ -334,27 +334,28 @@ class ScheduleSolver:
             subj = subjects[si]
             for t in subject_teachers[si]:
                 for r in range(num_rooms):
-                    # Facility match constraint
-                    subj_facility = get_facility(subj)
-                    room_facility = get_facility(classrooms[r])
-                    
-                    if subj_facility != room_facility:
-                        if subj_facility == "GYM" and not classrooms[r].get("is_gym"):
-                            continue
-                        if subj_facility != "GYM":
-                            continue
+                    for p in range(num_p):
+                        # Facility match constraint
+                        subj_facility = get_facility(subj)
+                        room_facility = get_facility(classrooms[r])
+                        
+                        if subj_facility != room_facility:
+                            if subj_facility == "GYM" and not classrooms[r].get("is_gym"):
+                                continue
+                            if subj_facility != "GYM":
+                                continue
 
-                    # Room capacity check: this section must fit in this room
-                    room_cap = classrooms[r].get("capacity", 30)
-                    if len(sec_students) > room_cap:
-                        continue  # skip rooms too small for this section
+                        # Room capacity check: this section must fit in this room
+                        room_cap = classrooms[r].get("capacity", 30)
+                        if len(sec_students) > room_cap:
+                            continue  # skip rooms too small for this section
 
-                    # Period lock rule check
-                    if si in subject_period_restriction:
-                        if (p + 1) not in subject_period_restriction[si]:
-                            continue
+                        # Period lock rule check (Rule Engine Integration)
+                        if si in subject_period_restriction:
+                            if (p + 1) not in subject_period_restriction[si]:
+                                continue
 
-                    x[sec_i, t, r, p] = model.NewBoolVar(f"x_sec{sec_i}_t{t}_r{r}_p{p}")
+                        x[sec_i, t, r, p] = model.NewBoolVar(f"x_sec{sec_i}_t{t}_r{r}_p{p}")
 
         # ── HARD CONSTRAINTS ──
 
@@ -390,26 +391,39 @@ class ScheduleSolver:
         if all_section_sums:
             model.Maximize(sum(all_section_sums))
 
-        # 2. No teacher double-booking + Off-Times
+        # 2. No teacher double-booking + Off-Times + Consecutive Limit
+        max_consecutive = settings.get("max_consecutive_periods", 3)
+        
         for t in range(num_teachers):
             off_times = teachers[t].get("off_times", [])
+            teacher_period_vars = [] # Store the 'is_teaching' var for each period
+            
             for p in range(num_p):
-                if (p + 1) in off_times:
-                    for sec_i, (si, _, _) in enumerate(sections):
-                        if t in subject_teachers.get(si, []):
-                            for r in range(num_rooms):
-                                if (sec_i, t, r, p) in x:
-                                    model.Add(x[sec_i, t, r, p] == 0)
+                # Teacher assignment at period p
+                p_vars = [
+                    x[sec_i, t, r, p]
+                    for sec_i, (si, _, _) in enumerate(sections)
+                    if t in subject_teachers.get(si, [])
+                    for r in range(num_rooms)
+                    if (sec_i, t, r, p) in x
+                ]
+                is_teaching_p = model.NewBoolVar(f"t{t}_active_p{p}")
+                if p_vars:
+                    model.Add(is_teaching_p == sum(p_vars))
+                else:
+                    model.Add(is_teaching_p == 0)
                 
-                model.Add(
-                    sum(
-                        x[sec_i, t, r, p]
-                        for sec_i, (si, _, _) in enumerate(sections)
-                        if t in subject_teachers.get(si, [])
-                        for r in range(num_rooms)
-                        if (sec_i, t, r, p) in x
-                    ) <= 1
-                )
+                teacher_period_vars.append(is_teaching_p)
+
+                # Hard Lock: Off-times
+                if (p + 1) in off_times:
+                    model.Add(is_teaching_p == 0)
+
+            # Constraint: Max consecutive periods (The Dash Prevention)
+            if num_p > max_consecutive:
+                for start_p in range(num_p - max_consecutive):
+                    window = teacher_period_vars[start_p : start_p + max_consecutive + 1]
+                    model.Add(sum(window) <= max_consecutive)
 
         # 3. No room double-booking
         for r in range(num_rooms):
@@ -423,9 +437,14 @@ class ScheduleSolver:
                     ) <= 1
                 )
 
-        # 4. Teacher max workload
+        # 4. Teacher max workload (Weekly)
         for t in range(num_teachers):
             max_p = teachers[t].get("max_periods_per_week", 25)
+            # Automatic Prep Period adjustment: if 4 periods/day and 5 days, 
+            # 1.0 FTE should be 15 periods/week max.
+            if num_p == 4 and max_p > 15:
+                max_p = 15
+            
             model.Add(
                 sum(
                     x[sec_i, t, r, p]
@@ -437,26 +456,35 @@ class ScheduleSolver:
                 ) <= max_p
             )
 
-        # 5. Student No-Overlap (Unique Student Schedules)
-        # Build student → sections mapping
-        student_sections: Dict[int, List[int]] = {}
-        for sec_i, (si, sec_idx, sec_students) in enumerate(sections):
-            for sti in sec_students:
-                student_sections.setdefault(sti, []).append(sec_i)
-        
-        for sti, sec_list in student_sections.items():
-            if len(sec_list) <= 1:
-                continue
+        # 5. Student No-Overlap + Consecutive Limit
+        # Build student → is_scheduled_at_p mapping
+        student_period_vars = {} # (student_idx, period_idx) -> Var
+
+        for sti in range(len(students)):
             for p in range(num_p):
-                overlap_vars = []
-                for sec_i in sec_list:
-                    si_for = section_subject_map[sec_i]
-                    for t in subject_teachers.get(si_for, []):
-                        for r in range(num_rooms):
-                            if (sec_i, t, r, p) in x:
-                                overlap_vars.append(x[sec_i, t, r, p])
-                if overlap_vars:
-                    model.Add(sum(overlap_vars) <= 1)
+                is_active_st_p = model.NewBoolVar(f"st{sti}_active_p{p}")
+                
+                # All assignments involving this student at period p
+                st_p_vars = []
+                for sec_i, (si, sec_idx, sec_students) in enumerate(sections):
+                    if sti in sec_students:
+                        for t in subject_teachers.get(si, []):
+                            for r in range(num_rooms):
+                                if (sec_i, t, r, p) in x:
+                                    st_p_vars.append(x[sec_i, t, r, p])
+                
+                if st_p_vars:
+                    model.Add(is_active_st_p == sum(st_p_vars))
+                else:
+                    model.Add(is_active_st_p == 0)
+                
+                student_period_vars[sti, p] = is_active_st_p
+
+            # Constraint: Max consecutive periods for student
+            if num_p > max_consecutive:
+                for start_p in range(num_p - max_consecutive):
+                    window = [student_period_vars[sti, p] for p in range(start_p, start_p + max_consecutive + 1)]
+                    model.Add(sum(window) <= max_consecutive)
 
         # ── SOLVE ──
         solver = cp_model.CpSolver()
