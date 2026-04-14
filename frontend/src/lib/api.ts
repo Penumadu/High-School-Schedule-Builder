@@ -1,8 +1,8 @@
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 
-                 (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8000/api/v1');
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== 'undefined' ? '/api/v1' : 'http://localhost:8000/api/v1');
 
 interface RequestOptions {
   method?: string;
@@ -13,7 +13,7 @@ interface RequestOptions {
 async function getAuthHeaders(): Promise<Record<string, string>> {
   // Wait for auth to initialize if needed
   let user = auth.currentUser;
-  
+
   if (!user) {
 
     // Wait up to 2 seconds for auth to initialize
@@ -46,18 +46,43 @@ export async function apiRequest<T = unknown>(
   const authHeaders = await getAuthHeaders();
   const { method = 'GET', body, headers = {} } = options;
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    method,
-    headers: { ...authHeaders, ...headers },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      method,
+      headers: { ...authHeaders, ...headers },
+      body: body ? JSON.stringify(body) : undefined,
+    });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-    throw new Error(error.detail || `HTTP ${response.status}`);
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error("Firebase Quota Exceeded (Daily Limit Reached). Please try again later.");
+      }
+
+      const errorBody = await response.json().catch(() => ({ detail: 'Request failed' }));
+      let message = 'Request failed';
+    
+    if (typeof errorBody.detail === 'string') {
+      message = errorBody.detail;
+    } else if (Array.isArray(errorBody.detail)) {
+      // Handle FastAPI validation errors (list of objects)
+      message = errorBody.detail.map((d: any) => `${d.loc.join('.')}: ${d.msg}`).join(', ');
+    } else if (errorBody.detail && typeof errorBody.detail === 'object') {
+      message = JSON.stringify(errorBody.detail);
+    } else {
+      message = `HTTP ${response.status}`;
+    }
+    
+    throw new Error(message);
   }
 
-  return response.json() as Promise<T>;
+    return response.json() as Promise<T>;
+  } catch (error: any) {
+    if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+      console.error('Network Error or CORS Block:', error);
+      throw new Error('Connection to the server failed. This may be due to a server crash or a Firebase quota limit being reached.');
+    }
+    throw error;
+  }
 }
 
 export async function apiUpload(

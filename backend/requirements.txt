@@ -9,3 +9,4 @@ python-multipart==0.0.9
 sendgrid==6.11.0
 pydantic==2.9.0
 python-dotenv==1.0.1
+fastapi-cache2[redis]==0.2.2

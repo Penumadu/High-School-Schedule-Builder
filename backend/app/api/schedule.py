@@ -10,6 +10,9 @@ from app.models.schedule import (
     PublishRequest,
 )
 from app.services.email_service import send_schedule_emails
+from fastapi_cache import FastAPICache
+from fastapi_cache.decorator import cache
+from app.core.cache import school_key_builder
 
 router = APIRouter(prefix="/schedule", tags=["Scheduling"])
 
@@ -31,6 +34,8 @@ async def generate_schedule(
 
     try:
         result = solver.generate(semester=request.semester)
+        # Clear cache for this school so the new schedule appears in lists
+        await FastAPICache.clear(namespace=request.school_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -43,6 +48,7 @@ async def generate_schedule(
 
 
 @router.get("/{school_id}/{schedule_id}", response_model=ScheduleResponse)
+@cache(expire=3600, key_builder=school_key_builder) # Long expiry for specific schedules
 async def get_schedule(
     school_id: str,
     schedule_id: str,
@@ -62,6 +68,7 @@ async def get_schedule(
 
 
 @router.get("/{school_id}/list")
+@cache(expire=600, key_builder=school_key_builder)
 async def list_schedules(
     school_id: str,
     user: dict = Depends(get_current_user),
@@ -107,6 +114,9 @@ async def publish_schedule(
 
     if request.send_emails:
         background_tasks.add_task(send_schedule_emails, school_id, schedule_id)
+
+    # Invalidate caches
+    await FastAPICache.clear(namespace=school_id)
 
     return {
         "message": "Schedule published successfully",

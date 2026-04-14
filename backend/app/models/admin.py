@@ -122,6 +122,7 @@ class StudentCreate(BaseModel):
     grade_level: int = Field(ge=9, le=12)
     historical_grades: Dict[str, float] = Field(default_factory=dict)
     requested_subjects: List[str] = Field(default_factory=list)
+    is_approved: bool = Field(default=False)
 
 
 class StudentUpdate(BaseModel):
@@ -131,6 +132,7 @@ class StudentUpdate(BaseModel):
     grade_level: Optional[int] = None
     historical_grades: Optional[Dict[str, float]] = None
     requested_subjects: Optional[List[str]] = None
+    is_approved: Optional[bool] = None
 
 
 class StudentResponse(BaseModel):
@@ -142,6 +144,7 @@ class StudentResponse(BaseModel):
     grade_level: int
     historical_grades: Dict[str, float]
     requested_subjects: List[str]
+    is_approved: bool = False
     last_schedule_email_status: str = "PENDING"
 
 

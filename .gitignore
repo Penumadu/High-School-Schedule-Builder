@@ -28,3 +28,4 @@ frontend/.next/
 .project
 .pydevproject
 .settings/
+backend/*.log

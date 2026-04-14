@@ -260,12 +260,13 @@ class ScheduleSolver:
                 if is_mandatory and student_grade == subj_grade:
                     should_enroll = True
                 
-                # Logic 2: Optional Choice?
+                # Logic 2: Optional Choice? (Only if Approved)
                 else:
+                    is_approved = student.get("is_approved", False)
                     requested = student.get("requested_subjects", [])
-                    if (subj_id in requested or 
-                        subj_name in requested or 
-                        subj_code in requested):
+                    if is_approved and (subj_id in requested or 
+                                      subj_name in requested or 
+                                      subj_code in requested):
                         should_enroll = True
 
                 if should_enroll:

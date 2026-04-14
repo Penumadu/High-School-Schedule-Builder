@@ -45,9 +45,10 @@ def _send_email_sendgrid(to_email: str, subject: str, html_content: str) -> bool
         return False
 
 
-async def send_schedule_emails(school_id: str, schedule_id: str):
+async def send_schedule_emails(school_id: str, schedule_id: str, student_ids: Optional[list[str]] = None):
     """
-    Background task: sends personalized schedule emails to all enrolled students.
+    Background task: sends personalized schedule emails to enrolled students.
+    If student_ids is provided, only sends to those specific students.
     Updates delivery status in Firestore.
     """
     db = get_firestore_client()
@@ -102,6 +103,10 @@ async def send_schedule_emails(school_id: str, schedule_id: str):
 
     # Send emails
     for student_id, schedule_items in student_schedules.items():
+        # Filter by student_ids if provided
+        if student_ids is not None and student_id not in student_ids:
+            continue
+            
         student_doc = school_ref.collection("students").document(student_id).get()
         if not student_doc.exists:
             continue

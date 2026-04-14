@@ -19,7 +19,14 @@ class Settings:
 
     # CORS
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
-    ALLOWED_ORIGINS: List[str] = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001").split(",")
+    # Extended local origins for robust dev communication
+    ALLOWED_ORIGINS: List[str] = os.getenv(
+        "ALLOWED_ORIGINS", 
+        "http://localhost:3000,http://127.0.0.1:3000,http://0.0.0.0:3000,http://localhost:3001"
+    ).split(",")
+
+    # Cache
+    REDIS_URL: str = os.getenv("REDIS_URL", "")
 
     # SendGrid (stubbed – set to enable real email sending)
     SENDGRID_API_KEY: str = os.getenv("SENDGRID_API_KEY", "")

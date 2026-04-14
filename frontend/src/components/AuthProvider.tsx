@@ -18,8 +18,8 @@ const AuthContext = createContext<AuthContextType>({
   role: '',
   schoolId: '',
   loading: true,
-  setRole: () => {},
-  setSchoolId: () => {},
+  setRole: () => { },
+  setSchoolId: () => { },
 });
 
 export function useAuth() {
@@ -39,11 +39,11 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const tokenResult = await firebaseUser.getIdTokenResult();
           const realRole = (tokenResult.claims.role as string) || '';
-          
+
           // Check for session overrides (for SUPER_ADMINs managing a specific school)
           const sessionRole = sessionStorage.getItem('acting_role');
           const sessionSchoolId = sessionStorage.getItem('acting_school_id');
-          
+
           if (realRole === 'SUPER_ADMIN' && sessionRole && sessionSchoolId) {
             setRole(sessionRole);
             setSchoolId(sessionSchoolId);
@@ -58,8 +58,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         setRole('');
         setSchoolId('');
-        sessionStorage.removeItem('acting_role');
-        sessionStorage.removeItem('acting_school_id');
       }
       setLoading(false);
     });

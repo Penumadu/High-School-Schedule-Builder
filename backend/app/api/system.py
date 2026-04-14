@@ -11,24 +11,40 @@ from app.models.system import (
     ProvisionResponse,
 )
 from firebase_admin import auth as firebase_auth
+from fastapi_cache import FastAPICache
+from fastapi_cache.decorator import cache
 
 router = APIRouter(prefix="/system", tags=["System Admin"])
 
 
 @router.get("/schools")
+@cache(expire=600, namespace="schools")
 async def list_schools(user: dict = Depends(require_role("SUPER_ADMIN"))):
     """List all registered schools."""
     db = get_firestore_client()
     schools_ref = db.collection("schools")
-    docs = schools_ref.stream()
-
-    schools = []
-    for doc in docs:
-        data = doc.to_dict()
-        data["school_id"] = doc.id
-        schools.append(data)
-
-    return {"schools": schools, "total": len(schools)}
+    
+    try:
+        docs = schools_ref.stream()
+        schools = []
+        for doc in docs:
+            data = doc.to_dict()
+            data["school_id"] = doc.id
+            schools.append(data)
+        return {"schools": schools, "total": len(schools)}
+    except Exception as e:
+        # Check if it's a quota error
+        if "Quota exceeded" in str(e) or "429" in str(e):
+            print("Quota Hit: Returning Demo fallback")
+            demo_schools = [{
+                "school_id": "demo-school",
+                "school_name": "Demo Academy (Quota Mode)",
+                "status": "ACTIVE",
+                "subscription_tier": "FREE",
+                "is_demo": True
+            }]
+            return {"schools": demo_schools, "total": 1, "note": "Showing demo data due to quota limits"}
+        raise e
 
 
 @router.get("/schools/{school_id}")
@@ -149,6 +165,9 @@ async def provision_school(
         print(f"Failed to copy master subjects: {e}")
         message += " (Warning: Master catalogue failed to initialize)"
 
+    # 6. Clear Schools Cache
+    await FastAPICache.clear(namespace="schools")
+
     return ProvisionResponse(
         school_id=request.school_id,
         school_name=request.school_name,
@@ -184,6 +203,7 @@ async def update_school_status(
     doc_ref.update({"status": new_status})
     return {"message": f"School '{school_id}' status updated to {new_status}"}
 @router.get("/stats")
+@cache(expire=300, namespace="schools")
 async def get_platform_stats(user: dict = Depends(require_role("SUPER_ADMIN"))):
     """
     Optimized platform-wide stats fetch using Firestore Aggregation queries.
@@ -203,6 +223,13 @@ async def get_platform_stats(user: dict = Depends(require_role("SUPER_ADMIN"))):
             "suspended": suspended
         }
     except Exception as e:
+        if "Quota exceeded" in str(e) or "429" in str(e):
+            return {
+                "total": 5, 
+                "active": 3, 
+                "suspended": 2,
+                "note": "Demo stats (Quota mode)"
+            }
         print(f"Platform stats optimization failed: {e}")
         return {"total": 0, "active": 0, "suspended": 0}
 
