@@ -3,6 +3,7 @@
 import React from 'react';
 import GenericRegistry from '@/components/GenericRegistry';
 import SubjectModal from '@/components/SubjectModal';
+import { getBadgeStyle } from '@/lib/colors';
 
 export default function SubjectsRegistry() {
   const columns = [
@@ -11,7 +12,16 @@ export default function SubjectsRegistry() {
     { key: 'grade_level', label: 'Grade Level', width: '140px' },
     { key: 'credits', label: 'Credits', width: '120px' },
     { key: 'level', label: 'Course Level', width: '150px' },
-    { key: 'department', label: 'Department', width: '130px' },
+    { 
+      key: 'department', 
+      label: 'Department', 
+      width: '130px',
+      render: (val: string) => (
+        <span className="badge" style={getBadgeStyle(val)}>
+          {val}
+        </span>
+      )
+    },
     { 
       key: 'prerequisites', 
       label: 'Prerequisites',
@@ -26,18 +36,11 @@ export default function SubjectsRegistry() {
       key: 'facility_type', 
       label: 'Facility',
       width: '100px',
-      render: (val: string) => {
-        const colors: Record<string, string> = {
-          'REGULAR': 'var(--primary-500)',
-          'LAB': '#8b5cf6', 'GYM': '#f59e0b', 'ART': '#ec4899', 'SHOP': '#10b981', 'MUSIC': '#3b82f6', 'DRAMA': '#f43f5e',
-        };
-        const color = colors[val] || 'var(--primary-500)';
-        return (
-          <span className="badge" style={{ fontSize: '10px', padding: '2px 8px', background: `${color}20`, color: color, border: `1px solid ${color}40`, fontWeight: '800' }}>
-            {val}
-          </span>
-        );
-      }
+      render: (val: string) => (
+        <span className="badge" style={getBadgeStyle(val)}>
+          {val}
+        </span>
+      )
     },
     { 
       key: 'is_mandatory', 
@@ -57,7 +60,7 @@ export default function SubjectsRegistry() {
       entityType="subjects"
       apiEndpoint="/admin/{schoolId}/subjects"
       columns={columns}
-      idField="subject_id"
+      idField="id"
       searchPlaceholder="Search subjects by name or code..."
       ModalComponent={SubjectModal}
     />

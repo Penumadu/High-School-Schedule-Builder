@@ -59,44 +59,51 @@ export default function StudentModal({ schoolId, onClose, onSuccess }: StudentMo
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'flex', gap: '16px' }}>
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">First Name</label>
+              <label className="form-label" htmlFor="first_name">First Name</label>
               <input 
+                id="first_name"
                 type="text" 
                 name="first_name" 
                 className="form-input" 
                 value={formData.first_name} 
                 onChange={handleChange} 
                 required 
+                autoComplete="given-name"
               />
             </div>
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Last Name</label>
+              <label className="form-label" htmlFor="last_name">Last Name</label>
               <input 
+                id="last_name"
                 type="text" 
                 name="last_name" 
                 className="form-input" 
                 value={formData.last_name} 
                 onChange={handleChange} 
                 required 
+                autoComplete="family-name"
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label" htmlFor="email">Email Address</label>
             <input 
+              id="email"
               type="email" 
               name="email" 
               className="form-input" 
               value={formData.email} 
               onChange={handleChange} 
               required 
+              autoComplete="email"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Grade Level</label>
+            <label className="form-label" htmlFor="grade_level">Grade Level</label>
             <select 
+              id="grade_level"
               name="grade_level" 
               className="form-select" 
               value={formData.grade_level} 

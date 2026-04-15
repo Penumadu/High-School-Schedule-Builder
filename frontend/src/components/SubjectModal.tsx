@@ -76,8 +76,9 @@ export default function SubjectModal({ schoolId, onClose, onSuccess, initialData
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', gap: '16px' }}>
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Course Code</label>
+              <label className="form-label" htmlFor="code">Course Code</label>
               <input 
+                id="code"
                 type="text" 
                 name="code" 
                 className="form-input" 
@@ -88,8 +89,9 @@ export default function SubjectModal({ schoolId, onClose, onSuccess, initialData
               />
             </div>
             <div className="form-group" style={{ flex: 2 }}>
-              <label className="form-label">Subject Name</label>
+              <label className="form-label" htmlFor="name">Subject Name</label>
               <input 
+                id="name"
                 type="text" 
                 name="name" 
                 className="form-input" 
@@ -103,8 +105,9 @@ export default function SubjectModal({ schoolId, onClose, onSuccess, initialData
 
           <div style={{ display: 'flex', gap: '16px' }}>
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Grade</label>
+              <label className="form-label" htmlFor="grade_level">Grade</label>
               <select 
+                id="grade_level"
                 name="grade_level" 
                 className="form-select" 
                 value={formData.grade_level} 

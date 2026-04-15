@@ -5,6 +5,9 @@ from fastapi.responses import StreamingResponse
 from typing import List
 import uuid
 import io
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 from app.core.auth import get_current_user, require_role
@@ -101,7 +104,7 @@ def _repo(school_id: str, collection: str):
 @router.get("/{school_id}/staff", response_model=List[TeacherResponse])
 @cache(expire=600, key_builder=school_key_builder)
 async def list_staff(school_id: str, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL"))):
-    return [TeacherResponse(teacher_id=d["id"], **d) for d in _repo(school_id, "teachers").list_all()]
+    return [TeacherResponse(**{**d, "teacher_id": d.get("teacher_id") or d["id"]}) for d in _repo(school_id, "teachers").list_all()]
 
 @router.post("/{school_id}/staff", response_model=TeacherResponse)
 async def create_teacher(school_id: str, teacher: TeacherCreate, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL"))):
@@ -169,7 +172,7 @@ async def create_classroom(school_id: str, classroom: ClassroomCreate, user: dic
 async def update_classroom(school_id: str, room_id: str, update: ClassroomUpdate, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL"))):
     data = _repo(school_id, "classrooms").upsert(room_id, update.model_dump(exclude_unset=True))
     await FastAPICache.clear(namespace=school_id)
-    return ClassroomResponse(room_id=room_id, **data)
+    return ClassroomResponse(**{**data, "room_id": room_id})
 
 # ──────────────────────── STUDENTS ────────────────────────
 
@@ -438,6 +441,22 @@ async def get_all_student_schedules(
     """
     db = get_firestore_client()
     school_ref = db.collection("schools").document(school_id)
+    school_doc = school_ref.get()
+    day_structure = []
+    if school_doc.exists:
+        day_structure = school_doc.to_dict().get("day_structure", [])
+    
+    # If no custom structure, provide the user requested default
+    if not day_structure:
+        day_structure = [
+            {"type": "PERIOD", "id": "PERIOD_1", "label": "Period 1"},
+            {"type": "BREAK", "id": "BREAK_1", "label": "Break (15 min)"},
+            {"type": "PERIOD", "id": "PERIOD_2", "label": "Period 2"},
+            {"type": "LUNCH", "id": "LUNCH_1", "label": "Lunch (30 min)"},
+            {"type": "PERIOD", "id": "PERIOD_3", "label": "Period 3"},
+            {"type": "BREAK", "id": "BREAK_2", "label": "Break (15 min)"},
+            {"type": "PERIOD", "id": "PERIOD_4", "label": "Period 4"}
+        ]
     
     # 1. Fetch Students
     students_docs = school_ref.collection("students").stream()
@@ -485,6 +504,7 @@ async def get_all_student_schedules(
     return {
         "schedule_id": active_sched["id"],
         "status": active_sched.get("status"),
+        "day_structure": day_structure,
         "students": list(students_map.values())
     }
 

@@ -51,10 +51,13 @@ export default function DashboardLanding() {
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR', 'SUPER_ADMIN']}>
       <DashboardLayout title="School Dashboard">
-        <div style={{ marginBottom: 'var(--space-xl)' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-            Welcome back, {user?.displayName || 'Admin'}
+        <div style={{ marginBottom: 'var(--space-xl)', animation: 'fadeIn 1s ease' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
+            Welcome back, {user?.displayName || (user?.email?.split('@')[0]) || 'Administrator'}
           </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} • {schoolId ? `School ID: ${schoolId}` : 'No school selected'}
+          </p>
         </div>
 
         {loading ? (

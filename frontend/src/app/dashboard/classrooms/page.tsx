@@ -3,6 +3,7 @@
 import React from 'react';
 import GenericRegistry from '@/components/GenericRegistry';
 import ClassroomModal from '@/components/ClassroomModal';
+import { getBadgeStyle } from '@/lib/colors';
 
 export default function Classrooms() {
   const columns = [
@@ -13,7 +14,7 @@ export default function Classrooms() {
       key: 'facility_type', 
       label: 'Facility',
       render: (facility: string) => (
-        <span className={`badge ${facility === 'REGULAR' ? 'badge-primary' : 'badge-accent'}`}>
+        <span className="badge" style={getBadgeStyle(facility)}>
           {facility}
         </span>
       )
@@ -26,7 +27,7 @@ export default function Classrooms() {
       entityType="classrooms"
       apiEndpoint="/admin/{schoolId}/classrooms"
       columns={columns}
-      idField="room_id"
+      idField="id"
       searchPlaceholder="Search rooms..."
       ModalComponent={ClassroomModal}
     />

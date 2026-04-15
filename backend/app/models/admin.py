@@ -31,15 +31,16 @@ class TeacherUpdate(BaseModel):
 
 
 class TeacherResponse(BaseModel):
+    id: str
     teacher_id: str
     user_id: Optional[str] = None
-    first_name: str
-    last_name: str
-    email: str
-    subject: str
-    subject_code: str
-    specializations: List[str]
-    max_periods_per_week: int
+    first_name: str = ""
+    last_name: str = ""
+    email: str = ""
+    subject: str = "General"
+    subject_code: str = "GEN"
+    specializations: List[str] = []
+    max_periods_per_week: int = 25
     is_active: bool = True
     off_times: List[int] = []
 
@@ -73,10 +74,11 @@ class SubjectUpdate(BaseModel):
 
 
 class SubjectResponse(BaseModel):
+    id: str
     subject_id: str
-    name: str
-    code: str
-    grade_level: str
+    name: str = ""
+    code: str = ""
+    grade_level: str = "Grade 10"
     credits: str = "1 Credit"
     level: str = "Open"
     department: str = "General"
@@ -105,12 +107,13 @@ class ClassroomUpdate(BaseModel):
 
 
 class ClassroomResponse(BaseModel):
+    id: str
     room_id: str
-    name: str
-    code: str
-    capacity: int
-    facility_type: str
-    is_gym: bool
+    name: str = ""
+    code: str = ""
+    capacity: int = 30
+    facility_type: str = "REGULAR"
+    is_gym: bool = False
 
 
 # ---------- STUDENTS ----------
@@ -136,14 +139,15 @@ class StudentUpdate(BaseModel):
 
 
 class StudentResponse(BaseModel):
+    id: str
     student_id: str
     user_id: Optional[str] = None
-    first_name: str
-    last_name: str
-    email: str
-    grade_level: int
-    historical_grades: Dict[str, float]
-    requested_subjects: List[str]
+    first_name: str = ""
+    last_name: str = ""
+    email: str = ""
+    grade_level: int = 9
+    historical_grades: Dict[str, float] = {}
+    requested_subjects: List[str] = []
     is_approved: bool = False
     last_schedule_email_status: str = "PENDING"
 
@@ -165,6 +169,7 @@ class RuleCreate(BaseModel):
 
 
 class RuleResponse(BaseModel):
+    id: str
     rule_id: str
     target_subject_id: str
     logic_tree: Dict[str, Any]

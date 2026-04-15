@@ -3,6 +3,7 @@
 import React from 'react';
 import GenericRegistry from '@/components/GenericRegistry';
 import StaffModal from '@/components/StaffModal';
+import { getBadgeStyle } from '@/lib/colors';
 
 export default function StaffRegistry() {
   const columns = [
@@ -13,9 +14,9 @@ export default function StaffRegistry() {
       label: 'Specialization', 
       width: '240px',
       render: (val: string[]) => (
-        <div style={{ display: 'flex', gap: '4px', flexWrap: 'nowrap', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap', overflow: 'hidden' }}>
           {(val || []).map(s => (
-            <span key={s} className="badge badge-primary" style={{ fontSize: '10px', padding: '2px 6px' }}>
+            <span key={s} className="badge" style={getBadgeStyle(s)}>
               {s}
             </span>
           ))}
@@ -41,7 +42,7 @@ export default function StaffRegistry() {
       entityType="staff"
       apiEndpoint="/admin/{schoolId}/staff"
       columns={columns}
-      idField="teacher_id"
+      idField="id"
       searchPlaceholder="Search staff by name or email..."
       ModalComponent={StaffModal}
     />

@@ -47,7 +47,7 @@ export default function GenericRegistry({
     if (!schoolId) return;
     setLoading(true);
     try {
-      const res = await api.get(apiEndpoint.replace('{schoolId}', schoolId));
+      const res: any = await api.get(apiEndpoint.replace('{schoolId}', schoolId));
       setData(res || []);
       setFilteredCount(res?.length || 0);
     } catch (err) {
@@ -63,7 +63,12 @@ export default function GenericRegistry({
   }, [schoolId, apiEndpoint]);
 
   const handleRowClick = (item: any) => {
-    router.push(`/dashboard/${entityType}/${item[idField]}`);
+    const id = item[idField] || item.id;
+    if (!id) {
+      console.error(`Missing ID for ${entityType}`, item);
+      return;
+    }
+    router.push(`/dashboard/${entityType}/${id}`);
   };
 
   const closeModal = () => setIsModalOpen(false);

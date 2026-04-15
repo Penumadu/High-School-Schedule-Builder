@@ -12,15 +12,15 @@
 .loginCard {
   width: 100%;
   max-width: 440px;
-  background: rgba(13, 17, 33, 0.75);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-xl);
   padding: 48px;
   position: relative;
-  z-index: 1;
-  backdrop-filter: blur(32px) saturate(180%);
-  -webkit-backdrop-filter: blur(32px) saturate(180%);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+  z-index: 10;
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  box-shadow: 0 40px 100px rgba(15, 23, 42, 0.1),
               var(--shadow-primary);
   animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -51,30 +51,30 @@
 
 .title {
   font-family: var(--font-heading);
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   margin-bottom: 8px;
-  background: linear-gradient(to bottom right, #fff, var(--primary-300));
+  background: linear-gradient(135deg, var(--text-primary), var(--primary-600));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .subtitle {
-  color: var(--text-muted);
-  font-size: 14px;
+  color: var(--text-secondary); /* Higher contrast */
+  font-size: 15px;
   font-weight: 500;
 }
 
 .errorMessage {
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  color: var(--error-600);
   padding: 14px 18px;
   border-radius: var(--radius-md);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 24px;
   animation: fadeIn 0.4s ease;
 }

@@ -36,7 +36,7 @@ export default function Students() {
       entityType="students"
       apiEndpoint="/admin/{schoolId}/students"
       columns={columns}
-      idField="student_id"
+      idField="id"
       searchPlaceholder="Search students..."
       ModalComponent={StudentModal}
     />

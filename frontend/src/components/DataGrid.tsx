@@ -111,8 +111,9 @@ export default function DataGrid<T extends Record<string, any>>({
           position: sticky;
           left: 0;
           z-index: 10;
-          background: #0d1117 !important;
-          border-right: 2px solid var(--border-glass) !important;
+          background: #ffffff !important;
+          border-right: 1px solid var(--gray-100) !important;
+          box-shadow: 2px 0 5px rgba(0,0,0,0.02);
         }
         
         thead th.sticky-col {
@@ -142,9 +143,9 @@ export default function DataGrid<T extends Record<string, any>>({
         justifyContent: 'flex-start', 
         alignItems: 'center', 
         marginTop: '8px',
-        marginBottom: '24px', 
+        marginBottom: '28px', 
         flexWrap: 'wrap', 
-        gap: '16px',
+        gap: '20px',
         minHeight: '44px'
       }}>
         <div style={{ 
@@ -153,13 +154,14 @@ export default function DataGrid<T extends Record<string, any>>({
           gap: '16px', 
           flexWrap: 'wrap' 
         }}>
-          <div className="search-bar" style={{ width: '320px', margin: 0 }}>
+          <div className="search-bar" style={{ width: '380px', margin: 0 }}>
             <span className="search-icon">🔍</span>
             <input 
               type="text" 
               placeholder={searchPlaceholder} 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              aria-label={searchPlaceholder}
             />
           </div>
           
@@ -167,10 +169,8 @@ export default function DataGrid<T extends Record<string, any>>({
             {countLabel && (
               <span className="badge badge-primary" style={{ 
                 fontSize: '12px', 
-                padding: '6px 14px',
+                padding: '8px 16px',
                 whiteSpace: 'nowrap',
-                background: 'rgba(99, 102, 241, 0.15)',
-                border: '1px solid rgba(99, 102, 241, 0.2)'
               }}>
                 {countLabel}
               </span>

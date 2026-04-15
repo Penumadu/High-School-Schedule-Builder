@@ -58,8 +58,9 @@ export default function ClassroomModal({ schoolId, onClose, onSuccess }: Classro
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'flex', gap: '16px' }}>
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Room Code</label>
+              <label className="form-label" htmlFor="code">Room Code</label>
               <input 
+                id="code"
                 type="text" 
                 name="code" 
                 className="form-input" 
@@ -70,8 +71,9 @@ export default function ClassroomModal({ schoolId, onClose, onSuccess }: Classro
               />
             </div>
             <div className="form-group" style={{ flex: 2 }}>
-              <label className="form-label">Room Description</label>
+              <label className="form-label" htmlFor="name">Room Description</label>
               <input 
+                id="name"
                 type="text" 
                 name="name" 
                 className="form-input" 
@@ -85,8 +87,9 @@ export default function ClassroomModal({ schoolId, onClose, onSuccess }: Classro
 
           <div style={{ display: 'flex', gap: '16px' }}>
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Student Capacity</label>
+              <label className="form-label" htmlFor="capacity">Student Capacity</label>
               <input 
+                id="capacity"
                 type="number" 
                 name="capacity" 
                 className="form-input" 
@@ -98,8 +101,9 @@ export default function ClassroomModal({ schoolId, onClose, onSuccess }: Classro
             </div>
 
             <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label">Facility Type</label>
+              <label className="form-label" htmlFor="facility_type">Facility Type</label>
               <select 
+                id="facility_type"
                 name="facility_type" 
                 className="form-select" 
                 value={formData.facility_type} 

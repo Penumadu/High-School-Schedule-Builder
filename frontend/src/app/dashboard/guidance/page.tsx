@@ -68,7 +68,7 @@ export default function GuidanceDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
-      <DashboardLayout title="Administrative Oversight">
+      <DashboardLayout title="Administrative Hub">
         
         {/* Main Tab Group */}
         <div className="tab-group" style={{ marginBottom: 'var(--space-2xl)', maxWidth: '500px' }}>

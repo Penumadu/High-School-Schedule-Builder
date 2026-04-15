@@ -16,7 +16,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
-from app.api import auth, system, admin, imports, schedule, student_teacher, export
+from app.api import auth, system, admin, imports, schedule, student_teacher, export, settings as school_settings
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from google.api_core import exceptions as google_exceptions
@@ -44,6 +44,19 @@ async def startup():
     # Initialize Firebase
     init_firebase()
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Ensure all errors include CORS headers for frontend debugging."""
+    logger.error(f"Global error: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc), "error_type": "INTERNAL_SERVER_ERROR"},
+        headers={
+            "Access-Control-Allow-Origin": request.headers.get("Origin", "*"),
+            "Access-Control-Allow-Credentials": "true",
+        }
+    )
+
 @app.exception_handler(google_exceptions.ResourceExhausted)
 async def quota_exception_handler(request: Request, exc: google_exceptions.ResourceExhausted):
     """Handle Firebase/Google Cloud Quota Exceeded errors gracefully."""
@@ -59,17 +72,6 @@ async def quota_exception_handler(request: Request, exc: google_exceptions.Resou
         }
     )
 
-# CORS middleware - Explicitly allow origins to handle credentialed requests
-# Added after routers to ensure it wraps error responses correctly in Starlette
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Include API routers (All modules are now lazy-loaded for stability)
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(system.router, prefix=settings.API_V1_PREFIX)
 app.include_router(admin.router, prefix=settings.API_V1_PREFIX)
@@ -77,6 +79,17 @@ app.include_router(imports.router, prefix=settings.API_V1_PREFIX)
 app.include_router(schedule.router, prefix=settings.API_V1_PREFIX)
 app.include_router(student_teacher.router, prefix=settings.API_V1_PREFIX)
 app.include_router(export.router, prefix=settings.API_V1_PREFIX)
+app.include_router(school_settings.router, prefix=settings.API_V1_PREFIX)
+
+# CORS middleware - MUST be added AFTER all routers to wrap all responses (including errors)
+# as the outermost layer in Starlette.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS + ["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get(f"{settings.API_V1_PREFIX}/health")
