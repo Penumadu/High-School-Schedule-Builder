@@ -11,7 +11,7 @@ interface ConflictItem {
 interface ConflictReportProps {
   report: {
     has_conflicts: boolean;
-    total_conflicts: int;
+    total_conflicts: number;
     conflicts: ConflictItem[];
   } | null;
 }

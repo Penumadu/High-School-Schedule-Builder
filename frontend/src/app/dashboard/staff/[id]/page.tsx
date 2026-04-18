@@ -35,7 +35,7 @@ export default function EditStaffPage() {
       
       let data = [];
       try {
-        const res = await api.get(`/admin/${schoolId}/staff`);
+        const res = await api.get(`/admin/${schoolId}/staff?_t=${Date.now()}`);
         data = res && res.length > 0 ? res : defaultTeachers;
       } catch (err) {
         console.warn('API fetch failed, falling back to master roster', err);
@@ -87,17 +87,37 @@ export default function EditStaffPage() {
     setError('');
 
     try {
+      // Safely process specializations
+      const rawSpecs = formData.specializations || '';
+      const processedSpecs = typeof rawSpecs === 'string' 
+        ? rawSpecs.split(',').map(s => s.trim()).filter(s => s.length > 0)
+        : [];
+
+      // Safely process unavailable periods
+      const rawPeriods = formData.unavailable_periods || '';
+      const processedPeriods = typeof rawPeriods === 'string'
+        ? rawPeriods.split(',').map(s => parseInt(s.trim())).filter(s => !isNaN(s))
+        : [];
+
       const payload = {
         ...formData,
-        specializations: formData.specializations.split(',').map(s => s.trim()).filter(s => s !== ''),
-        off_times: formData.unavailable_periods.split(',').map(s => parseInt(s.trim())).filter(s => !isNaN(s))
+        specializations: processedSpecs,
+        off_times: processedPeriods
       };
       
-      // Remove temporary display field
       const { unavailable_periods, ...cleanPayload } = payload;
 
       await api.put(`/admin/${schoolId}/staff/${staffId}`, cleanPayload);
-      router.push('/dashboard/staff');
+      
+      // Visual feedback before redirecting
+      setSaving(false);
+      const btn = document.getElementById('save-btn');
+      if (btn) btn.innerHTML = '✅ Saved Successfully!';
+      
+      setTimeout(() => {
+        router.refresh(); // Clear Next.js client-side cache
+        router.push('/dashboard/staff');
+      }, 800);
     } catch (err: any) {
       setError(err.message || 'Failed to save changes');
       setSaving(false);
@@ -118,105 +138,135 @@ export default function EditStaffPage() {
             {loading ? (
               <div className="skeleton" style={{ height: '500px' }} />
             ) : (
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                 {error && <div className="toast error" style={{ position: 'relative', marginBottom: '16px' }}>{error}</div>}
 
-                <div style={{ display: 'flex', gap: '24px' }}>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label className="form-label">First Name</label>
-                    <input type="text" name="first_name" className="form-input" value={formData.first_name} onChange={handleChange} required />
+                <section>
+                  <h3 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--primary-700)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ background: 'var(--primary-100)', padding: '6px', borderRadius: '8px' }}>👤</span> 
+                    Personal Information
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                    <div className="form-group">
+                      <label className="form-label">First Name</label>
+                      <input type="text" name="first_name" className="form-input" value={formData.first_name} onChange={handleChange} required />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Last Name</label>
+                      <input type="text" name="last_name" className="form-input" value={formData.last_name} onChange={handleChange} required />
+                    </div>
+                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                      <label className="form-label">Email Address</label>
+                      <input type="email" name="email" className="form-input" value={formData.email} onChange={handleChange} required />
+                    </div>
                   </div>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label className="form-label">Last Name</label>
-                    <input type="text" name="last_name" className="form-input" value={formData.last_name} onChange={handleChange} required />
+                </section>
+
+                <div style={{ height: '1px', background: 'var(--border-glass)' }} />
+
+                <section>
+                  <h3 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--primary-700)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ background: 'var(--primary-100)', padding: '6px', borderRadius: '8px' }}>📚</span> 
+                    Academic Assignment
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+                    <div className="form-group">
+                      <label className="form-label">Primary Subject</label>
+                      <input 
+                        type="text" 
+                        name="subject" 
+                        className="form-input" 
+                        placeholder="e.g. Science"
+                        value={formData.subject} 
+                        onChange={handleChange} 
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Subject Code</label>
+                      <input 
+                        type="text" 
+                        name="subject_code" 
+                        className="form-input" 
+                        placeholder="e.g. SNC1W"
+                        value={formData.subject_code} 
+                        onChange={handleChange} 
+                        required
+                      />
+                    </div>
+                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                      <label className="form-label">Other Specializations</label>
+                      <input 
+                        type="text" 
+                        name="specializations" 
+                        className="form-input" 
+                        placeholder="Math, Physics, Computer Science" 
+                        value={formData.specializations} 
+                        onChange={handleChange} 
+                      />
+                      <small style={{ color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>Separate multiple areas with commas</small>
+                      {formData.specializations && (
+                        <div style={{ marginTop: '8px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          {formData.specializations.split(',').map(s => s.trim()).filter(s => s.length > 0).map((s, i) => (
+                            <span key={i} className="badge" style={{ background: 'var(--primary-100)', color: 'var(--primary-700)', fontSize: '11px', padding: '2px 8px' }}>
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </section>
 
-                <div className="form-group">
-                  <label className="form-label">Email Address</label>
-                  <input type="email" name="email" className="form-input" value={formData.email} onChange={handleChange} required />
-                </div>
+                <div style={{ height: '1px', background: 'var(--border-glass)' }} />
 
-                <div style={{ display: 'flex', gap: '24px' }}>
-                  <div className="form-group" style={{ flex: 2 }}>
-                    <label className="form-label">Teaching Subjects (Comma separated)</label>
-                    <input 
-                      type="text" 
-                      name="subject" 
-                      className="form-input" 
-                      placeholder="e.g. Science, Math, Geography"
-                      value={formData.subject} 
-                      onChange={handleChange} 
-                      required
-                    />
+                <section>
+                  <h3 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--primary-700)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ background: 'var(--primary-100)', padding: '6px', borderRadius: '8px' }}>⚙️</span> 
+                    Scheduling Constraints
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                    <div className="form-group">
+                      <label className="form-label">Employment Status</label>
+                      <select 
+                        name="is_active" 
+                        className="form-select" 
+                        value={formData.is_active.toString()} 
+                        onChange={handleChange}
+                      >
+                        <option value="true">Active & Teaching</option>
+                        <option value="false">On Leave / Not Available</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Max Periods per Week</label>
+                      <input 
+                        type="number" 
+                        name="max_periods_per_week" 
+                        className="form-input" 
+                        min="1" max="40" 
+                        value={formData.max_periods_per_week} 
+                        onChange={handleChange} 
+                      />
+                    </div>
+                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                      <label className="form-label">Unavailable Period Indices</label>
+                      <input 
+                        type="text" 
+                        name="unavailable_periods" 
+                        className="form-input" 
+                        placeholder="e.g. 1, 5, 8"
+                        value={formData.unavailable_periods} 
+                        onChange={handleChange} 
+                      />
+                      <small style={{ color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>Periods where this teacher cannot be assigned (e.g. part-time or prep time requests)</small>
+                    </div>
                   </div>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label className="form-label">Subject Codes</label>
-                    <input 
-                      type="text" 
-                      name="subject_code" 
-                      className="form-input" 
-                      placeholder="e.g. SNC1W, MTH1W"
-                      value={formData.subject_code} 
-                      onChange={handleChange} 
-                      required
-                    />
-                  </div>
-                </div>
+                </section>
 
-                <div className="form-group">
-                  <label className="form-label">Specializations (Comma separated)</label>
-                  <input 
-                    type="text" 
-                    name="specializations" 
-                    className="form-input" 
-                    placeholder="Math, Physics, Computer Science" 
-                    value={formData.specializations} 
-                    onChange={handleChange} 
-                  />
-                </div>
-
-                <div style={{ display: 'flex', gap: '24px' }}>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label className="form-label">Employment Status</label>
-                    <select 
-                      name="is_active" 
-                      className="form-select" 
-                      value={formData.is_active.toString()} 
-                      onChange={handleChange}
-                    >
-                      <option value="true">Active</option>
-                      <option value="false">Not Available</option>
-                    </select>
-                  </div>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label className="form-label">Max Periods per Week</label>
-                    <input 
-                      type="number" 
-                      name="max_periods_per_week" 
-                      className="form-input" 
-                      min="1" max="40" 
-                      value={formData.max_periods_per_week} 
-                      onChange={handleChange} 
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Unavailable Periods (e.g. 1, 5, 8)</label>
-                  <input 
-                    type="text" 
-                    name="unavailable_periods" 
-                    className="form-input" 
-                    placeholder="1, 2"
-                    value={formData.unavailable_periods} 
-                    onChange={handleChange} 
-                  />
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '32px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '16px' }}>
                   <button type="button" className="btn btn-secondary" onClick={() => router.push('/dashboard/staff')}>Cancel</button>
-                  <button type="submit" className="btn btn-primary" disabled={saving}>
+                  <button type="submit" id="save-btn" className="btn btn-primary" disabled={saving} style={{ minWidth: '180px' }}>
                     {saving ? 'Saving Changes...' : 'Save Teacher Details'}
                   </button>
                 </div>

@@ -102,12 +102,12 @@ def _repo(school_id: str, collection: str):
 # ──────────────────────── STAFF / TEACHERS ────────────────────────
 
 @router.get("/{school_id}/staff", response_model=List[TeacherResponse])
-@cache(expire=600, key_builder=school_key_builder)
-async def list_staff(school_id: str, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL"))):
+# Temporarily removed cache to ensure real-time updates reflect immediately
+async def list_staff(school_id: str, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR"))):
     return [TeacherResponse(**{**d, "teacher_id": d.get("teacher_id") or d["id"]}) for d in _repo(school_id, "teachers").list_all()]
 
 @router.post("/{school_id}/staff", response_model=TeacherResponse)
-async def create_teacher(school_id: str, teacher: TeacherCreate, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL"))):
+async def create_teacher(school_id: str, teacher: TeacherCreate, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR"))):
     t_id = f"teacher_{uuid.uuid4().hex[:8]}"
     data = {**teacher.model_dump(), "is_active": True}
     res = _repo(school_id, "teachers").upsert(t_id, data)
@@ -115,15 +115,18 @@ async def create_teacher(school_id: str, teacher: TeacherCreate, user: dict = De
     return TeacherResponse(**{**res, "teacher_id": t_id})
 
 @router.put("/{school_id}/staff/{teacher_id}", response_model=TeacherResponse)
-async def update_teacher(school_id: str, teacher_id: str, update: TeacherUpdate, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL"))):
-    data = _repo(school_id, "teachers").upsert(teacher_id, update.model_dump(exclude_unset=True))
+async def update_teacher(school_id: str, teacher_id: str, update: TeacherUpdate, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR"))):
+    dumped = update.model_dump(exclude_unset=True)
+    print(f"DEBUG update_teacher - received: {update.model_dump()}")
+    print(f"DEBUG update_teacher - dumped (exclude_unset): {dumped}")
+    data = _repo(school_id, "teachers").upsert(teacher_id, dumped)
+    print(f"DEBUG update_teacher - saved data: {data}")
     await FastAPICache.clear(namespace=school_id)
     return TeacherResponse(**{**data, "teacher_id": teacher_id})
 
 # ──────────────────────── SUBJECTS ────────────────────────
 
 @router.get("/{school_id}/subjects", response_model=List[SubjectResponse])
-@cache(expire=600, key_builder=school_key_builder)
 async def list_subjects(school_id: str, user: dict = Depends(get_current_user)):
     return [SubjectResponse(**{**d, "subject_id": d.get("subject_id") or d["id"]}) for d in _repo(school_id, "subjects").list_all()]
 
@@ -157,7 +160,6 @@ async def delete_subject(
 
 
 @router.get("/{school_id}/classrooms", response_model=List[ClassroomResponse])
-@cache(expire=600, key_builder=school_key_builder)
 async def list_classrooms(school_id: str, user: dict = Depends(get_current_user)):
     return [ClassroomResponse(**{**d, "room_id": d.get("room_id") or d["id"]}) for d in _repo(school_id, "classrooms").list_all()]
 
@@ -177,7 +179,6 @@ async def update_classroom(school_id: str, room_id: str, update: ClassroomUpdate
 # ──────────────────────── STUDENTS ────────────────────────
 
 @router.get("/{school_id}/students", response_model=List[StudentResponse])
-@cache(expire=600, key_builder=school_key_builder)
 async def list_students(school_id: str, grade: int = None, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR"))):
     data = _repo(school_id, "students").list_all()
     if grade: data = [d for d in data if d.get("grade_level") == grade]
@@ -201,7 +202,6 @@ async def update_student(school_id: str, student_id: str, update: StudentUpdate,
 # ──────────────────────── RULES ────────────────────────
 
 @router.get("/{school_id}/rules", response_model=List[RuleResponse])
-@cache(expire=600, key_builder=school_key_builder)
 async def list_rules(
     school_id: str,
     user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),

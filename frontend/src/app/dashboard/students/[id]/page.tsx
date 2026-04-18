@@ -21,13 +21,19 @@ export default function EditStudentPage() {
     last_name: '',
     email: '',
     grade_level: 9,
-    requested_subjects: ''
+    requested_subjects: '',
+    prerequisite_waivers: [] as string[]
   });
+  const [subjects, setSubjects] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchStudent = async () => {
       if (!schoolId || !studentId) return;
       try {
+        // Fetch subjects for the waiver toggles
+        const subRes = await api.get(`/admin/${schoolId}/subjects`);
+        setSubjects(subRes || []);
+
         const res = await api.get(`/admin/${schoolId}/students`);
         const student = res.find((s: any) => s.student_id === studentId || s.id === studentId);
         if (student) {
@@ -36,13 +42,14 @@ export default function EditStudentPage() {
             last_name: student.last_name || '',
             email: student.email || '',
             grade_level: student.grade_level || 9,
-            requested_subjects: (student.requested_subjects || []).join(', ')
+            requested_subjects: (student.requested_subjects || []).join(', '),
+            prerequisite_waivers: student.prerequisite_waivers || []
           });
         } else {
           setError('Student not found in registry');
         }
       } catch (err: any) {
-        setError('Failed to load student data');
+        setError('Failed to load student data or subjects');
       } finally {
         setLoading(false);
       }
@@ -51,12 +58,23 @@ export default function EditStudentPage() {
     fetchStudent();
   }, [schoolId, studentId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: name === 'grade_level' ? parseInt(value) : value
     }));
+  };
+
+  const toggleWaiver = (subjectId: string) => {
+    setFormData(prev => {
+      const current = prev.prerequisite_waivers;
+      if (current.includes(subjectId)) {
+        return { ...prev, prerequisite_waivers: current.filter(id => id !== subjectId) };
+      } else {
+        return { ...prev, prerequisite_waivers: [...current, subjectId] };
+      }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -134,6 +152,52 @@ export default function EditStudentPage() {
                   <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px' }}>
                     Enter the subjects this student has chosen for the upcoming semester.
                   </p>
+                </div>
+
+                <div className="form-group" style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '24px', marginTop: '8px' }}>
+                  <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '18px' }}>🛡️</span> Academic Rule Waivers
+                  </label>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.5' }}>
+                    Select subjects below to <strong>bypass all prerequisite requirements</strong> (e.g., the 80% grade rule) for this specific student. The CP-SAT solver will allow them into these classes regardless of their historical grades.
+                  </p>
+                  
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', maxHeight: '200px', overflowY: 'auto', padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-glass)' }}>
+                    {subjects.length === 0 ? (
+                      <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No subjects available.</span>
+                    ) : (
+                      subjects.map(subj => {
+                        const isWaived = formData.prerequisite_waivers.includes(subj.subject_id);
+                        return (
+                          <label 
+                            key={subj.subject_id} 
+                            style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '8px', 
+                              padding: '8px 12px', 
+                              borderRadius: 'var(--radius-full)', 
+                              background: isWaived ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255,255,255,0.05)',
+                              border: `1px solid ${isWaived ? 'var(--primary-400)' : 'transparent'}`,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              userSelect: 'none'
+                            }}
+                          >
+                            <input 
+                              type="checkbox" 
+                              checked={isWaived} 
+                              onChange={() => toggleWaiver(subj.subject_id)}
+                              style={{ accentColor: 'var(--primary-500)', width: '16px', height: '16px' }}
+                            />
+                            <span style={{ fontSize: '13px', color: isWaived ? 'var(--primary-100)' : 'var(--text-secondary)', fontWeight: isWaived ? 500 : 400 }}>
+                              {subj.name} <span style={{ opacity: 0.6 }}>({subj.code})</span>
+                            </span>
+                          </label>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '32px' }}>

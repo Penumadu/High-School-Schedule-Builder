@@ -125,6 +125,7 @@ class StudentCreate(BaseModel):
     grade_level: int = Field(ge=9, le=12)
     historical_grades: Dict[str, float] = Field(default_factory=dict)
     requested_subjects: List[str] = Field(default_factory=list)
+    prerequisite_waivers: List[str] = Field(default_factory=list, description="Subject IDs where academic rules are waived")
     is_approved: bool = Field(default=False)
 
 
@@ -135,6 +136,7 @@ class StudentUpdate(BaseModel):
     grade_level: Optional[int] = None
     historical_grades: Optional[Dict[str, float]] = None
     requested_subjects: Optional[List[str]] = None
+    prerequisite_waivers: Optional[List[str]] = None
     is_approved: Optional[bool] = None
 
 
@@ -148,6 +150,7 @@ class StudentResponse(BaseModel):
     grade_level: int = 9
     historical_grades: Dict[str, float] = {}
     requested_subjects: List[str] = []
+    prerequisite_waivers: List[str] = []
     is_approved: bool = False
     last_schedule_email_status: str = "PENDING"
 
@@ -169,7 +172,6 @@ class RuleCreate(BaseModel):
 
 
 class RuleResponse(BaseModel):
-    id: str
     rule_id: str
     target_subject_id: str
     logic_tree: Dict[str, Any]

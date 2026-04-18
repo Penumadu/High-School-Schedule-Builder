@@ -140,7 +140,7 @@ export default function DataGrid<T extends Record<string, any>>({
 
       <div style={{ 
         display: 'flex', 
-        justifyContent: 'flex-start', 
+        justifyContent: 'space-between', 
         alignItems: 'center', 
         marginTop: '8px',
         marginBottom: '28px', 
@@ -176,11 +176,13 @@ export default function DataGrid<T extends Record<string, any>>({
               </span>
             )}
           </div>
+        </div>
 
+        {topActions && (
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
              {topActions}
           </div>
-        </div>
+        )}
       </div>
 
       <div className="scroll-container">

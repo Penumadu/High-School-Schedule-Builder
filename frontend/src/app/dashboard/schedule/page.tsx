@@ -37,7 +37,7 @@ export default function ScheduleDashboard() {
       setSettings(settingsRes);
       if (schedRes.schedules?.length > 0 && !activeSchedule) {
         // Show the most recently created
-        setActiveSchedule(res.schedules.sort((a: Schedule, b: Schedule) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]);
+        setActiveSchedule(schedRes.schedules.sort((a: Schedule, b: Schedule) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]);
       }
     } catch (_err) {
       console.error('Failed to load schedules', _err);

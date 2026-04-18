@@ -15,6 +15,7 @@ export default function RulesRegistry() {
   const [subjects, setSubjects] = useState<Record<string, string>>({});
   const [teacherMap, setTeacherMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [filteredCount, setFilteredCount] = useState<number>(0);
 
   const fetchData = async () => {
     if (!schoolId) return;
@@ -34,7 +35,8 @@ export default function RulesRegistry() {
 
       // 3. Fetch rules
       const ruleRes = await api.get(`/admin/${schoolId}/rules`);
-      setRules(ruleRes);
+      setRules(ruleRes || []);
+      setFilteredCount(ruleRes?.length || 0);
     } catch (err) {
       console.error('Failed to load rules', err);
     } finally {
@@ -90,10 +92,11 @@ export default function RulesRegistry() {
     { 
       key: 'target_subject_id', 
       label: 'Target Subject',
+      width: '250px',
       render: (id: string) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <strong style={{ color: 'var(--primary-400)' }}>{subjects[id] || id}</strong>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{id}</span>
+          <strong style={{ color: 'var(--primary-400)', fontWeight: 700 }}>{subjects[id] || id}</strong>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{id}</span>
         </div>
       )
     },
@@ -118,33 +121,71 @@ export default function RulesRegistry() {
     {
       key: 'actions',
       label: 'Actions',
+      width: '100px',
       render: (_: any, row: any) => (
-        <button className="btn btn-secondary btn-sm" onClick={(e) => handleDelete(e, row.rule_id)}>
+        <button className="btn btn-secondary btn-sm" style={{ border: 'none', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error-400)' }} onClick={(e) => handleDelete(e, row.rule_id)}>
           Delete
         </button>
       )
     }
   ];
 
+  const academicCount = rules.filter(r => JSON.stringify(r.logic_tree).includes('ACADEMIC')).length;
+  const teacherLockCount = rules.filter(r => JSON.stringify(r.logic_tree).includes('TEACHER')).length;
+
   return (
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Academic Rules Engine">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-          <button className="btn btn-primary" onClick={() => router.push('/dashboard/rules/new')}>
-            + Create New Rule
-          </button>
-        </div>
+        <div className="fade-in">
+          {/* Header Summary Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+            <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ fontSize: '24px' }}>⚖️</div>
+              <div>
+                <div style={{ fontSize: '20px', fontWeight: 800 }}>{rules.length}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Active Rules</div>
+              </div>
+            </div>
+            <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ fontSize: '24px' }}>📚</div>
+              <div>
+                <div style={{ fontSize: '20px', fontWeight: 800 }}>{academicCount}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Prerequisites</div>
+              </div>
+            </div>
+            <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ fontSize: '24px' }}>👨‍🏫</div>
+              <div>
+                <div style={{ fontSize: '20px', fontWeight: 800 }}>{teacherLockCount}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Teacher Locks</div>
+              </div>
+            </div>
+          </div>
 
-        {loading ? (
-          <div className="skeleton" style={{ height: '400px', borderRadius: 'var(--radius-lg)' }} />
-        ) : (
-          <DataGrid 
-            columns={columns} 
-            data={rules} 
-            searchPlaceholder="Search rules by subject..." 
-            onRowClick={(row) => router.push(`/dashboard/rules/${row.rule_id}`)}
-          />
-        )}
+          <div style={{ marginBottom: '24px', padding: '16px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.5', margin: 0 }}>
+              <strong>Rule Policy:</strong> Define global academic prerequisites here. To waive these rules for specific students (e.g., overriding the 80% grade requirement), navigate to their individual profile in the <strong>Students roster</strong>.
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="skeleton" style={{ height: '400px', borderRadius: 'var(--radius-lg)' }} />
+          ) : (
+            <DataGrid 
+              columns={columns} 
+              data={rules} 
+              searchPlaceholder="Search rules by subject code or name..." 
+              onFilteredCount={setFilteredCount}
+              onRowClick={(row) => router.push(`/dashboard/rules/${row.rule_id}`)}
+              countLabel={`${filteredCount} Active Rules`}
+              topActions={
+                <button className="btn btn-primary btn-sm" onClick={() => router.push('/dashboard/rules/new')}>
+                  + Create New Rule
+                </button>
+              }
+            />
+          )}
+        </div>
       </DashboardLayout>
     </ProtectedRoute>
   );

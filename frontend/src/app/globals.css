@@ -327,7 +327,7 @@ a:hover {
 /* ─── STAT CARDS ─── */
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: var(--space-lg);
 }
 
@@ -335,34 +335,77 @@ a:hover {
   padding: var(--space-lg);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 140px;
 }
-.stat-card::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, transparent 70%);
-  pointer-events: none;
+
+/* Color Variants for Stat Cards */
+.stat-card.purple {
+  background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
+}
+.stat-card.green {
+  background: linear-gradient(135deg, var(--success-500), #059669);
+}
+.stat-card.orange {
+  background: linear-gradient(135deg, var(--warning-500), #d97706);
+}
+.stat-card.red {
+  background: linear-gradient(135deg, var(--error-500), #991b1b);
+}
+
+.stat-card.purple:hover,
+.stat-card.green:hover,
+.stat-card.orange:hover,
+.stat-card.red:hover {
+  transform: translateY(-4px);
+  filter: brightness(1.05);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-card.purple .stat-value,
+.stat-card.green .stat-value,
+.stat-card.orange .stat-value,
+.stat-card.red .stat-value,
+.stat-card.purple .stat-label,
+.stat-card.green .stat-label,
+.stat-card.orange .stat-label,
+.stat-card.red .stat-label {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background: none !important;
 }
 
 .stat-card .stat-value {
   font-family: var(--font-heading);
-  font-size: 38px;
+  font-size: 42px;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  background: linear-gradient(to bottom right, #fff, var(--primary-300));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 4px;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--primary-700); /* Fallback/Default high contrast color */
+  margin-bottom: 8px;
+  z-index: 1;
 }
+
 .stat-card .stat-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-transform: none; /* Accessible title case */
-  letter-spacing: -0.01em;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+  z-index: 1;
+}
+
+.stat-card .stat-icon {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 48px;
+  opacity: 0.15;
+  filter: grayscale(1) brightness(2);
+  pointer-events: none;
 }
 
 /* ─── SEARCH BAR ─── */

@@ -56,7 +56,7 @@ async def update_school_settings(
     
     # Store the day structure as a list of dicts
     school_ref.update({
-        "day_structure": [item.dict() for item in payload.day_structure]
+        "day_structure": [item.model_dump() for item in payload.day_structure]
     })
     
     return {"status": "success", "message": "Settings updated"}
