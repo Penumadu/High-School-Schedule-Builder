@@ -135,7 +135,7 @@ export default function SchoolsRegistry() {
                   <th>Tier</th>
                   <th>Status</th>
                   <th>Created</th>
-                  {!isGuest && <th>Actions</th>}
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -165,30 +165,32 @@ export default function SchoolsRegistry() {
                         </span>
                       </td>
                       <td>{school.created_at ? new Date(school.created_at).toLocaleDateString() : 'N/A'}</td>
-                      {!isGuest && (
-                        <td>
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <button
-                              className="btn btn-primary btn-sm"
-                              onClick={() => handleManageSchool(school.school_id)}
-                            >
-                              Manage ↗
-                            </button>
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => handleStatusToggle(school.school_id, school.status)}
-                            >
-                              {school.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                            </button>
-                            <button
-                              className="btn btn-error btn-sm"
-                              onClick={() => handleDelete(school.school_id)}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      )}
+                      <td>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleManageSchool(school.school_id)}
+                          >
+                            Manage ↗
+                          </button>
+                          {!isGuest && (
+                            <>
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleStatusToggle(school.school_id, school.status)}
+                              >
+                                {school.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                              </button>
+                              <button
+                                className="btn btn-error btn-sm"
+                                onClick={() => handleDelete(school.school_id)}
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))
                 )}

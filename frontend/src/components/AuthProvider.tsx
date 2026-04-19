@@ -37,8 +37,16 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       if (firebaseUser) {
         setUser(firebaseUser);
         if (firebaseUser.isAnonymous) {
-          setRole('GUEST');
-          setSchoolId('');
+          const sessionRole = sessionStorage.getItem('acting_role');
+          const sessionSchoolId = sessionStorage.getItem('acting_school_id');
+
+          if (sessionRole && sessionSchoolId) {
+            setRole(sessionRole);
+            setSchoolId(sessionSchoolId);
+          } else {
+            setRole('GUEST');
+            setSchoolId('');
+          }
           setLoading(false);
           return;
         }

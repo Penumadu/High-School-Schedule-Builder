@@ -18,7 +18,7 @@ class SchoolSettings(BaseModel):
 @router.get("/{school_id}", response_model=SchoolSettings)
 async def get_school_settings(
     school_id: str,
-    user: dict = Depends(require_role("PRINCIPAL", "COORDINATOR", "SUPER_ADMIN")),
+    user: dict = Depends(require_role("PRINCIPAL", "COORDINATOR", "SUPER_ADMIN", "GUEST")),
 ):
     """Retrieve the master configuration/day structure for a school."""
     db = get_firestore_client()

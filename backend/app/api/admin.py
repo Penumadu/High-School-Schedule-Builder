@@ -103,7 +103,7 @@ def _repo(school_id: str, collection: str):
 
 @router.get("/{school_id}/staff", response_model=List[TeacherResponse])
 # Temporarily removed cache to ensure real-time updates reflect immediately
-async def list_staff(school_id: str, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR"))):
+async def list_staff(school_id: str, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR", "GUEST"))):
     return [TeacherResponse(**{**d, "teacher_id": d.get("teacher_id") or d["id"]}) for d in _repo(school_id, "teachers").list_all()]
 
 @router.post("/{school_id}/staff", response_model=TeacherResponse)
@@ -179,7 +179,7 @@ async def update_classroom(school_id: str, room_id: str, update: ClassroomUpdate
 # ──────────────────────── STUDENTS ────────────────────────
 
 @router.get("/{school_id}/students", response_model=List[StudentResponse])
-async def list_students(school_id: str, grade: int = None, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR"))):
+async def list_students(school_id: str, grade: int = None, user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR", "GUEST"))):
     data = _repo(school_id, "students").list_all()
     if grade: data = [d for d in data if d.get("grade_level") == grade]
     return [StudentResponse(**{**d, "student_id": d.get("student_id") or d["id"]}) for d in data]
@@ -204,7 +204,7 @@ async def update_student(school_id: str, student_id: str, update: StudentUpdate,
 @router.get("/{school_id}/rules", response_model=List[RuleResponse])
 async def list_rules(
     school_id: str,
-    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR", "GUEST")),
 ):
     """List all rules for a school. Fallbacks for demo-school."""
     from app.core.db import FirestoreRepo
@@ -229,7 +229,7 @@ async def create_rule(
 async def get_rule(
     school_id: str,
     rule_id: str,
-    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR", "GUEST")),
 ):
     ref = _school_ref(school_id).collection("rules").document(rule_id)
     doc = ref.get()
@@ -273,7 +273,7 @@ async def delete_rule(
 @cache(expire=300, key_builder=school_key_builder)
 async def get_school_stats(
     school_id: str,
-    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR", "GUEST")),
 ):
     """
     Optimized stats fetch using Firestore Aggregation queries.
@@ -314,7 +314,7 @@ async def get_school_stats(
 @router.get("/{school_id}/settings", response_model=dict)
 async def get_school_settings(
     school_id: str,
-    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR", "GUEST")),
 ):
     """Fetch current school settings."""
     doc = _school_ref(school_id).get()
@@ -342,7 +342,7 @@ async def update_school_settings(
 @cache(expire=300, key_builder=school_key_builder)
 async def get_guidance_status(
     school_id: str,
-    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),
+    user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR", "GUEST")),
 ):
     """Fetch completion status of student course selections. Fallbacks for demo-school."""
     from app.core.db import FirestoreRepo
@@ -446,7 +446,7 @@ async def export_master_schedule(
 @cache(expire=600, key_builder=school_key_builder)
 async def get_all_student_schedules(
     school_id: str,
-    user: dict = Depends(require_role("PRINCIPAL", "COORDINATOR", "SUPER_ADMIN")),
+    user: dict = Depends(require_role("PRINCIPAL", "COORDINATOR", "SUPER_ADMIN", "GUEST")),
 ):
     """
     Unified view of all students, their requested subjects, 
