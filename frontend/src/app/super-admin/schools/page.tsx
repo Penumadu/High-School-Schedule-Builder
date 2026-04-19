@@ -30,8 +30,11 @@ export default function SchoolsRegistry() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get<{ schools: School[] }>('/system/schools');
+      const res = await api.get<{ schools: School[], note?: string }>('/system/schools');
       setSchools(res.schools || []);
+      if (res.note) {
+        setError(res.note);
+      }
     } catch (err: any) {
       console.error('Failed to fetch schools:', err);
       const msg = err.message || '';

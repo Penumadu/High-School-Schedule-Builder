@@ -12,6 +12,7 @@ export default function SuperAdminDashboard() {
     activeSchools: 0,
     suspendedSchools: 0
   });
+  const [note, setNote] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function SuperAdminDashboard() {
           activeSchools: res.active,
           suspendedSchools: res.suspended,
         });
+        if (res.note) setNote(res.note);
       } catch (err) {
         console.error('Failed to load stats', err);
       } finally {
@@ -36,6 +38,11 @@ export default function SuperAdminDashboard() {
   return (
     <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
       <DashboardLayout title="Platform Overview">
+        {note && (
+          <div className="alert alert-warning fade-in" style={{ marginBottom: '24px', padding: '12px 16px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>⚠️</span> <strong>System Note:</strong> {note}
+          </div>
+        )}
         {loading ? (
           <div className="skeleton" style={{ height: '120px', borderRadius: 'var(--radius-lg)' }} />
         ) : (

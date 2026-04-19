@@ -20,6 +20,7 @@ export default function EditRulePage() {
   const [error, setError] = useState('');
   const [subjects, setSubjects] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
+  const [classrooms, setClassrooms] = useState<any[]>([]);
   const [targetSubjectId, setTargetSubjectId] = useState('');
   const [logicTree, setLogicTree] = useState<any>({
     condition: 'AND',
@@ -29,7 +30,7 @@ export default function EditRulePage() {
   useEffect(() => {
     const fetchData = async () => {
       if (!schoolId) return;
-      
+
       try {
         // 1. Fetch all subjects for target selection
         const subRes = await api.get(`/admin/${schoolId}/subjects`);
@@ -38,9 +39,15 @@ export default function EditRulePage() {
         // 2. Fetch all teachers for rule selection
         const teachRes = await api.get(`/admin/${schoolId}/staff`);
         setTeachers(teachRes || []);
-        
-        // 3. If editing, fetch existing rule
-        if (!isNew) {
+
+        // 3. Fetch all classrooms
+        const roomRes = await api.get(`/admin/${schoolId}/classrooms`);
+        setClassrooms(roomRes || []);
+
+        // 4. If editing, fetch existing rule
+        if (!ruleId || ruleId === 'new') {
+          if (subRes.length > 0) setTargetSubjectId(subRes[0].subject_id);
+        } else {
           try {
             const ruleRes = await api.get(`/admin/${schoolId}/rules/${ruleId}`);
             setTargetSubjectId(ruleRes.target_subject_id);
@@ -48,8 +55,6 @@ export default function EditRulePage() {
           } catch (err) {
             setError('Could not find this rule in your registry.');
           }
-        } else if (subRes.length > 0) {
-          setTargetSubjectId(subRes[0].subject_id);
         }
       } catch (err: any) {
         setError(err.message || 'Failed to load prerequisite data');
@@ -59,7 +64,7 @@ export default function EditRulePage() {
     };
 
     fetchData();
-  }, [schoolId, ruleId, isNew]);
+  }, [schoolId, ruleId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,9 +116,9 @@ export default function EditRulePage() {
                 <div className="form-group" style={{ marginBottom: '32px', maxWidth: '400px' }}>
                   <label className="form-label" style={{ fontSize: '16px', fontWeight: 600 }}>1. Select Target Subject</label>
                   <p className="form-help" style={{ marginBottom: '12px' }}>Which course requires these prerequisites?</p>
-                  <select 
-                    className="form-select" 
-                    value={targetSubjectId} 
+                  <select
+                    className="form-select"
+                    value={targetSubjectId}
                     onChange={(e) => setTargetSubjectId(e.target.value)}
                     required
                   >
@@ -126,12 +131,12 @@ export default function EditRulePage() {
                   <p className="form-help" style={{ marginBottom: '20px' }}>
                     Define the academic thresholds (grades/subjects) a student must meet.
                   </p>
-                  
-                  <RuleBuilder 
-                    subjects={subjects} 
+
+                  <RuleBuilder
+                    subjects={subjects}
                     teachers={teachers}
-                    value={logicTree} 
-                    onChange={(val) => setLogicTree(val)} 
+                    value={logicTree}
+                    onChange={(val) => setLogicTree(val)}
                   />
                 </div>
 
@@ -142,7 +147,7 @@ export default function EditRulePage() {
                   </button>
                 </div>
               </div>
-              
+
               <div className="glass-card" style={{ padding: 'var(--space-lg)', background: 'rgba(56, 189, 248, 0.05)', borderColor: 'rgba(56, 189, 248, 0.2)' }}>
                 <h4 style={{ color: 'var(--primary-400)', marginBottom: '8px', fontSize: '14px' }}>Pro-Tip: Logical Grouping</h4>
                 <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>

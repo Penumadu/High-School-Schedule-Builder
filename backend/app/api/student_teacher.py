@@ -240,40 +240,64 @@ async def get_daily_attendance_report(
     date: str = None, # YYYY-MM-DD
     user: dict = Depends(require_role("PRINCIPAL", "COORDINATOR")),
 ):
-    """Aggregate a list of all students marked absent today/specified date."""
+    """Aggregate a list of all students marked absent today/specified date. Fallback for demo-school."""
     import datetime
     db = get_firestore_client()
     if not date:
         date = datetime.date.today().isoformat()
     
-    # Query all attendance records for this date
-    att_ref = db.collection("schools").document(school_id).collection("attendance")
-    docs = att_ref.where("date", "==", date).stream()
-    
-    absences_by_student = {} # student_id -> [period_names]
-    
-    for doc in docs:
-        data = doc.to_dict()
-        period = data.get("period_name", "Unknown")
-        for sid in data.get("absent_student_ids", []):
-            if sid not in absences_by_student:
-                absences_by_student[sid] = []
-            absences_by_student[sid].append(period)
-            
-    # Enrich with student names
-    report = []
-    for sid, periods in absences_by_student.items():
-        s_doc = db.collection("schools").document(school_id).collection("students").document(sid).get()
-        s_data = s_doc.to_dict() if s_doc.exists else {}
-        report.append({
-            "student_id": sid,
-            "name": f"{s_data.get('first_name', '')} {s_data.get('last_name', '')}",
-            "grade": s_data.get("grade_level"),
-            "periods_absent": periods,
-            "total_periods": len(periods)
-        })
+    try:
+        # Query all attendance records for this date
+        att_ref = db.collection("schools").document(school_id).collection("attendance")
+        docs = att_ref.where("date", "==", date).stream()
         
-    return {"date": date, "absentees": report}
+        absences_by_student = {} # student_id -> [period_names]
+        
+        for doc in docs:
+            data = doc.to_dict()
+            period = data.get("period_name", "Unknown")
+            for sid in data.get("absent_student_ids", []):
+                if sid not in absences_by_student:
+                    absences_by_student[sid] = []
+                absences_by_student[sid].append(period)
+                
+        # Enrich with student names
+        report = []
+        for sid, periods in absences_by_student.items():
+            s_doc = db.collection("schools").document(school_id).collection("students").document(sid).get()
+            s_data = s_doc.to_dict() if s_doc.exists else {}
+            report.append({
+                "student_id": sid,
+                "name": f"{s_data.get('first_name', '')} {s_data.get('last_name', '')}",
+                "grade": s_data.get("grade_level"),
+                "periods_absent": periods,
+                "total_periods": len(periods)
+            })
+            
+        if not report and school_id == "demo-school":
+            # Provide some mock absences for demo
+            return {
+                "date": date,
+                "absentees": [
+                    {"student_id": "s0", "name": "Alice Smith", "grade": 10, "periods_absent": ["PERIOD_1", "PERIOD_2"], "total_periods": 2},
+                    {"student_id": "s4", "name": "Edward Miller", "grade": 12, "periods_absent": ["PERIOD_3", "PERIOD_4", "PERIOD_5"], "total_periods": 3},
+                    {"student_id": "s9", "name": "Julia Moore", "grade": 9, "periods_absent": ["PERIOD_1"], "total_periods": 1},
+                ],
+                "note": "Representative attendance (Demo Mode)"
+            }
+
+        return {"date": date, "absentees": report}
+    except Exception as e:
+        if school_id == "demo-school":
+            return {
+                "date": date,
+                "absentees": [
+                    {"student_id": "s0", "name": "Alice Smith", "grade": 10, "periods_absent": ["PERIOD_1", "PERIOD_2"], "total_periods": 2},
+                    {"student_id": "s4", "name": "Edward Miller", "grade": 12, "periods_absent": ["PERIOD_3", "PERIOD_4", "PERIOD_5"], "total_periods": 3},
+                ],
+                "note": "Representative attendance (Demo Fallback)"
+            }
+        raise e
 
 
 @router.get("/student/{school_id}/attendance/summary")

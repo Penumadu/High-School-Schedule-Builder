@@ -37,20 +37,26 @@ export default function GuidanceDashboard() {
   const [activeTab, setActiveTab] = useState<'CHOICES' | 'ATTENDANCE'>('CHOICES');
   const [data, setData] = useState<GuidanceStatus | null>(null);
   const [attendance, setAttendance] = useState<AttendanceSummary | null>(null);
+  const [note, setNote] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'SUBMITTED'>('ALL');
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!schoolId) return;
+      if (!schoolId) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         if (activeTab === 'CHOICES') {
-          const res = await api.get<GuidanceStatus>(`/admin/${schoolId}/guidance/status`);
+          const res = await api.get<any>(`/admin/${schoolId}/guidance/status`);
           setData(res);
+          if (res.note) setNote(res.note);
         } else {
-          const res = await api.get<AttendanceSummary>(`/admin/${schoolId}/attendance/daily`);
+          const res = await api.get<any>(`/admin/${schoolId}/attendance/daily`);
           setAttendance(res);
+          if (res.note) setNote(res.note);
         }
       } catch (err) {
         console.error('Failed to load dashboard data', err);
@@ -70,6 +76,15 @@ export default function GuidanceDashboard() {
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Administrative Hub">
         
+        {note && (
+          <div className="alert alert-warning fade-in" style={{ marginBottom: 'var(--space-lg)', padding: '10px 14px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>⚠️</span> 
+            <div>
+              <strong>System Note:</strong> {note}
+            </div>
+          </div>
+        )}
+
         {/* Main Tab Group */}
         <div className="tab-group" style={{ marginBottom: 'var(--space-2xl)', maxWidth: '500px' }}>
           <button 

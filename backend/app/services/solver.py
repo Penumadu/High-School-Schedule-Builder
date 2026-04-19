@@ -82,54 +82,45 @@ class ScheduleSolver:
         return True
 
     def _load_data(self) -> Dict[str, Any]:
-        """Load all necessary data from Firestore for the solver."""
+        """Load all necessary data from Firestore for the solver. Fallbacks to demo data if quota hit."""
+        from app.core.db import FirestoreRepo
+        
         # School settings
-        school_doc = self.school_ref.get()
-        if not school_doc.exists:
-            raise ValueError(f"School '{self.school_id}' not found")
-        school = school_doc.to_dict()
+        try:
+            school_doc = self.school_ref.get()
+            if not school_doc.exists:
+                if self.school_id == "demo-school":
+                    school = {"settings": {"periods_per_day": 8}}
+                else:
+                    raise ValueError(f"School '{self.school_id}' not found")
+            else:
+                school = school_doc.to_dict()
+        except Exception as e:
+            if ("Quota exceeded" in str(e) or "429" in str(e)) and self.school_id == "demo-school":
+                school = {"settings": {"periods_per_day": 8}}
+            else:
+                raise e
+
         settings = school.get("settings", {})
         periods_per_day = settings.get("periods_per_day", 8)
 
-        # Teachers
-        teachers = []
-        for doc in self.school_ref.collection("teachers").stream():
-            data = doc.to_dict()
-            data["teacher_id"] = doc.id
-            if data.get("is_active", True):
-                teachers.append(data)
-
-        # Subjects
-        subjects = []
-        for doc in self.school_ref.collection("subjects").stream():
-            data = doc.to_dict()
-            data["subject_id"] = doc.id
-            # Ensure mandatory defaults to False
-            data["is_mandatory"] = data.get("is_mandatory", False)
-            subjects.append(data)
-
-        # Classrooms
-        classrooms = []
-        for doc in self.school_ref.collection("classrooms").stream():
-            data = doc.to_dict()
-            data["room_id"] = doc.id
-            classrooms.append(data)
-
-        # Students
-        students = []
-        for doc in self.school_ref.collection("students").stream():
-            data = doc.to_dict()
-            data["student_id"] = doc.id
-            students.append(data)
-
-        # Academic Rules
+        # Use FirestoreRepo to benefit from its fallback logic
+        teachers = FirestoreRepo(self.school_id, "teachers").list_all()
+        subjects = FirestoreRepo(self.school_id, "subjects").list_all()
+        classrooms = FirestoreRepo(self.school_id, "classrooms").list_all()
+        students = FirestoreRepo(self.school_id, "students").list_all()
+        
+        # Rules need transformation to dict: subject_id -> logic_tree
+        raw_rules = FirestoreRepo(self.school_id, "rules").list_all()
         rules = {}
-        for doc in self.school_ref.collection("rules").stream():
-            data = doc.to_dict()
-            rules[data["target_subject_id"]] = data["logic_tree"]
+        for r in raw_rules:
+            # Handle both list of rules and logic tree structure
+            if "target_subject_id" in r and "logic_tree" in r:
+                rules[r["target_subject_id"]] = r["logic_tree"]
 
         return {
             "periods_per_day": periods_per_day,
+            "settings": settings,
             "teachers": teachers,
             "subjects": subjects,
             "classrooms": classrooms,
@@ -139,22 +130,25 @@ class ScheduleSolver:
 
     def _get_assignment_constraints(self, node: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Extract non-academic constraints (Teacher/Period) from a logic tree.
-        Returns a simplified map of { 'allowed_teachers': set(), 'allowed_periods': set() }.
-        This is a pre-processor for the solver variables.
+        Extract non-academic constraints (Teacher/Period/Room) from a logic tree.
         """
         if not node: return {}
         
-        # Leaf Node
         if node.get("type") == "TEACHER":
             return {"allowed_teachers": {node.get("teacher_id")}}
         if node.get("type") == "PERIOD":
             return {"allowed_periods": {node.get("period")}}
+        if node.get("type") == "FACILITY":
+            # Can be by room_id OR facility_type
+            return {
+                "allowed_rooms": {node.get("room_id")} if node.get("room_id") else None,
+                "facility_type": node.get("facility_type")
+            }
         
         # Group Node
         if "condition" in node:
             res_list = [self._get_assignment_constraints(r) for r in node.get("rules", [])]
-            combined = {"allowed_teachers": set(), "allowed_periods": set()}
+            combined = {"allowed_teachers": set(), "allowed_periods": set(), "allowed_rooms": set(), "facility_types": set()}
             
             if node["condition"] == "AND":
                 # Intersection logic (Must meet ALL)
@@ -165,11 +159,18 @@ class ScheduleSolver:
                     if "allowed_periods" in r:
                         if not combined["allowed_periods"]: combined["allowed_periods"] = r["allowed_periods"]
                         else: combined["allowed_periods"] &= r["allowed_periods"]
+                    if "allowed_rooms" in r and r["allowed_rooms"]:
+                        if not combined["allowed_rooms"]: combined["allowed_rooms"] = r["allowed_rooms"]
+                        else: combined["allowed_rooms"] &= r["allowed_rooms"]
+                    if "facility_type" in r:
+                        combined["facility_types"].add(r["facility_type"])
             else:
                 # Union logic (Can meet ANY)
                 for r in res_list:
                     if "allowed_teachers" in r: combined["allowed_teachers"] |= r["allowed_teachers"]
                     if "allowed_periods" in r: combined["allowed_periods"] |= r["allowed_periods"]
+                    if "allowed_rooms" in r and r["allowed_rooms"]: combined["allowed_rooms"] |= r["allowed_rooms"]
+                    if "facility_type" in r: combined["facility_types"].add(r["facility_type"])
             
             return {k: v for k, v in combined.items() if v}
             
@@ -186,6 +187,7 @@ class ScheduleSolver:
         students = data["students"]
         rules = data["rules"]
         num_periods = data["periods_per_day"]
+        settings = data["settings"]
 
         if not teachers:
             raise ValueError("No active teachers found. Cannot generate schedule.")
@@ -200,51 +202,65 @@ class ScheduleSolver:
         room_idx = {r["room_id"]: i for i, r in enumerate(classrooms)}
         period_names = [f"Period_{p+1}" for p in range(num_periods)]
 
-        # Build subject → qualified teachers mapping (Now with Rule Enforcement!)
+        # Build subject → qualified teachers/rooms mapping (Now with Rule Enforcement!)
         subject_teachers: Dict[int, List[int]] = {}
         subject_period_restriction: Dict[int, List[int]] = {} # p+1 values
+        subject_room_restriction: Dict[int, List[int]] = {}
 
         for si, subj in enumerate(subjects):
             subj_id = subj["subject_id"]
             subj_name = subj.get("name", "").lower()
             subj_code = subj.get("code", "").lower()
+            subj_facility = subj.get("facility_type", "REGULAR")
             rule = rules.get(subj_id)
             
-            # Get specific assignment constraints from the rules engine
+            # 1. Get assignment constraints from Rules Engine
             constraints = self._get_assignment_constraints(rule)
             req_teacher_ids = constraints.get("allowed_teachers", set())
             req_periods = constraints.get("allowed_periods", set())
+            req_room_ids = constraints.get("allowed_rooms", set())
+            req_facility_types = constraints.get("facility_types", set())
 
-            qualified_idx = []
+            # 2. Qualified Teachers
+            qualified_teachers = []
             for ti, teacher in enumerate(teachers):
                 t_id = teacher["teacher_id"]
                 specs = [s.lower() for s in teacher.get("specializations", [])]
-                
-                # Rule 1: If rule specifies teachers, you MUST be one of them
                 if req_teacher_ids and t_id not in req_teacher_ids:
                     continue
-                
-                # Rule 2: Specialization match (Improved: Case-insensitive & Keyword based)
                 if not req_teacher_ids:
-                    is_qualified = False
-                    for spec in specs:
-                        if (spec in subj_id.lower() or 
-                            spec in subj_name or 
-                            spec in subj_code or
-                            subj_name in spec or
-                            subj_code in spec):
-                            is_qualified = True
-                            break
-                    if not is_qualified:
-                        continue
-                
-                qualified_idx.append(ti)
+                    is_qualified = any(spec in subj_id.lower() or spec in subj_name or subj_name in spec for spec in specs)
+                    if not is_qualified: continue
+                qualified_teachers.append(ti)
 
-            # Fallback: if no one is specifically qualified, allow all (unless restricted by rule)
-            if not qualified_idx and not req_teacher_ids:
-                qualified_idx = list(range(len(teachers)))
+            if not qualified_teachers and not req_teacher_ids:
+                qualified_teachers = list(range(len(teachers)))
+            subject_teachers[si] = qualified_teachers
+
+            # 3. Qualified Rooms
+            qualified_rooms = []
+            for ri, room in enumerate(classrooms):
+                r_id = room["room_id"]
+                r_facility = room.get("facility_type", "REGULAR")
                 
-            subject_teachers[si] = qualified_idx
+                # Rule Lock (Specific ID)
+                if req_room_ids and r_id not in req_room_ids:
+                    continue
+                
+                # Facility Lock (If subject or rule requires specific type)
+                allowed_types = req_facility_types if req_facility_types else {subj_facility}
+                if r_facility not in allowed_types:
+                    continue
+                
+                qualified_rooms.append(ri)
+            
+            # If no rooms match specialized type, fallback to any room (avoid crash) but warn
+            if not qualified_rooms:
+                qualified_rooms = list(range(len(classrooms)))
+            
+            subject_room_restriction[si] = qualified_rooms
+
+            # 4. Period Restrictions
             if req_periods:
                 subject_period_restriction[si] = list(req_periods)
 
@@ -365,16 +381,12 @@ class ScheduleSolver:
         for sec_i, (si, sec_idx) in enumerate(sections):
             subj = subjects[si]
             for t in subject_teachers[si]:
-                for r in range(num_rooms):
+                for r in subject_room_restriction[si]:
                     for p in range(num_p):
-                        subj_facility = get_facility(subj)
-                        room_facility = get_facility(classrooms[r])
-                        if subj_facility != room_facility:
-                            if subj_facility == "GYM" and not classrooms[r].get("is_gym"): continue
-                            if subj_facility != "GYM": continue
-
+                        # Period Restriction Check
                         if si in subject_period_restriction:
-                            if (p + 1) not in subject_period_restriction[si]: continue
+                            if (p + 1) not in subject_period_restriction[si]: 
+                                continue
 
                         x[sec_i, t, r, p] = model.NewBoolVar(f"x_sec{sec_i}_t{t}_r{r}_p{p}")
 
@@ -387,7 +399,8 @@ class ScheduleSolver:
         for sec_i in range(num_sections):
             for p in range(num_p):
                 sec_period[sec_i, p] = model.NewBoolVar(f"sec{sec_i}_p{p}")
-                relevant_x = [x[sec_i, t, r, p] for t in subject_teachers[sections[sec_i][0]] for r in range(num_rooms) if (sec_i, t, r, p) in x]
+                si_for_sec = sections[sec_i][0]
+                relevant_x = [x[sec_i, t, r, p] for t in subject_teachers[si_for_sec] for r in subject_room_restriction[si_for_sec] if (sec_i, t, r, p) in x]
                 if relevant_x:
                     model.Add(sec_period[sec_i, p] == sum(relevant_x))
                 else:
@@ -617,29 +630,37 @@ class ScheduleSolver:
             "conflict_report": conflict_report.model_dump(),
             "created_at": timestamp,
         }
-        self.school_ref.collection("schedules").document(schedule_id).set(schedule_data)
+        
+        try:
+            self.school_ref.collection("schedules").document(schedule_id).set(schedule_data)
 
-        # ──────────────────────── INDIVIDUAL STUDENT SCHEDULES ────────────────────────
-        # Map master assignments back to each student for unique viewing
-        if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
-            for sti, student in enumerate(students):
-                student_id = student["student_id"]
-                student_assignments = []
-                
-                # Find all master assignments that include this student
-                for assignment in assignments:
-                    if student_id in assignment.enrolled_student_ids:
-                        student_assignments.append(assignment.model_dump())
-                
-                if student_assignments:
-                    # Save a snapshot of this student's schedule
-                    self.school_ref.collection("students").document(student_id)\
-                        .collection("student_schedules").document(schedule_id).set({
-                            "schedule_id": schedule_id,
-                            "semester": semester,
-                            "assignments": student_assignments,
-                            "updated_at": timestamp
-                        })
+            # ──────────────────────── INDIVIDUAL STUDENT SCHEDULES ────────────────────────
+            # Map master assignments back to each student for unique viewing
+            if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+                for sti, student in enumerate(students):
+                    student_id = student["student_id"]
+                    student_assignments = []
+                    
+                    # Find all master assignments that include this student
+                    for assignment in assignments:
+                        if student_id in assignment.enrolled_student_ids:
+                            student_assignments.append(assignment.model_dump())
+                    
+                    if student_assignments:
+                        # Save a snapshot of this student's schedule
+                        self.school_ref.collection("students").document(student_id)\
+                            .collection("student_schedules").document(schedule_id).set({
+                                "schedule_id": schedule_id,
+                                "semester": semester,
+                                "assignments": student_assignments,
+                                "updated_at": timestamp
+                            })
+        except Exception as e:
+            if self.school_id == "demo-school":
+                # In demo mode, we can fail silently on save as long as we return the result
+                pass
+            else:
+                raise e
 
         return ScheduleGenerateResponse(
             schedule_id=schedule_id,

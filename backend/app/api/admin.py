@@ -206,9 +206,10 @@ async def list_rules(
     school_id: str,
     user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),
 ):
-    ref = _school_ref(school_id).collection("rules")
-    docs = ref.stream()
-    return [RuleResponse(**{**d.to_dict(), "rule_id": d.id}) for d in docs]
+    """List all rules for a school. Fallbacks for demo-school."""
+    from app.core.db import FirestoreRepo
+    rules = FirestoreRepo(school_id, "rules").list_all()
+    return [RuleResponse(**{**d, "rule_id": d.get("rule_id") or d["id"]}) for d in rules]
 
 
 @router.post("/{school_id}/rules", response_model=RuleResponse)
@@ -294,14 +295,15 @@ async def get_school_stats(
             "classrooms": classrooms_count
         }
     except Exception as e:
-        # Fallback if Firestore client doesn't support count() or Quota hit
-        if "Quota exceeded" in str(e) or "429" in str(e):
+        # Fallback for demo mode or quota hits
+        is_quota = "Quota exceeded" in str(e) or "429" in str(e)
+        if is_quota or school_id == "demo-school":
             return {
-                "students": 120,
-                "staff": 15,
-                "subjects": 45,
-                "classrooms": 20,
-                "note": "Representative stats (Quota mode)"
+                "students": 25,
+                "staff": 12,
+                "subjects": 15,
+                "classrooms": 8,
+                "note": "Representative stats (Demo Mode)" if school_id == "demo-school" else "Representative stats (Quota Mode)"
             }
         print(f"Stats optimization failed: {e}")
         return {"students": 0, "staff": 0, "subjects": 0, "classrooms": 0}
@@ -342,46 +344,57 @@ async def get_guidance_status(
     school_id: str,
     user: dict = Depends(require_role("SUPER_ADMIN", "PRINCIPAL", "COORDINATOR")),
 ):
-    """Fetch completion status of student course selections."""
-    db = get_firestore_client()
-    students_ref = _school_ref(school_id).collection("students")
+    """Fetch completion status of student course selections. Fallbacks for demo-school."""
+    from app.core.db import FirestoreRepo
     
-    docs = students_ref.stream()
-    students = []
-    total = 0
-    submitted = 0
-    
-    course_demand = {} # code -> count
+    try:
+        raw_students = FirestoreRepo(school_id, "students").list_all()
+        students = []
+        total = 0
+        submitted = 0
+        course_demand = {} # code -> count
 
-    for doc in docs:
-        data = doc.to_dict()
-        total += 1
-        choices = data.get("requested_subjects", [])
-        has_submitted = len(choices) > 0
-        if has_submitted:
-            submitted += 1
-            for code in choices:
-                course_demand[code] = course_demand.get(code, 0) + 1
-        
-        students.append({
-            "id": doc.id,
-            "name": f"{data.get('first_name', '')} {data.get('last_name', '')}",
-            "grade": data.get("grade_level"),
-            "status": "SUBMITTED" if has_submitted else "PENDING",
-            "choice_count": len(choices)
-        })
+        for data in raw_students:
+            total += 1
+            choices = data.get("requested_subjects", [])
+            has_submitted = len(choices) > 0
+            if has_submitted:
+                submitted += 1
+                for code in choices:
+                    course_demand[code] = course_demand.get(code, 0) + 1
+            
+            students.append({
+                "id": data.get("id"),
+                "name": f"{data.get('first_name', '')} {data.get('last_name', '')}",
+                "grade": data.get("grade_level"),
+                "status": "SUBMITTED" if has_submitted else "PENDING",
+                "choice_count": len(choices)
+            })
 
-    # Sort demand
-    sorted_demand = sorted(course_demand.items(), key=lambda x: x[1], reverse=True)
+        # Sort demand
+        sorted_demand = sorted(course_demand.items(), key=lambda x: x[1], reverse=True)
 
-    return {
-        "total_students": total,
-        "submitted_count": submitted,
-        "pending_count": total - submitted,
-        "completion_rate": (submitted / total * 100) if total > 0 else 0,
-        "students": students,
-        "top_demanded_courses": sorted_demand[:10]
-    }
+        return {
+            "total_students": total,
+            "submitted_count": submitted,
+            "pending_count": total - submitted,
+            "completion_rate": (submitted / total * 100) if total > 0 else 0,
+            "students": students,
+            "top_demanded_courses": sorted_demand[:10],
+            "note": "Representative stats (Demo Mode)" if school_id == "demo-school" else None
+        }
+    except Exception as e:
+        if school_id == "demo-school":
+             return {
+                 "total_students": 25,
+                 "submitted_count": 20,
+                 "pending_count": 5,
+                 "completion_rate": 80.0,
+                 "students": [],
+                 "top_demanded_courses": [("MATH101", 15), ("SCI101", 12)],
+                 "note": "Representative stats (Demo Mode Fallback)"
+             }
+        raise e
 
 
 @router.get("/{school_id}/export/schedule")

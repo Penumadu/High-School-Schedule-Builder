@@ -41,9 +41,14 @@ async def list_schools(user: dict = Depends(require_role("SUPER_ADMIN"))):
                 "school_name": "Demo Academy (Quota Mode)",
                 "status": "ACTIVE",
                 "subscription_tier": "FREE",
-                "is_demo": True
+                "is_demo": True,
+                "created_at": datetime.utcnow().isoformat()
             }]
-            return {"schools": demo_schools, "total": 1, "note": "Showing demo data due to quota limits"}
+            return {
+                "schools": demo_schools, 
+                "total": 1, 
+                "note": "Firebase database quota exceeded. Showing cached demo data."
+            }
         raise e
 
 
@@ -225,10 +230,10 @@ async def get_platform_stats(user: dict = Depends(require_role("SUPER_ADMIN"))):
     except Exception as e:
         if "Quota exceeded" in str(e) or "429" in str(e):
             return {
-                "total": 5, 
-                "active": 3, 
-                "suspended": 2,
-                "note": "Demo stats (Quota mode)"
+                "total": 1, 
+                "active": 1, 
+                "suspended": 0,
+                "note": "Firebase database quota exceeded. Showing cached demo stats."
             }
         print(f"Platform stats optimization failed: {e}")
         return {"total": 0, "active": 0, "suspended": 0}

@@ -14,17 +14,22 @@ export default function RulesRegistry() {
   const [rules, setRules] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<Record<string, string>>({});
   const [teacherMap, setTeacherMap] = useState<Record<string, string>>({});
+  const [roomMap, setRoomMap] = useState<Record<string, string>>({});
+  const [note, setNote] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [filteredCount, setFilteredCount] = useState<number>(0);
 
   const fetchData = async () => {
-    if (!schoolId) return;
+    if (!schoolId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       // 1. Fetch subjects
       const subRes = await api.get(`/admin/${schoolId}/subjects`);
       const subMap: Record<string, string> = {};
-      subRes.forEach((s: any) => { subMap[s.subject_id] = s.name; });
+      (subRes || []).forEach((s: any) => { subMap[s.subject_id] = s.name; });
       setSubjects(subMap);
 
       // 2. Fetch teachers
@@ -33,10 +38,22 @@ export default function RulesRegistry() {
       (teachRes || []).forEach((t: any) => { tMap[t.teacher_id] = `${t.first_name} ${t.last_name}`; });
       setTeacherMap(tMap);
 
-      // 3. Fetch rules
-      const ruleRes = await api.get(`/admin/${schoolId}/rules`);
-      setRules(ruleRes || []);
-      setFilteredCount(ruleRes?.length || 0);
+      // 3. Fetch classrooms
+      const roomRes = await api.get(`/admin/${schoolId}/classrooms`);
+      const rMap: Record<string, string> = {};
+      (roomRes || []).forEach((r: any) => { rMap[r.room_id] = r.name; });
+      setRoomMap(rMap);
+
+      // 4. Fetch rules
+      const ruleRes = await api.get<any>(`/admin/${schoolId}/rules`);
+      if (Array.isArray(ruleRes)) {
+        setRules(ruleRes);
+        setFilteredCount(ruleRes.length);
+      } else if (ruleRes && ruleRes.rules) {
+        setRules(ruleRes.rules);
+        setFilteredCount(ruleRes.rules.length);
+        if (ruleRes.note) setNote(ruleRes.note);
+      }
     } catch (err) {
       console.error('Failed to load rules', err);
     } finally {
@@ -78,6 +95,11 @@ export default function RulesRegistry() {
         return `Taught by: ${teaName}`;
       case 'PERIOD':
         return `Period ${node.period} only`;
+      case 'FACILITY':
+        if (node.room_id) {
+          return `Room: ${roomMap[node.room_id] || node.room_id}`;
+        }
+        return `Requires: ${node.facility_type || 'Regular Classroom'}`;
       default:
         // Legacy fallback
         if (node.prerequisite) {
@@ -137,6 +159,14 @@ export default function RulesRegistry() {
     <ProtectedRoute allowedRoles={['PRINCIPAL', 'COORDINATOR']}>
       <DashboardLayout title="Academic Rules Engine">
         <div className="fade-in">
+          {note && (
+            <div className="alert alert-warning fade-in" style={{ marginBottom: 'var(--space-lg)', padding: '10px 14px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>⚠️</span> 
+              <div>
+                <strong>System Note:</strong> {note}
+              </div>
+            </div>
+          )}
           {/* Header Summary Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '32px' }}>
             <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>

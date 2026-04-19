@@ -14,6 +14,7 @@ export default function DashboardLanding() {
     subjects: 0,
     classrooms: 0,
   });
+  const [note, setNote] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +34,10 @@ export default function DashboardLanding() {
           subjects: statsRes.subjects || 0,
           classrooms: statsRes.classrooms || 0,
         });
+
+        if (statsRes.note) {
+          setNote(statsRes.note);
+        }
       } catch (err: any) {
         console.error('Failed to load dashboard stats', err);
         if (err.message?.includes('429')) {
@@ -77,22 +82,25 @@ export default function DashboardLanding() {
             </div>
 
             <div className="stat-card orange glass-card">
-              <div className="stat-value">{error === 'Quota Exceeded' ? '⚠️' : stats.subjects}</div>
+              <div className="stat-value">{stats.subjects}</div>
               <div className="stat-label">Subject Catalog</div>
               <div className="stat-icon">📚</div>
             </div>
 
             <div className="stat-card red glass-card">
-              <div className="stat-value">{error === 'Quota Exceeded' ? '⚠️' : stats.classrooms}</div>
+              <div className="stat-value">{stats.classrooms}</div>
               <div className="stat-label">Classrooms</div>
               <div className="stat-icon">🚪</div>
             </div>
           </div>
         )}
 
-        {error && (
-          <div className="alert alert-warning fade-in" style={{ marginTop: 'var(--space-md)', padding: '12px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)', color: 'var(--text-error)', fontSize: '13px' }}>
-            <strong>Note:</strong> Some real-time statistics may be delayed or unavailable due to {error === 'Quota Exceeded' ? 'Firebase quota limits' : 'connectivity issues'}.
+        {(error || note) && (
+          <div className="alert alert-warning fade-in" style={{ marginTop: 'var(--space-md)', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>⚠️</span> 
+            <div>
+              <strong>System Note:</strong> {note || (error === 'Quota Exceeded' ? 'Firebase quota limits reached. Showing representative test data.' : 'Connectivity issues detected.')}
+            </div>
           </div>
         )}
 
