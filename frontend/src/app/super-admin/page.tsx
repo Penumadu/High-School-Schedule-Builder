@@ -36,7 +36,7 @@ export default function SuperAdminDashboard() {
   }, []);
 
   return (
-    <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+    <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'GUEST']}>
       <DashboardLayout title="Platform Overview">
         {note && (
           <div className="alert alert-warning fade-in" style={{ marginBottom: '24px', padding: '12px 16px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>

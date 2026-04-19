@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInAnonymously } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { auth } from '@/lib/firebase';
 import { useAuth } from '@/components/AuthProvider';
 import styles from './Login.module.css';
@@ -24,6 +25,7 @@ export default function LoginPage() {
   const redirectBasedOnRole = (userRole: string) => {
     switch (userRole) {
       case 'SUPER_ADMIN':
+      case 'GUEST':
         router.push('/super-admin');
         break;
       case 'PRINCIPAL':
@@ -60,6 +62,17 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err: any) {
       setError(err.message || 'Failed to login');
+      setLoading(false);
+    }
+  };
+
+  const handleGuestLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await signInAnonymously(auth);
+    } catch (err: any) {
+      setError(err.message || 'Guest login failed');
       setLoading(false);
     }
   };
@@ -142,6 +155,28 @@ export default function LoginPage() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
+        <div style={{ margin: '24px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ flex: 1, height: '1px', background: 'var(--border-glass)' }}></div>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>OR</span>
+          <div style={{ flex: 1, height: '1px', background: 'var(--border-glass)' }}></div>
+        </div>
+
+        <button
+          onClick={handleGuestLogin}
+          className="btn btn-secondary"
+          style={{ width: '100%', marginBottom: '16px', border: '1px dashed var(--primary-300)' }}
+          disabled={loading}
+        >
+          ✨ Try as Guest (Demo)
+        </button>
+
+        <p style={{ textAlign: 'center', fontSize: '14px', color: 'var(--text-secondary)', marginTop: '8px' }}>
+          Don't have an account?{' '}
+          <Link href="/signup" style={{ color: 'var(--primary-600)', fontWeight: 600, textDecoration: 'none' }}>
+            Sign Up
+          </Link>
+        </p>
       </div>
     </div>
   );

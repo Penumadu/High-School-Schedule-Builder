@@ -18,8 +18,9 @@ interface School {
 }
 
 export default function SchoolsRegistry() {
-  const { setRole, setSchoolId } = useAuth();
+  const { role, setRole, setSchoolId } = useAuth();
   const router = useRouter();
+  const isGuest = role === 'GUEST';
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +96,7 @@ export default function SchoolsRegistry() {
   });
 
   return (
-    <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+    <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'GUEST']}>
       <DashboardLayout title="School Registry">
         {error && (
           <div className="alert alert-warning" style={{ marginBottom: 'var(--space-md)', padding: '12px 16px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -118,9 +119,11 @@ export default function SchoolsRegistry() {
                 {filteredSchools.length === schools.length ? `${schools.length} Schools Registered` : `Showing ${filteredSchools.length} of ${schools.length} Schools`}
               </span>
             </div>
-            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-              + Add New School
-            </button>
+            {!isGuest && (
+              <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                + Add New School
+              </button>
+            )}
           </div>
 
           <div style={{ overflowX: 'auto' }}>
@@ -132,7 +135,7 @@ export default function SchoolsRegistry() {
                   <th>Tier</th>
                   <th>Status</th>
                   <th>Created</th>
-                  <th>Actions</th>
+                  {!isGuest && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -162,28 +165,30 @@ export default function SchoolsRegistry() {
                         </span>
                       </td>
                       <td>{school.created_at ? new Date(school.created_at).toLocaleDateString() : 'N/A'}</td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleManageSchool(school.school_id)}
-                          >
-                            Manage ↗
-                          </button>
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => handleStatusToggle(school.school_id, school.status)}
-                          >
-                            {school.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                          </button>
-                          <button
-                            className="btn btn-error btn-sm"
-                            onClick={() => handleDelete(school.school_id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
+                      {!isGuest && (
+                        <td>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              className="btn btn-primary btn-sm"
+                              onClick={() => handleManageSchool(school.school_id)}
+                            >
+                              Manage ↗
+                            </button>
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleStatusToggle(school.school_id, school.status)}
+                            >
+                              {school.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                            </button>
+                            <button
+                              className="btn btn-error btn-sm"
+                              onClick={() => handleDelete(school.school_id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}

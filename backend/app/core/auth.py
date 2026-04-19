@@ -33,8 +33,8 @@ async def get_current_user(token: str = Depends(get_token_header)) -> dict:
         decoded_token = firebase_auth.verify_id_token(token)
         return {
             "uid": decoded_token.get("uid"),
-            "email": decoded_token.get("email"),
-            "role": decoded_token.get("role", ""),
+            "email": decoded_token.get("email", ""),
+            "role": decoded_token.get("role", "GUEST"),
             "school_id": decoded_token.get("school_id", ""),
         }
     except ValueError as e:

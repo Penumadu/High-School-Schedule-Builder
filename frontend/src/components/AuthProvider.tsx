@@ -36,9 +36,16 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
+        if (firebaseUser.isAnonymous) {
+          setRole('GUEST');
+          setSchoolId('');
+          setLoading(false);
+          return;
+        }
+
         try {
           const tokenResult = await firebaseUser.getIdTokenResult();
-          const realRole = (tokenResult.claims.role as string) || '';
+          const realRole = (tokenResult.claims.role as string) || 'GUEST';
 
           // Check for session overrides (for SUPER_ADMINs managing a specific school)
           const sessionRole = sessionStorage.getItem('acting_role');

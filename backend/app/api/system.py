@@ -19,7 +19,7 @@ router = APIRouter(prefix="/system", tags=["System Admin"])
 
 @router.get("/schools")
 @cache(expire=600, namespace="schools")
-async def list_schools(user: dict = Depends(require_role("SUPER_ADMIN"))):
+async def list_schools(user: dict = Depends(require_role("SUPER_ADMIN", "GUEST"))):
     """List all registered schools."""
     db = get_firestore_client()
     schools_ref = db.collection("schools")
@@ -209,7 +209,7 @@ async def update_school_status(
     return {"message": f"School '{school_id}' status updated to {new_status}"}
 @router.get("/stats")
 @cache(expire=300, namespace="schools")
-async def get_platform_stats(user: dict = Depends(require_role("SUPER_ADMIN"))):
+async def get_platform_stats(user: dict = Depends(require_role("SUPER_ADMIN", "GUEST"))):
     """
     Optimized platform-wide stats fetch using Firestore Aggregation queries.
     Prevents O(N) read costs for the Super Admin dashboard.
